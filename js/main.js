@@ -181,9 +181,45 @@ async function saveStoreInfo() {
 // 전체 봇 실행
 // ========================================
 async function runAllBots() {
+    // localStorage에서 매장 정보 확인
     if (!currentStore || !currentStore.id) {
+        const storedStore = localStorage.getItem('currentStore');
+        if (storedStore) {
+            currentStore = JSON.parse(storedStore);
+            console.log('📦 localStorage에서 매장 정보 복구:', currentStore);
+        }
+    }
+    
+    if (!currentStore || !currentStore.id) {
+        alert('❌ 매장 정보가 없습니다!\n\n메인 페이지에서 매장 정보를 입력하고 저장해주세요.');
         showNotification('먼저 매장 정보를 저장해주세요!', 'error');
         return;
+    }
+    
+    // 백엔드에 매장이 없으면 자동 생성
+    try {
+        const checkStore = await apiClient.getStore(currentStore.id);
+        console.log('✅ 백엔드에 매장 존재:', checkStore);
+    } catch (error) {
+        console.log('⚠️ 백엔드에 매장 없음. 자동 생성 시도...');
+        try {
+            const result = await apiClient.createStore({
+                name: currentStore.name,
+                industry: currentStore.industry || 'other',
+                location: currentStore.location,
+                targetAge: currentStore.targetAge || '',
+                avgPrice: currentStore.avgPrice || '',
+                competitors: currentStore.competitors || 0,
+                naverUrl: currentStore.naverUrl || ''
+            });
+            console.log('✅ 매장 자동 생성 완료:', result);
+            currentStore.id = result.storeId;
+            localStorage.setItem('currentStore', JSON.stringify(currentStore));
+        } catch (createError) {
+            alert('❌ 매장 생성 실패!\n\n' + createError.message);
+            showNotification('매장 생성에 실패했습니다', 'error');
+            return;
+        }
     }
     
     showNotification('30개 AI 봇을 실행합니다... 예상 소요 시간: 5-10분', 'info');

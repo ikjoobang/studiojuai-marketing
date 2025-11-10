@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studiojuai</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-color: #667eea;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #000000;
+            --text-secondary: #666666;
+            --accent-color: #667eea;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(0, 0, 0, 0.1);
+        }
+        
+        * { 
+            font-family: 'Noto Sans KR', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    
+    <!-- 테마 토글 버튼 -->
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+        🌙
+    </button>
+    
+    <!-- 헤더 -->
+    <header class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <button onclick="location.href='../index.html'" class="text-sm opacity-80 hover:opacity-100 mb-2">
+                    <i class="fas fa-arrow-left mr-2"></i>메인으로 돌아가기
+                </button>
+                <h1 class="text-3xl md:text-4xl font-bold flex items-center">
+                    <i class="fas fa-chart-pie mr-3"></i>
+                    분석 리포트
+                </h1>
+                <p class="text-sm md:text-base mt-2 opacity-90">AI 마케팅 성과를 데이터로 확인하세요</p>
+            </div>
+            <div class="flex flex-col md:flex-row gap-3">
+                <button onclick="generatePremiumPPTFromAnalytics()" class="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-lg font-bold hover:shadow-lg transition">
+                    <i class="fas fa-star mr-2"></i>프리미엄 PPT (60-80p)
+                </button>
+                <button onclick="generatePPTReportFromAnalytics()" class="bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 transition">
+                    <i class="fas fa-file-powerpoint mr-2"></i>기본 PPT (37p)
+                </button>
+                <button onclick="exportReport()" class="bg-white text-purple-700 px-6 py-3 rounded-lg font-bold hover:bg-opacity-90 transition">
+                    <i class="fas fa-download mr-2"></i>데이터 다운로드
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 기간 선택 -->
+    <section class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <label class="block mb-2 text-sm font-bold">분석 기간</label>
+                <select id="periodSelect" class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white">
+                    <option value="7">최근 7일</option>
+                    <option value="30" selected>최근 30일</option>
+                    <option value="90">최근 90일</option>
+                    <option value="365">최근 1년</option>
+                </select>
+            </div>
+            <div class="flex-1">
+                <label class="block mb-2 text-sm font-bold">매장 선택</label>
+                <select id="storeSelect" class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white">
+                    <option value="all">전체 매장</option>
+                </select>
+            </div>
+        </div>
+    </section>
+
+    <!-- 실제 통계 카드 (과장 없음) -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="glass-effect rounded-xl p-6 text-white">
+            <h3 class="text-sm opacity-80 mb-2">총 봇 실행 횟수</h3>
+            <p class="text-4xl font-bold mb-2" id="statTotalExecutions">0</p>
+            <p class="text-xs opacity-70">선택된 기간 내 실제 실행 횟수</p>
+        </div>
+        
+        <div class="glass-effect rounded-xl p-6 text-white">
+            <h3 class="text-sm opacity-80 mb-2">실행 성공률</h3>
+            <p class="text-4xl font-bold mb-2" id="statSuccessRate">0%</p>
+            <p class="text-xs opacity-70">완료된 실행 / 전체 실행</p>
+        </div>
+        
+        <div class="glass-effect rounded-xl p-6 text-white">
+            <h3 class="text-sm opacity-80 mb-2">평균 실행 시간</h3>
+            <p class="text-4xl font-bold mb-2" id="statAvgTime">0s</p>
+            <p class="text-xs opacity-70">봇 1개당 평균 소요 시간</p>
+        </div>
+        
+        <div class="glass-effect rounded-xl p-6 text-white">
+            <h3 class="text-sm opacity-80 mb-2">활성 매장 수</h3>
+            <p class="text-4xl font-bold mb-2" id="statActiveStores">0</p>
+            <p class="text-xs opacity-70">봇을 실행한 매장 수</p>
+        </div>
+    </section>
+
+    <!-- 봇 실행 트렌드 -->
+    <section class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <h2 class="text-2xl font-bold mb-4">봇 실행 트렌드</h2>
+        <div style="height: 400px;">
+            <canvas id="executionTrendChart"></canvas>
+        </div>
+    </section>
+
+    <!-- 카테고리별 분석 -->
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <div class="glass-effect rounded-2xl p-6 text-white">
+            <h2 class="text-2xl font-bold mb-4">카테고리별 실행</h2>
+            <div style="height: 300px;">
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+        
+        <div class="glass-effect rounded-2xl p-6 text-white">
+            <h2 class="text-2xl font-bold mb-4">Top 10 인기 봇</h2>
+            <div id="topBotsList" class="space-y-3">
+                <!-- JavaScript로 동적 생성 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 업종별 분석 -->
+    <section class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <h2 class="text-2xl font-bold mb-4">업종별 성과</h2>
+        <div style="height: 400px;">
+            <canvas id="industryChart"></canvas>
+        </div>
+    </section>
+
+    <!-- 상세 통계 테이블 -->
+    <section class="glass-effect rounded-2xl p-6 text-white">
+        <h2 class="text-2xl font-bold mb-4">상세 통계</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="border-b border-white border-opacity-20">
+                    <tr>
+                        <th class="text-left py-3">봇 이름</th>
+                        <th class="text-left py-3">실행 횟수</th>
+                        <th class="text-left py-3">성공률</th>
+                        <th class="text-left py-3">평균 시간</th>
+                        <th class="text-left py-3">최근 실행</th>
+                    </tr>
+                </thead>
+                <tbody id="detailStatsTable">
+                    <!-- JavaScript로 동적 생성 -->
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="text-center text-white opacity-80 mt-8" style="padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px;">
+        <p class="text-sm" style="margin-bottom: 10px;">
+            <a href="https://www.studiojuai.com" target="_blank" rel="noopener" class="hover:text-white transition" style="color: #FF6B35; text-decoration: none;">
+                https://www.studiojuai.com
+            </a>
+            <span style="margin: 0 8px;">|</span>
+            <a href="https://twitter.com/STUDIO_JU_AI" target="_blank" rel="noopener" class="hover:text-white transition" style="color: #FF6B35; text-decoration: none;">
+                @STUDIO_JU_AI
+            </a>
+        </p>
+        <p class="text-xs" style="opacity: 0.7;">
+            © 2025. ALL RIGHTS RESERVED.
+            <span style="margin: 0 8px;">|</span>
+            <a href="mailto:ikjoobang@gmail.com" class="hover:text-white transition" style="color: #FF6B35; text-decoration: none;">
+                ikjoobang@gmail.com
+            </a>
+        </p>
+    </footer>
+
+    <!-- PptxGenJS - PPT 생성 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    
+    <!-- 보안 모듈 (가장 먼저 로드) -->
+    <script src="../js/security.js"></script>
+    
+    <script src="../js/main.js"></script>
+    <script src="../js/bot-system.js"></script>
+    <script src="../js/data-manager.js"></script>
+    <script src="../js/report-data.js"></script>
+    <script src="../js/ppt-generator.js"></script>
+    <script src="../js/ppt-generator-premium.js"></script>
+    
+    <script>
+        // 테마 토글 함수
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme === 'light' ? 'light' : null);
+            localStorage.setItem('theme', newTheme);
+            
+            document.getElementById('themeToggle').textContent = newTheme === 'light' ? '☀️' : '🌙';
+        }
+        
+        // 페이지 로드 시 저장된 테마 적용
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('themeToggle').textContent = '☀️';
+            } else {
+                document.getElementById('themeToggle').textContent = '🌙';
+            }
+        });
+    </script>
+    <script>
+        let executionTrendChart, categoryChart, industryChart;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            populateStoreSelect();
+            loadAnalytics();
+            
+            document.getElementById('periodSelect').addEventListener('change', loadAnalytics);
+            document.getElementById('storeSelect').addEventListener('change', loadAnalytics);
+        });
+        
+        // 매장 선택 옵션 채우기
+        function populateStoreSelect() {
+            const stores = dataManager.getStores();
+            const select = document.getElementById('storeSelect');
+            
+            stores.forEach(store => {
+                const option = document.createElement('option');
+                option.value = store.id;
+                option.textContent = `${store.name} (${getIndustryName(store.industry)})`;
+                select.appendChild(option);
+            });
+        }
+        
+        // 분석 데이터 로드
+        function loadAnalytics() {
+            const period = parseInt(document.getElementById('periodSelect').value);
+            const storeId = document.getElementById('storeSelect').value;
+            
+            const startDate = new Date(Date.now() - period * 24 * 60 * 60 * 1000);
+            const executions = storeId === 'all' 
+                ? dataManager.getBotExecutions() 
+                : dataManager.getBotExecutionsByStore(storeId);
+            
+            const filteredExecutions = executions.filter(e => 
+                new Date(e.createdAt) >= startDate
+            );
+            
+            loadKPIs(filteredExecutions);
+            loadExecutionTrend(filteredExecutions, period);
+            loadCategoryChart(filteredExecutions);
+            loadTopBots(filteredExecutions);
+            loadIndustryChart(filteredExecutions);
+            loadDetailStats();
+        }
+        
+        // 실제 통계 로드 (과장 없이)
+        function loadKPIs(executions) {
+            const total = executions.length;
+            const completed = executions.filter(e => e.status === 'completed').length;
+            const successRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+            
+            // 평균 실행 시간 계산
+            const avgTime = total > 0 
+                ? executions.reduce((sum, e) => sum + (e.executionTime || 0), 0) / total / 1000
+                : 0;
+            
+            // 활성 매장 수 (봇을 실행한 매장)
+            const activeStores = new Set(executions.map(e => e.storeId).filter(id => id)).size;
+            
+            // 실제 데이터만 표시
+            document.getElementById('statTotalExecutions').textContent = total;
+            document.getElementById('statSuccessRate').textContent = successRate + '%';
+            document.getElementById('statAvgTime').textContent = avgTime.toFixed(1) + 's';
+            document.getElementById('statActiveStores').textContent = activeStores;
+        }
+        
+        // 실행 트렌드 차트
+        function loadExecutionTrend(executions, period) {
+            const ctx = document.getElementById('executionTrendChart').getContext('2d');
+            
+            // 날짜별 그룹화
+            const dailyData = {};
+            executions.forEach(e => {
+                const date = new Date(e.createdAt).toLocaleDateString('ko-KR');
+                dailyData[date] = (dailyData[date] || 0) + 1;
+            });
+            
+            const labels = Object.keys(dailyData);
+            const data = Object.values(dailyData);
+            
+            if (executionTrendChart) executionTrendChart.destroy();
+            
+            executionTrendChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.length > 0 ? labels : ['데이터 없음'],
+                    datasets: [{
+                        label: '일별 봇 실행 수',
+                        data: data.length > 0 ? data : [0],
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: 'white' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 카테고리별 차트
+        function loadCategoryChart(executions) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            
+            const categories = {
+                'market': 0,
+                'content': 0,
+                'creative': 0,
+                'operations': 0
+            };
+            
+            executions.forEach(e => {
+                const bot = findBotById(e.botId);
+                if (bot && categories.hasOwnProperty(bot.category)) {
+                    categories[bot.category]++;
+                }
+            });
+            
+            if (categoryChart) categoryChart.destroy();
+            
+            categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['시장 분석', '콘텐츠 자동화', '크리에이티브', '운영 자동화'],
+                    datasets: [{
+                        data: Object.values(categories),
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(34, 197, 94, 0.7)',
+                            'rgba(168, 85, 247, 0.7)',
+                            'rgba(251, 146, 60, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(59, 130, 246)',
+                            'rgb(34, 197, 94)',
+                            'rgb(168, 85, 247)',
+                            'rgb(251, 146, 60)'
+                        ],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: 'white' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Top 10 봇
+        function loadTopBots(executions) {
+            const botCounts = {};
+            
+            executions.forEach(e => {
+                const key = `${e.botId}-${e.botName}`;
+                if (!botCounts[key]) {
+                    botCounts[key] = {
+                        id: e.botId,
+                        name: e.botName,
+                        count: 0
+                    };
+                }
+                botCounts[key].count++;
+            });
+            
+            const topBots = Object.values(botCounts)
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 10);
+            
+            const container = document.getElementById('topBotsList');
+            
+            if (topBots.length === 0) {
+                container.innerHTML = '<p class="text-center opacity-50">데이터 없음</p>';
+                return;
+            }
+            
+            container.innerHTML = topBots.map((bot, index) => `
+                <div class="flex items-center justify-between bg-white bg-opacity-10 p-3 rounded-lg">
+                    <div class="flex items-center">
+                        <span class="font-bold text-2xl opacity-50 mr-3">#${index + 1}</span>
+                        <div>
+                            <p class="font-bold">${bot.name}</p>
+                            <p class="text-xs opacity-70">봇 #${bot.id}</p>
+                        </div>
+                    </div>
+                    <span class="font-bold text-xl">${bot.count}회</span>
+                </div>
+            `).join('');
+        }
+        
+        // 업종별 차트
+        function loadIndustryChart(executions) {
+            const ctx = document.getElementById('industryChart').getContext('2d');
+            
+            const industryData = {};
+            executions.forEach(e => {
+                const industry = e.industry || 'other';
+                industryData[industry] = (industryData[industry] || 0) + 1;
+            });
+            
+            const labels = Object.keys(industryData).map(k => getIndustryName(k));
+            const data = Object.values(industryData);
+            
+            if (industryChart) industryChart.destroy();
+            
+            industryChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.length > 0 ? labels : ['데이터 없음'],
+                    datasets: [{
+                        label: '업종별 봇 실행 수',
+                        data: data.length > 0 ? data : [0],
+                        backgroundColor: 'rgba(102, 126, 234, 0.7)',
+                        borderColor: 'rgb(102, 126, 234)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: 'white' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 상세 통계 테이블
+        function loadDetailStats() {
+            const allBots = [...marketBots, ...contentBots, ...creativeBots, ...operationsBots];
+            const tbody = document.getElementById('detailStatsTable');
+            
+            const rows = allBots.map(bot => {
+                const executions = dataManager.getBotExecutionsByBotId(bot.id);
+                const total = executions.length;
+                const completed = executions.filter(e => e.status === 'completed').length;
+                const successRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+                const avgTime = total > 0 
+                    ? Math.round(executions.reduce((sum, e) => sum + (e.executionTime || 0), 0) / total / 1000)
+                    : 0;
+                const lastExecution = executions.length > 0 
+                    ? new Date(executions[executions.length - 1].createdAt).toLocaleDateString('ko-KR')
+                    : '-';
+                
+                return `
+                    <tr class="border-b border-white border-opacity-10">
+                        <td class="py-3">${bot.name}</td>
+                        <td class="py-3">${total}회</td>
+                        <td class="py-3">${successRate}%</td>
+                        <td class="py-3">${avgTime.toFixed(1)}s</td>
+                        <td class="py-3">${lastExecution}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            tbody.innerHTML = rows;
+        }
+        
+        // 리포트 다운로드
+        function exportReport() {
+            const report = {
+                generatedAt: new Date().toISOString(),
+                period: document.getElementById('periodSelect').value + '일',
+                store: document.getElementById('storeSelect').value,
+                kpis: {
+                    totalExecutions: document.getElementById('kpiTotalExecutions').textContent,
+                    successRate: document.getElementById('kpiSuccessRate').textContent,
+                    contentGenerated: document.getElementById('kpiContentGenerated').textContent,
+                    revenueGrowth: document.getElementById('kpiRevenueGrowth').textContent
+                },
+                stores: dataManager.getStores(),
+                executions: dataManager.getBotExecutions(),
+                analytics: dataManager.getAnalytics()
+            };
+            
+            const dataStr = JSON.stringify(report, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `analytics_report_${Date.now()}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            showNotification('리포트가 다운로드되었습니다!', 'success');
+        }
+        
+        // PPT 보고서 생성 함수
+        async function generatePPTReportFromAnalytics() {
+            const storeSelect = document.getElementById('storeSelect');
+            const selectedStoreId = storeSelect.value;
+            
+            if (!selectedStoreId || selectedStoreId === 'all') {
+                alert('PPT 보고서를 생성할 매장을 선택해주세요.');
+                return;
+            }
+            
+            try {
+                // 로딩 표시
+                const loadingMsg = document.createElement('div');
+                loadingMsg.id = 'ppt-loading';
+                loadingMsg.className = 'fixed top-20 right-4 bg-purple-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                loadingMsg.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>PPT 보고서 생성 중... 잠시만 기다려주세요';
+                document.body.appendChild(loadingMsg);
+                
+                // PPT 생성
+                const result = await window.pptGenerator.generateReport(selectedStoreId);
+                
+                // 완료 메시지
+                loadingMsg.innerHTML = `<i class="fas fa-check-circle mr-2"></i>생성 완료: ${result.fileName}`;
+                loadingMsg.className = 'fixed top-20 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+                
+                setTimeout(() => {
+                    if (document.body.contains(loadingMsg)) {
+                        document.body.removeChild(loadingMsg);
+                    }
+                }, 5000);
+                
+            } catch (error) {
+                console.error('PPT 생성 오류:', error);
+                alert('PPT 생성에 실패했습니다. 콘솔을 확인해주세요.');
+                
+                const loadingMsg = document.getElementById('ppt-loading');
+                if (loadingMsg && document.body.contains(loadingMsg)) {
+                    document.body.removeChild(loadingMsg);
+                }
+            }
+        }
+        
+        // 프리미엄 PPT 보고서 생성 함수
+        async function generatePremiumPPTFromAnalytics() {
+            const storeSelect = document.getElementById('storeSelect');
+            const selectedStoreId = storeSelect.value;
+            
+            if (!selectedStoreId || selectedStoreId === 'all') {
+                alert('프리미엄 PPT 보고서를 생성할 매장을 선택해주세요.');
+                return;
+            }
+            
+            try {
+                const loadingMsg = document.createElement('div');
+                loadingMsg.id = 'ppt-loading';
+                loadingMsg.className = 'fixed top-20 right-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-4 rounded-lg shadow-lg z-50';
+                loadingMsg.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        <span class="font-bold">프리미엄 PPT 생성 중...</span>
+                    </div>
+                    <div class="text-sm opacity-90">
+                        60-80페이지 고품질 보고서 제작 중입니다
+                    </div>
+                `;
+                document.body.appendChild(loadingMsg);
+                
+                const result = await window.premiumPPTGenerator.generatePremiumReport(selectedStoreId);
+                
+                loadingMsg.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span class="font-bold">생성 완료!</span>
+                    </div>
+                    <div class="text-sm">
+                        ${result.fileName}<br>
+                        총 ${result.totalPages}페이지
+                    </div>
+                `;
+                loadingMsg.className = 'fixed top-20 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg z-50';
+                
+                setTimeout(() => {
+                    if (document.body.contains(loadingMsg)) {
+                        document.body.removeChild(loadingMsg);
+                    }
+                }, 7000);
+                
+            } catch (error) {
+                console.error('프리미엄 PPT 생성 오류:', error);
+                alert('프리미엄 PPT 생성에 실패했습니다:\n' + error.message);
+                
+                const loadingMsg = document.getElementById('ppt-loading');
+                if (loadingMsg && document.body.contains(loadingMsg)) {
+                    document.body.removeChild(loadingMsg);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

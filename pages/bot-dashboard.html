@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studiojuai</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-color: #667eea;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #000000;
+            --text-secondary: #666666;
+            --accent-color: #667eea;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(0, 0, 0, 0.1);
+        }
+        
+        * { 
+            font-family: 'Noto Sans KR', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    
+    <!-- 테마 토글 버튼 -->
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+        🌙
+    </button>
+    
+    <!-- 헤더 -->
+    <header class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <button onclick="location.href='../index.html'" class="text-sm opacity-80 hover:opacity-100 mb-2">
+                    <i class="fas fa-arrow-left mr-2"></i>메인으로 돌아가기
+                </button>
+                <h1 class="text-3xl md:text-4xl font-bold flex items-center">
+                    <i class="fas fa-th-large mr-3"></i>
+                    봇 관리 대시보드
+                </h1>
+                <p class="text-sm md:text-base mt-2 opacity-90">30개 AI 봇의 실행 현황과 성과를 한눈에 확인하세요</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- 통계 카드 -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="glass-effect rounded-xl p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm opacity-80">총 봇 수</h3>
+                <i class="fas fa-robot text-2xl"></i>
+            </div>
+            <p class="text-4xl font-bold">30</p>
+            <p class="text-xs opacity-70 mt-2">4개 카테고리</p>
+        </div>
+        
+        <div class="glass-effect rounded-xl p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm opacity-80">실행 완료</h3>
+                <i class="fas fa-check-circle text-2xl text-green-300"></i>
+            </div>
+            <p class="text-4xl font-bold" id="completedCount">0</p>
+            <p class="text-xs opacity-70 mt-2">성공률: <span id="successRate">0%</span></p>
+        </div>
+        
+        <div class="glass-effect rounded-xl p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm opacity-80">평균 실행 시간</h3>
+                <i class="fas fa-clock text-2xl text-blue-300"></i>
+            </div>
+            <p class="text-4xl font-bold" id="avgTime">0s</p>
+            <p class="text-xs opacity-70 mt-2">최근 50회 기준</p>
+        </div>
+        
+        <div class="glass-effect rounded-xl p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm opacity-80">인기 봇</h3>
+                <i class="fas fa-star text-2xl text-yellow-300"></i>
+            </div>
+            <p class="text-4xl font-bold" id="popularBotId">-</p>
+            <p class="text-xs opacity-70 mt-2" id="popularBotName">데이터 없음</p>
+        </div>
+    </section>
+
+    <!-- 필터 및 검색 -->
+    <section class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-1">
+                <label class="block mb-2 text-sm font-bold">카테고리 필터</label>
+                <select id="categoryFilter" class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white">
+                    <option value="all">전체 (30개)</option>
+                    <option value="market">시장 분석 (8개)</option>
+                    <option value="content">콘텐츠 자동화 (8개)</option>
+                    <option value="creative">크리에이티브 (6개)</option>
+                    <option value="operations">운영 자동화 (8개)</option>
+                </select>
+            </div>
+            
+            <div class="flex-1">
+                <label class="block mb-2 text-sm font-bold">상태 필터</label>
+                <select id="statusFilter" class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white">
+                    <option value="all">전체</option>
+                    <option value="completed">완료</option>
+                    <option value="running">실행중</option>
+                    <option value="waiting">대기</option>
+                </select>
+            </div>
+            
+            <div class="flex-1">
+                <label class="block mb-2 text-sm font-bold">봇 검색</label>
+                <input type="text" id="botSearch" placeholder="봇 이름 검색..." class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white">
+            </div>
+        </div>
+    </section>
+
+    <!-- 봇 목록 -->
+    <section id="botListContainer">
+        <!-- JavaScript로 동적 생성 -->
+    </section>
+
+    <!-- 실행 기록 -->
+    <section class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <h2 class="text-2xl font-bold mb-4 flex items-center">
+            <i class="fas fa-history mr-3"></i>
+            최근 실행 기록
+        </h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="border-b border-white border-opacity-20">
+                    <tr>
+                        <th class="text-left py-3">시간</th>
+                        <th class="text-left py-3">봇 이름</th>
+                        <th class="text-left py-3">매장</th>
+                        <th class="text-left py-3">상태</th>
+                        <th class="text-left py-3">실행 시간</th>
+                        <th class="text-left py-3">작업</th>
+                    </tr>
+                </thead>
+                <tbody id="executionHistory">
+                    <tr>
+                        <td colspan="6" class="text-center py-8 opacity-50">
+                            실행 기록이 없습니다
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="text-center text-white opacity-80 mt-8" style="padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px;">
+        <p class="text-sm" style="margin-bottom: 10px;">
+            <a href="https://www.studiojuai.com" target="_blank" rel="noopener" class="hover:text-white transition" style="color: #FF6B35; text-decoration: none;">
+                https://www.studiojuai.com
+            </a>
+            <span style="margin: 0 8px;">|</span>
+            <a href="https://twitter.com/STUDIO_JU_AI" target="_blank" rel="noopener" class="hover:text-white transition" style="color: #FF6B35; text-decoration: none;">
+                @STUDIO_JU_AI
+            </a>
+        </p>
+        <p class="text-xs" style="opacity: 0.7;">
+            © 2025. ALL RIGHTS RESERVED.
+            <span style="margin: 0 8px;">|</span>
+            <a href="mailto:ikjoobang@gmail.com" class="hover:text-white transition" style="color: #FF6B35; text-decoration: none;">
+                ikjoobang@gmail.com
+            </a>
+        </p>
+    </footer>
+
+    <!-- PptxGenJS - PPT 생성 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    
+    <!-- 보안 모듈 (가장 먼저 로드) -->
+    <script src="../js/security.js"></script>
+    
+    <script src="../js/main.js"></script>
+    <script src="../js/bot-system.js"></script>
+    <script src="../js/data-manager.js"></script>
+    <script src="../js/report-data.js"></script>
+    <script src="../js/ppt-generator.js"></script>
+    
+    <script>
+        // 테마 토글 함수
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme === 'light' ? 'light' : null);
+            localStorage.setItem('theme', newTheme);
+            
+            document.getElementById('themeToggle').textContent = newTheme === 'light' ? '☀️' : '🌙';
+        }
+        
+        // 페이지 로드 시 저장된 테마 적용
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('themeToggle').textContent = '☀️';
+            } else {
+                document.getElementById('themeToggle').textContent = '🌙';
+            }
+        });
+    </script>
+    <script>
+        // 봇 대시보드 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            loadBotDashboard();
+            loadExecutionHistory();
+            loadStatistics();
+            
+            // 필터 이벤트 리스너
+            document.getElementById('categoryFilter').addEventListener('change', filterBots);
+            document.getElementById('statusFilter').addEventListener('change', filterBots);
+            document.getElementById('botSearch').addEventListener('input', filterBots);
+        });
+        
+        // 봇 대시보드 로드
+        function loadBotDashboard() {
+            const allBots = [...marketBots, ...contentBots, ...creativeBots, ...operationsBots];
+            const container = document.getElementById('botListContainer');
+            
+            // 카테고리별로 그룹화
+            const categories = {
+                'market': { name: '📊 시장 분석 봇', bots: marketBots, color: 'bg-blue-500' },
+                'content': { name: '📝 콘텐츠 자동화 봇', bots: contentBots, color: 'bg-green-500' },
+                'creative': { name: '🎨 크리에이티브 봇', bots: creativeBots, color: 'bg-purple-500' },
+                'operations': { name: '🔧 운영 자동화 봇', bots: operationsBots, color: 'bg-orange-500' }
+            };
+            
+            Object.entries(categories).forEach(([key, category]) => {
+                const section = document.createElement('div');
+                section.className = 'mb-6';
+                section.setAttribute('data-category', key);
+                
+                section.innerHTML = `
+                    <h3 class="text-2xl font-bold mb-4 text-white">${category.name}</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="${key}Bots">
+                    </div>
+                `;
+                
+                container.appendChild(section);
+                
+                // 봇 카드 생성
+                const botsContainer = section.querySelector(`#${key}Bots`);
+                category.bots.forEach(bot => {
+                    botsContainer.appendChild(createDetailedBotCard(bot));
+                });
+            });
+        }
+        
+        // 상세 봇 카드 생성
+        function createDetailedBotCard(bot) {
+            const card = document.createElement('div');
+            card.className = 'glass-effect rounded-xl p-5 text-white';
+            card.setAttribute('data-bot-id', bot.id);
+            card.setAttribute('data-bot-name', bot.name.toLowerCase());
+            
+            const executions = dataManager.getBotExecutionsByBotId(bot.id);
+            const executionCount = executions.length;
+            const avgTime = executionCount > 0 
+                ? Math.round(executions.reduce((sum, e) => sum + (e.executionTime || 0), 0) / executionCount)
+                : 0;
+            
+            card.innerHTML = `
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-start">
+                        <div class="${bot.color} w-14 h-14 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                            <i class="fas ${bot.icon} text-2xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-bold">${bot.name}</h4>
+                            <p class="text-xs opacity-70">봇 #${bot.id} | ${bot.category}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <p class="text-xs opacity-80 mb-3">${bot.description}</p>
+                
+                <div class="grid grid-cols-2 gap-2 mb-3 text-xs">
+                    <div class="bg-white bg-opacity-10 p-2 rounded">
+                        <p class="opacity-70">실행 횟수</p>
+                        <p class="font-bold">${executionCount}회</p>
+                    </div>
+                    <div class="bg-white bg-opacity-10 p-2 rounded">
+                        <p class="opacity-70">평균 시간</p>
+                        <p class="font-bold">${(avgTime/1000).toFixed(1)}s</p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-2">
+                    <button onclick="runSingleBot(${bot.id})" class="${bot.color} hover:opacity-80 flex-1 py-2 rounded-lg text-sm font-bold transition">
+                        <i class="fas fa-play mr-2"></i>실행
+                    </button>
+                    <button onclick="showBotDetails(${bot.id})" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-sm transition">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        // 봇 필터링
+        function filterBots() {
+            const category = document.getElementById('categoryFilter').value;
+            const status = document.getElementById('statusFilter').value;
+            const search = document.getElementById('botSearch').value.toLowerCase();
+            
+            const sections = document.querySelectorAll('[data-category]');
+            sections.forEach(section => {
+                const sectionCategory = section.getAttribute('data-category');
+                const cards = section.querySelectorAll('[data-bot-id]');
+                
+                // 카테고리 필터
+                if (category !== 'all' && sectionCategory !== category) {
+                    section.style.display = 'none';
+                    return;
+                } else {
+                    section.style.display = 'block';
+                }
+                
+                // 카드 필터
+                cards.forEach(card => {
+                    const botName = card.getAttribute('data-bot-name');
+                    const matchesSearch = search === '' || botName.includes(search);
+                    
+                    if (matchesSearch) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        // 봇 상세 정보 표시
+        function showBotDetails(botId) {
+            const bot = findBotById(botId);
+            if (!bot) return;
+            
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-2xl font-bold text-purple-700">${bot.name}</h3>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="${bot.color} w-20 h-20 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas ${bot.icon} text-4xl text-white"></i>
+                        </div>
+                        <p class="text-gray-600 mb-4">${bot.description}</p>
+                        
+                        <h4 class="font-bold text-lg mb-2">주요 기능</h4>
+                        <ul class="list-disc list-inside text-gray-600 mb-4">
+                            ${bot.features.map(f => `<li>${f}</li>`).join('')}
+                        </ul>
+                        
+                        <h4 class="font-bold text-lg mb-2">프롬프트 템플릿</h4>
+                        <div class="bg-gray-100 p-4 rounded-lg text-sm text-gray-700">
+                            <pre class="whitespace-pre-wrap">${bot.prompt}</pre>
+                        </div>
+                    </div>
+                    
+                    <button onclick="this.closest('.fixed').remove()" class="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700">
+                        닫기
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // 실행 기록 로드
+        function loadExecutionHistory() {
+            const executions = dataManager.getRecentExecutions(20);
+            const tbody = document.getElementById('executionHistory');
+            
+            if (executions.length === 0) return;
+            
+            tbody.innerHTML = executions.map(e => `
+                <tr class="border-b border-white border-opacity-10">
+                    <td class="py-3">${new Date(e.createdAt).toLocaleString('ko-KR', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'})}</td>
+                    <td class="py-3">${e.botName}</td>
+                    <td class="py-3">${e.storeName || '-'}</td>
+                    <td class="py-3">
+                        <span class="px-2 py-1 rounded text-xs ${e.status === 'completed' ? 'bg-green-500' : 'bg-yellow-500'}">
+                            ${e.status === 'completed' ? '완료' : '실행중'}
+                        </span>
+                    </td>
+                    <td class="py-3">${e.executionTime ? (e.executionTime/1000).toFixed(1) + 's' : '-'}</td>
+                    <td class="py-3">
+                        <button onclick='showBotResult(${JSON.stringify(e.result || {}).replace(/'/g, "\\'")})' class="text-blue-300 hover:text-blue-100">
+                            <i class="fas fa-eye"></i> 결과보기
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+        
+        // 통계 로드
+        function loadStatistics() {
+            const executions = dataManager.getBotExecutions();
+            const completed = executions.filter(e => e.status === 'completed').length;
+            const total = executions.length;
+            
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('successRate').textContent = total > 0 ? Math.round((completed/total) * 100) + '%' : '0%';
+            
+            const avgTime = dataManager.calculateAverageExecutionTime(executions.slice(-50));
+            document.getElementById('avgTime').textContent = (avgTime/1000).toFixed(1) + 's';
+            
+            const popularBots = dataManager.getPopularBots(1);
+            if (popularBots.length > 0) {
+                document.getElementById('popularBotId').textContent = `#${popularBots[0].botId}`;
+                document.getElementById('popularBotName').textContent = popularBots[0].botName;
+            }
+        }
+    </script>
+</body>
+</html>

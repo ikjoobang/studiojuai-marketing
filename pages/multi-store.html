@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studiojuai</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-color: #667eea;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #000000;
+            --text-secondary: #666666;
+            --accent-color: #667eea;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --card-border: rgba(0, 0, 0, 0.1);
+        }
+        
+        * { 
+            font-family: 'Noto Sans KR', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        
+        .glass-effect {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+        }
+        
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+        .store-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .store-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    
+    <!-- 테마 토글 버튼 -->
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+        🌙
+    </button>
+    
+    <!-- 헤더 -->
+    <header class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <button onclick="location.href='../index.html'" class="text-sm opacity-80 hover:opacity-100 mb-2">
+                    <i class="fas fa-arrow-left mr-2"></i>메인으로 돌아가기
+                </button>
+                <h1 class="text-3xl md:text-4xl font-bold flex items-center">
+                    <i class="fas fa-store mr-3"></i>
+                    멀티 매장 관리
+                </h1>
+                <p class="text-sm md:text-base mt-2 opacity-90">여러 매장을 한곳에서 통합 관리하세요</p>
+            </div>
+            <div class="flex flex-col md:flex-row gap-3">
+                <button onclick="generateBatchPPTReports()" class="bg-purple-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-purple-700 transition">
+                    <i class="fas fa-file-powerpoint mr-2"></i>일괄 PPT 생성
+                </button>
+                <button onclick="showAddStoreModal()" class="bg-white text-purple-700 px-6 py-3 rounded-lg font-bold hover:bg-opacity-90 transition">
+                    <i class="fas fa-plus mr-2"></i>매장 추가
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 통계 요약 -->
+    <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="glass-effect rounded-xl p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm opacity-80">총 매장 수</h3>
+                <i class="fas fa-store-alt text-2xl"></i>
+            </div>
+            <p class="text-4xl font-bold" id="totalStores">0</p>
+            <p class="text-xs opacity-70 mt-2"><span id="franchiseCount">0</span>개 프랜차이즈</p>
+        </div>
+        
+        <div class="glass-effect rounded-xl p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm opacity-80">평균 매출 증가</h3>
+                <i class="fas fa-chart-line text-2xl text-green-300"></i>
+            </div>
+            <p class="text-4xl font-bold text-green-300">+<span id="avgGrowth">0</span>%</p>
+            <p class="text-xs opacity-70 mt-2">지난 달 대비</p>
+        </div>
+        
+        <div class="glass-effect rounded-xl p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm opacity-80">활성 봇</h3>
+                <i class="fas fa-robot text-2xl text-blue-300"></i>
+            </div>
+            <p class="text-4xl font-bold" id="activeBots">0</p>
+            <p class="text-xs opacity-70 mt-2">실행중인 자동화</p>
+        </div>
+        
+        <div class="glass-effect rounded-xl p-6 text-white">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="text-sm opacity-80">최고 성과 매장</h3>
+                <i class="fas fa-trophy text-2xl text-yellow-300"></i>
+            </div>
+            <p class="text-2xl font-bold" id="topStore">-</p>
+            <p class="text-xs opacity-70 mt-2" id="topStoreMetric">데이터 없음</p>
+        </div>
+    </section>
+
+    <!-- 필터 -->
+    <section class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+                <label class="block mb-2 text-sm font-bold">업종 필터</label>
+                <select id="industryFilter" class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white">
+                    <option value="all">전체 업종</option>
+                    <option value="cafe">카페</option>
+                    <option value="chicken">치킨</option>
+                    <option value="korean">한식</option>
+                    <option value="beauty">미용실</option>
+                    <option value="pizza">피자</option>
+                    <option value="dessert">디저트</option>
+                    <option value="other">기타</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block mb-2 text-sm font-bold">지역 필터</label>
+                <select id="locationFilter" class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white">
+                    <option value="all">전체 지역</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block mb-2 text-sm font-bold">매장 검색</label>
+                <input type="text" id="storeSearch" placeholder="매장명 검색..." class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white">
+            </div>
+        </div>
+    </section>
+
+    <!-- 매장 목록 -->
+    <section class="mb-6">
+        <h2 class="text-2xl font-bold mb-4 text-white">
+            <i class="fas fa-th mr-3"></i>
+            매장 목록
+        </h2>
+        <div id="storeList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <!-- JavaScript로 동적 생성 -->
+        </div>
+        <div id="emptyState" class="glass-effect rounded-2xl p-12 text-center text-white" style="display: none;">
+            <i class="fas fa-store text-6xl opacity-50 mb-4"></i>
+            <h3 class="text-2xl font-bold mb-2">등록된 매장이 없습니다</h3>
+            <p class="opacity-70 mb-6">첫 매장을 등록하고 AI 마케팅을 시작하세요!</p>
+            <button onclick="showAddStoreModal()" class="bg-white text-purple-700 px-6 py-3 rounded-lg font-bold hover:bg-opacity-90 transition">
+                <i class="fas fa-plus mr-2"></i>매장 추가
+            </button>
+        </div>
+    </section>
+
+    <!-- 비교 분석 -->
+    <section class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <h2 class="text-2xl font-bold mb-4 flex items-center">
+            <i class="fas fa-chart-bar mr-3"></i>
+            매장 비교 분석
+        </h2>
+        <div style="height: 400px;">
+            <canvas id="comparisonChart"></canvas>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="text-center text-white opacity-80 mt-8" style="padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px;">
+        <p class="text-sm" style="margin-bottom: 10px;">
+            <a href="https://www.studiojuai.com" target="_blank" rel="noopener" class="hover:text-white transition" style="color: #FF6B35; text-decoration: none;">
+                https://www.studiojuai.com
+            </a>
+            <span style="margin: 0 8px;">|</span>
+            <a href="https://twitter.com/STUDIO_JU_AI" target="_blank" rel="noopener" class="hover:text-white transition" style="color: #FF6B35; text-decoration: none;">
+                @STUDIO_JU_AI
+            </a>
+        </p>
+        <p class="text-xs" style="opacity: 0.7;">
+            © 2025. ALL RIGHTS RESERVED.
+            <span style="margin: 0 8px;">|</span>
+            <a href="mailto:ikjoobang@gmail.com" class="hover:text-white transition" style="color: #FF6B35; text-decoration: none;">
+                ikjoobang@gmail.com
+            </a>
+        </p>
+    </footer>
+
+    <!-- PptxGenJS - PPT 생성 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    
+    <!-- 보안 모듈 (가장 먼저 로드) -->
+    <script src="../js/security.js"></script>
+    
+    <script src="../js/main.js"></script>
+    <script src="../js/bot-system.js"></script>
+    <script src="../js/data-manager.js"></script>
+    <script src="../js/report-data.js"></script>
+    <script src="../js/ppt-generator.js"></script>
+    
+    <script>
+        // 테마 토글 함수
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme === 'light' ? 'light' : null);
+            localStorage.setItem('theme', newTheme);
+            
+            document.getElementById('themeToggle').textContent = newTheme === 'light' ? '☀️' : '🌙';
+        }
+        
+        // 페이지 로드 시 저장된 테마 적용
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('themeToggle').textContent = '☀️';
+            } else {
+                document.getElementById('themeToggle').textContent = '🌙';
+            }
+        });
+    </script>
+    <script>
+        let comparisonChart = null;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStores();
+            loadStatistics();
+            initComparisonChart();
+            populateLocationFilter();
+            
+            // 필터 이벤트
+            document.getElementById('industryFilter').addEventListener('change', filterStores);
+            document.getElementById('locationFilter').addEventListener('change', filterStores);
+            document.getElementById('storeSearch').addEventListener('input', filterStores);
+        });
+        
+        // 매장 목록 로드
+        function loadStores() {
+            const stores = dataManager.getStores();
+            const container = document.getElementById('storeList');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (stores.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+            
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+            container.innerHTML = '';
+            
+            stores.forEach(store => {
+                container.appendChild(createStoreCard(store));
+            });
+        }
+        
+        // 매장 카드 생성
+        function createStoreCard(store) {
+            const card = document.createElement('div');
+            card.className = 'store-card glass-effect rounded-xl p-5 text-white';
+            card.setAttribute('data-store-id', store.id);
+            card.setAttribute('data-industry', store.industry);
+            card.setAttribute('data-location', store.location);
+            card.setAttribute('data-name', store.name.toLowerCase());
+            
+            const stats = dataManager.getStoreStatistics(store.id);
+            const industryIcon = getIndustryIcon(store.industry);
+            
+            card.innerHTML = `
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-start">
+                        <div class="bg-white bg-opacity-20 w-12 h-12 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas ${industryIcon} text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-lg">${store.name}</h3>
+                            <p class="text-xs opacity-70">${getIndustryName(store.industry)} | ${store.location}</p>
+                        </div>
+                    </div>
+                    <button onclick="deleteStore('${store.id}')" class="text-red-300 hover:text-red-100">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2 mb-3 text-xs">
+                    <div class="bg-white bg-opacity-10 p-2 rounded">
+                        <p class="opacity-70">타겟층</p>
+                        <p class="font-bold">${store.targetAge || '-'}</p>
+                    </div>
+                    <div class="bg-white bg-opacity-10 p-2 rounded">
+                        <p class="opacity-70">객단가</p>
+                        <p class="font-bold">${store.avgPrice || '-'}</p>
+                    </div>
+                    <div class="bg-white bg-opacity-10 p-2 rounded">
+                        <p class="opacity-70">경쟁사</p>
+                        <p class="font-bold">${store.competitors || 0}개</p>
+                    </div>
+                    <div class="bg-white bg-opacity-10 p-2 rounded">
+                        <p class="opacity-70">봇 실행</p>
+                        <p class="font-bold">${stats.completedExecutions}회</p>
+                    </div>
+                </div>
+                
+                <div class="flex gap-2">
+                    <button onclick="viewStoreDetails('${store.id}')" class="flex-1 bg-white bg-opacity-20 hover:bg-opacity-30 py-2 rounded-lg text-sm font-bold transition">
+                        <i class="fas fa-chart-line mr-2"></i>상세보기
+                    </button>
+                    <button onclick="editStore('${store.id}')" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg text-sm transition">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        // 업종 아이콘 가져오기
+        function getIndustryIcon(industry) {
+            const icons = {
+                'cafe': 'fa-coffee',
+                'chicken': 'fa-drumstick-bite',
+                'korean': 'fa-utensils',
+                'beauty': 'fa-cut',
+                'pizza': 'fa-pizza-slice',
+                'dessert': 'fa-ice-cream',
+                'other': 'fa-store'
+            };
+            return icons[industry] || 'fa-store';
+        }
+        
+        // 통계 로드
+        function loadStatistics() {
+            const stores = dataManager.getStores();
+            document.getElementById('totalStores').textContent = stores.length;
+            
+            // 프랜차이즈 수 계산 (같은 이름의 매장들)
+            const franchises = new Set(stores.map(s => s.name.split(' ')[0]));
+            document.getElementById('franchiseCount').textContent = franchises.size;
+            
+            // 평균 성장률 (시뮬레이션)
+            const avgGrowth = stores.length > 0 ? Math.floor(Math.random() * 150) + 50 : 0;
+            document.getElementById('avgGrowth').textContent = avgGrowth;
+            
+            // 활성 봇 수
+            const executions = dataManager.getBotExecutions();
+            const recentExecutions = executions.filter(e => {
+                const executionDate = new Date(e.createdAt);
+                const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+                return executionDate > dayAgo;
+            });
+            document.getElementById('activeBots').textContent = recentExecutions.length;
+            
+            // 최고 성과 매장
+            if (stores.length > 0) {
+                const topStoreData = stores.reduce((max, store) => {
+                    const stats = dataManager.getStoreStatistics(store.id);
+                    return stats.completedExecutions > max.count 
+                        ? { store: store, count: stats.completedExecutions }
+                        : max;
+                }, { store: stores[0], count: 0 });
+                
+                document.getElementById('topStore').textContent = topStoreData.store.name;
+                document.getElementById('topStoreMetric').textContent = `${topStoreData.count}회 봇 실행`;
+            }
+        }
+        
+        // 지역 필터 채우기
+        function populateLocationFilter() {
+            const stores = dataManager.getStores();
+            const locations = [...new Set(stores.map(s => s.location))];
+            const select = document.getElementById('locationFilter');
+            
+            locations.forEach(location => {
+                const option = document.createElement('option');
+                option.value = location;
+                option.textContent = location;
+                select.appendChild(option);
+            });
+        }
+        
+        // 매장 필터링
+        function filterStores() {
+            const industry = document.getElementById('industryFilter').value;
+            const location = document.getElementById('locationFilter').value;
+            const search = document.getElementById('storeSearch').value.toLowerCase();
+            
+            const cards = document.querySelectorAll('.store-card');
+            cards.forEach(card => {
+                const cardIndustry = card.getAttribute('data-industry');
+                const cardLocation = card.getAttribute('data-location');
+                const cardName = card.getAttribute('data-name');
+                
+                const matchesIndustry = industry === 'all' || cardIndustry === industry;
+                const matchesLocation = location === 'all' || cardLocation === location;
+                const matchesSearch = search === '' || cardName.includes(search);
+                
+                if (matchesIndustry && matchesLocation && matchesSearch) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+        
+        // 매장 추가 모달
+        function showAddStoreModal() {
+            alert('매장 추가 기능은 메인 페이지에서 이용해주세요!\n\n메인 페이지 > 매장 정보 입력 > 저장');
+            location.href = '../index.html';
+        }
+        
+        // 매장 상세보기
+        function viewStoreDetails(storeId) {
+            const store = dataManager.getStoreById(storeId);
+            if (!store) return;
+            
+            const stats = dataManager.getStoreStatistics(storeId);
+            const executions = dataManager.getBotExecutionsByStore(storeId);
+            
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-2xl p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 class="text-3xl font-bold text-purple-700">${store.name}</h2>
+                            <p class="text-gray-600">${getIndustryName(store.industry)} | ${store.location}</p>
+                        </div>
+                        <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times text-2xl"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                        <div class="bg-purple-100 p-4 rounded-lg">
+                            <p class="text-sm text-purple-600">총 봇 실행</p>
+                            <p class="text-2xl font-bold text-purple-700">${stats.totalExecutions}회</p>
+                        </div>
+                        <div class="bg-green-100 p-4 rounded-lg">
+                            <p class="text-sm text-green-600">성공</p>
+                            <p class="text-2xl font-bold text-green-700">${stats.completedExecutions}회</p>
+                        </div>
+                        <div class="bg-red-100 p-4 rounded-lg">
+                            <p class="text-sm text-red-600">실패</p>
+                            <p class="text-2xl font-bold text-red-700">${stats.failedExecutions}회</p>
+                        </div>
+                        <div class="bg-blue-100 p-4 rounded-lg">
+                            <p class="text-sm text-blue-600">평균 시간</p>
+                            <p class="text-2xl font-bold text-blue-700">${(stats.averageExecutionTime/1000).toFixed(1)}s</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold mb-3">매장 정보</h3>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div><strong>타겟층:</strong> ${store.targetAge || '-'}</div>
+                            <div><strong>객단가:</strong> ${store.avgPrice || '-'}</div>
+                            <div><strong>경쟁사:</strong> ${store.competitors || 0}개</div>
+                            <div><strong>등록일:</strong> ${new Date(store.createdAt).toLocaleDateString('ko-KR')}</div>
+                        </div>
+                        ${store.naverUrl ? `
+                            <div class="mt-3">
+                                <a href="${store.naverUrl}" target="_blank" class="text-blue-600 hover:underline">
+                                    <i class="fas fa-external-link-alt mr-2"></i>네이버 플레이스 바로가기
+                                </a>
+                            </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold mb-3">최근 봇 실행 기록</h3>
+                        <div class="max-h-60 overflow-y-auto">
+                            ${executions.length > 0 ? `
+                                <table class="w-full text-sm">
+                                    <thead class="bg-gray-100">
+                                        <tr>
+                                            <th class="text-left p-2">봇 이름</th>
+                                            <th class="text-left p-2">실행 시간</th>
+                                            <th class="text-left p-2">상태</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${executions.slice(-10).reverse().map(e => `
+                                            <tr class="border-b">
+                                                <td class="p-2">${e.botName}</td>
+                                                <td class="p-2">${new Date(e.createdAt).toLocaleString('ko-KR')}</td>
+                                                <td class="p-2">
+                                                    <span class="px-2 py-1 rounded text-xs ${e.status === 'completed' ? 'bg-green-200 text-green-800' : 'bg-yellow-200 text-yellow-800'}">
+                                                        ${e.status === 'completed' ? '완료' : '진행중'}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            ` : '<p class="text-gray-500 text-center py-4">실행 기록이 없습니다</p>'}
+                        </div>
+                    </div>
+                    
+                    <button onclick="this.closest('.fixed').remove()" class="w-full bg-purple-600 text-white py-3 rounded-lg font-bold hover:bg-purple-700">
+                        닫기
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // 매장 수정
+        function editStore(storeId) {
+            alert('매장 수정 기능은 곧 추가됩니다!');
+        }
+        
+        // 매장 삭제
+        function deleteStore(storeId) {
+            const store = dataManager.getStoreById(storeId);
+            if (!store) return;
+            
+            if (confirm(`"${store.name}" 매장을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) {
+                dataManager.deleteStore(storeId);
+                loadStores();
+                loadStatistics();
+                showNotification('매장이 삭제되었습니다.', 'success');
+            }
+        }
+        
+        // 비교 차트 초기화
+        function initComparisonChart() {
+            const ctx = document.getElementById('comparisonChart').getContext('2d');
+            const stores = dataManager.getStores();
+            
+            const labels = stores.map(s => s.name);
+            const executionData = stores.map(s => {
+                const stats = dataManager.getStoreStatistics(s.id);
+                return stats.completedExecutions;
+            });
+            
+            comparisonChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels.length > 0 ? labels : ['데이터 없음'],
+                    datasets: [{
+                        label: '완료된 봇 실행 수',
+                        data: executionData.length > 0 ? executionData : [0],
+                        backgroundColor: 'rgba(102, 126, 234, 0.7)',
+                        borderColor: 'rgba(102, 126, 234, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: 'white' }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        },
+                        x: {
+                            ticks: { color: 'white' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // 일괄 PPT 보고서 생성 함수
+        async function generateBatchPPTReports() {
+            const stores = dataManager.getStores();
+            
+            if (stores.length === 0) {
+                alert('생성할 매장이 없습니다. 먼저 매장을 추가해주세요.');
+                return;
+            }
+            
+            const confirmed = confirm(`${stores.length}개 매장의 PPT 보고서를 일괄 생성하시겠습니까?\n(매장당 약 10초 소요)`);
+            if (!confirmed) return;
+            
+            try {
+                // 로딩 표시
+                const loadingMsg = document.createElement('div');
+                loadingMsg.id = 'ppt-batch-loading';
+                loadingMsg.className = 'fixed top-20 right-4 bg-purple-600 text-white px-6 py-4 rounded-lg shadow-lg z-50 max-w-md';
+                loadingMsg.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-spinner fa-spin mr-2"></i>
+                        <span class="font-bold">일괄 PPT 생성 중...</span>
+                    </div>
+                    <div class="text-sm">
+                        <span id="ppt-current">0</span> / <span id="ppt-total">${stores.length}</span> 완료
+                    </div>
+                    <div class="mt-2 bg-white bg-opacity-20 rounded-full h-2">
+                        <div id="ppt-progress" class="bg-white h-2 rounded-full transition-all" style="width: 0%"></div>
+                    </div>
+                `;
+                document.body.appendChild(loadingMsg);
+                
+                // 각 매장별로 PPT 생성
+                const results = [];
+                for (let i = 0; i < stores.length; i++) {
+                    const store = stores[i];
+                    
+                    try {
+                        console.log(`🚀 [${i+1}/${stores.length}] ${store.name} PPT 생성 시작...`);
+                        const result = await window.pptGenerator.generateReport(store.id);
+                        results.push({ store: store.name, success: true, fileName: result.fileName });
+                        
+                        // 진행률 업데이트
+                        const progress = ((i + 1) / stores.length) * 100;
+                        document.getElementById('ppt-current').textContent = i + 1;
+                        document.getElementById('ppt-progress').style.width = progress + '%';
+                        
+                        // 각 매장 사이에 짧은 딜레이 (브라우저 부하 방지)
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                        
+                    } catch (error) {
+                        console.error(`❌ ${store.name} PPT 생성 실패:`, error);
+                        results.push({ store: store.name, success: false, error: error.message });
+                    }
+                }
+                
+                // 완료 메시지
+                const successCount = results.filter(r => r.success).length;
+                const failCount = results.length - successCount;
+                
+                loadingMsg.innerHTML = `
+                    <div class="flex items-center mb-2">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span class="font-bold">일괄 생성 완료!</span>
+                    </div>
+                    <div class="text-sm">
+                        성공: ${successCount}개 | 실패: ${failCount}개
+                    </div>
+                    ${failCount > 0 ? '<div class="text-xs mt-2 text-yellow-300">실패한 항목은 콘솔을 확인해주세요.</div>' : ''}
+                `;
+                loadingMsg.className = 'fixed top-20 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-lg z-50 max-w-md';
+                
+                setTimeout(() => {
+                    if (document.body.contains(loadingMsg)) {
+                        document.body.removeChild(loadingMsg);
+                    }
+                }, 7000);
+                
+                // 결과 콘솔 출력
+                console.log('📊 일괄 PPT 생성 결과:', results);
+                
+            } catch (error) {
+                console.error('일괄 PPT 생성 오류:', error);
+                alert('일괄 생성 중 오류가 발생했습니다. 콘솔을 확인해주세요.');
+                
+                const loadingMsg = document.getElementById('ppt-batch-loading');
+                if (loadingMsg && document.body.contains(loadingMsg)) {
+                    document.body.removeChild(loadingMsg);
+                }
+            }
+        }
+    </script>
+</body>
+</html>

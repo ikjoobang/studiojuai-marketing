@@ -1,0 +1,41 @@
+{
+  "name": "studiojuai-marketing-platform",
+  "version": "2.0.0",
+  "description": "AI 마케팅 자동화 플랫폼 - 30개 AI 봇 시스템 (Full Backend)",
+  "type": "module",
+  "main": "worker/index.js",
+  "scripts": {
+    "dev": "wrangler dev --config wrangler-worker.toml",
+    "dev:pages": "wrangler pages dev . --port 3000",
+    "build": "echo 'Static site - no build required'",
+    "deploy:worker": "wrangler deploy --config wrangler-worker.toml",
+    "deploy:pages": "wrangler pages deploy . --project-name studiojuai",
+    "db:create": "wrangler d1 create studiojuai-db",
+    "db:migrate": "wrangler d1 migrations apply studiojuai-db --config wrangler-worker.toml",
+    "db:migrate:local": "wrangler d1 migrations apply studiojuai-db --local --config wrangler-worker.toml",
+    "db:console": "wrangler d1 execute studiojuai-db --config wrangler-worker.toml",
+    "secret:openai": "wrangler secret put OPENAI_API_KEY --config wrangler-worker.toml",
+    "secret:naver": "wrangler secret put NAVER_CLIENT_ID --config wrangler-worker.toml && wrangler secret put NAVER_CLIENT_SECRET --config wrangler-worker.toml"
+  },
+  "keywords": [
+    "ai",
+    "marketing",
+    "automation",
+    "gpt",
+    "naver-api",
+    "cloudflare-workers",
+    "d1-database"
+  ],
+  "author": "Studiojuai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/studiojuai-marketing-platform.git"
+  },
+  "dependencies": {
+    "itty-router": "^4.0.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.46.0"
+  }
+}

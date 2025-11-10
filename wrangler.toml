@@ -1,0 +1,11 @@
+name = "studiojuai"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "."
+
+# Cloudflare Pages configuration
+# This is a static site deployment
+
+# Environment Variables for Naver API
+[vars]
+NAVER_CLIENT_ID = "fUhHJ1HWyF6fFw_aBfkg"
+NAVER_CLIENT_SECRET = "gA4jUFDYK0"

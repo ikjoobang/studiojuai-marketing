@@ -1,0 +1,592 @@
+/**
+ * ========================================
+ * 📱 반응형 디자인 시스템
+ * Studiojuai 마케팅 최적화 플랫폼
+ * ========================================
+ * 
+ * 디자인 원칙:
+ * - Progressive Disclosure (점진적 정보 공개)
+ * - Mobile First
+ * - 52px 제목 (PC), 32px (Mobile)
+ * - 145% 줄높이
+ * - Roboto + Noto Sans KR
+ */
+
+/* ==================== 폰트 설정 ==================== */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+
+/* ==================== CSS Variables (반응형) ==================== */
+:root {
+    /* 색상 시스템 */
+    --primary: #667eea;
+    --primary-dark: #5568d3;
+    --primary-light: #8b9df6;
+    
+    --bg-dark: #000000;
+    --bg-light: #FFFFFF;
+    --bg-gray: #F8F9FB;
+    
+    --text-primary: #000000;
+    --text-secondary: #666666;
+    --text-tertiary: #999999;
+    
+    --border-color: #E5E5E5;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+    
+    /* 타이포그래피 - 모바일 기본 */
+    --font-family-primary: 'Roboto', sans-serif;
+    --font-family-secondary: 'Noto Sans KR', sans-serif;
+    
+    --font-hero: 40px;          /* 모바일 히어로 */
+    --font-h1: 32px;            /* 모바일 제목 */
+    --font-h2: 24px;            /* 모바일 부제목 */
+    --font-h3: 20px;
+    --font-body: 16px;          /* 모바일 본문 */
+    --font-small: 14px;
+    --font-tiny: 12px;
+    
+    --line-height: 145%;        /* 기본 줄높이 */
+    --line-height-tight: 120%;
+    --line-height-relaxed: 160%;
+    
+    /* 간격 시스템 (8px 기준) */
+    --space-1: 8px;
+    --space-2: 16px;
+    --space-3: 24px;
+    --space-4: 32px;
+    --space-5: 40px;
+    --space-6: 48px;
+    --space-8: 64px;
+    
+    /* 브레이크포인트 */
+    --mobile-max: 767px;
+    --tablet-min: 768px;
+    --tablet-max: 1023px;
+    --desktop-min: 1024px;
+    --desktop-large: 1440px;
+    
+    /* Progressive Disclosure */
+    --transition-speed: 0.3s;
+    --transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 다크 모드 */
+[data-theme="dark"] {
+    --bg-dark: #000000;
+    --bg-light: #1a1a1a;
+    --bg-gray: #2a2a2a;
+    
+    --text-primary: #FFFFFF;
+    --text-secondary: #B0B0B0;
+    --text-tertiary: #808080;
+    
+    --border-color: #333333;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.6);
+}
+
+/* ==================== PC (Desktop) ==================== */
+@media (min-width: 1024px) {
+    :root {
+        --font-hero: 72px;      /* PC 히어로 */
+        --font-h1: 52px;        /* PC 제목 (요구사항) */
+        --font-h2: 36px;        /* PC 부제목 */
+        --font-h3: 28px;
+        --font-body: 18px;      /* PC 본문 */
+        --font-small: 16px;
+        --font-tiny: 14px;
+    }
+}
+
+/* ==================== 기본 스타일 ==================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family-primary);
+    font-size: var(--font-body);
+    line-height: var(--line-height);
+    color: var(--text-primary);
+    background-color: var(--bg-gray);
+    transition: background-color var(--transition-speed) var(--transition-easing),
+                color var(--transition-speed) var(--transition-easing);
+}
+
+/* 한글 텍스트 */
+body, h1, h2, h3, h4, h5, h6, p, button, input, select, textarea {
+    font-family: var(--font-family-secondary);
+}
+
+/* ==================== 타이포그래피 시스템 ==================== */
+.hero-text {
+    font-size: var(--font-hero);
+    font-weight: 900;
+    line-height: var(--line-height-tight);
+    letter-spacing: -0.02em;
+}
+
+h1, .h1 {
+    font-size: var(--font-h1);
+    font-weight: 700;
+    line-height: var(--line-height);
+    margin-bottom: var(--space-3);
+}
+
+h2, .h2 {
+    font-size: var(--font-h2);
+    font-weight: 700;
+    line-height: var(--line-height);
+    margin-bottom: var(--space-2);
+}
+
+h3, .h3 {
+    font-size: var(--font-h3);
+    font-weight: 600;
+    line-height: var(--line-height);
+    margin-bottom: var(--space-2);
+}
+
+p, .body {
+    font-size: var(--font-body);
+    line-height: var(--line-height);
+    margin-bottom: var(--space-2);
+}
+
+.small {
+    font-size: var(--font-small);
+}
+
+.tiny {
+    font-size: var(--font-tiny);
+}
+
+/* ==================== Progressive Disclosure ==================== */
+
+/* 기본: 중요한 것만 보이기 */
+.progressive-hidden {
+    display: none;
+}
+
+/* 확장 가능한 섹션 */
+.expandable-section {
+    transition: all var(--transition-speed) var(--transition-easing);
+}
+
+.expandable-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height var(--transition-speed) var(--transition-easing);
+}
+
+.expandable-content.expanded {
+    max-height: 2000px;
+}
+
+/* 토글 버튼 */
+.toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--transition-speed) var(--transition-easing);
+}
+
+.toggle-btn:hover {
+    background: var(--bg-gray);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.toggle-icon {
+    transition: transform var(--transition-speed) var(--transition-easing);
+}
+
+.toggle-btn.active .toggle-icon {
+    transform: rotate(180deg);
+}
+
+/* ==================== 반응형 컨테이너 ==================== */
+.container {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 var(--space-2);
+}
+
+/* 모바일 */
+@media (max-width: 767px) {
+    .container {
+        padding: 0 var(--space-2);
+    }
+}
+
+/* 태블릿 */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .container {
+        padding: 0 var(--space-4);
+    }
+}
+
+/* PC */
+@media (min-width: 1024px) {
+    .container {
+        padding: 0 var(--space-6);
+    }
+}
+
+/* ==================== 그리드 시스템 ==================== */
+
+/* 모바일: 1열 */
+.grid {
+    display: grid;
+    gap: var(--space-3);
+    grid-template-columns: 1fr;
+}
+
+/* 태블릿: 2열 */
+@media (min-width: 768px) {
+    .grid-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* PC: 3-4열 */
+@media (min-width: 1024px) {
+    .grid-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .grid-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ==================== 카드 컴포넌트 ==================== */
+.card {
+    background: var(--bg-light);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: var(--space-3);
+    transition: all var(--transition-speed) var(--transition-easing);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* 모바일: 작은 패딩 */
+@media (max-width: 767px) {
+    .card {
+        padding: var(--space-2);
+        border-radius: 12px;
+    }
+}
+
+/* PC: 큰 패딩 */
+@media (min-width: 1024px) {
+    .card {
+        padding: var(--space-4);
+        border-radius: 20px;
+    }
+}
+
+/* ==================== 버튼 시스템 ==================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-body);
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-speed) var(--transition-easing);
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+/* 모바일: 전체 너비 */
+@media (max-width: 767px) {
+    .btn-mobile-full {
+        width: 100%;
+    }
+}
+
+/* PC: 큰 버튼 */
+@media (min-width: 1024px) {
+    .btn-lg {
+        padding: var(--space-3) var(--space-5);
+        font-size: 18px;
+    }
+}
+
+/* ==================== 네비게이션 ==================== */
+
+/* 모바일: 하단 네비게이션 */
+@media (max-width: 767px) {
+    .mobile-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--bg-light);
+        border-top: 1px solid var(--border-color);
+        padding: var(--space-2);
+        display: flex;
+        justify-content: space-around;
+        z-index: 1000;
+        box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: color var(--transition-speed);
+    }
+    
+    .mobile-nav-item:hover,
+    .mobile-nav-item.active {
+        color: var(--primary);
+    }
+    
+    .mobile-nav-icon {
+        font-size: 24px;
+    }
+    
+    .mobile-nav-label {
+        font-size: 11px;
+    }
+}
+
+/* PC: 상단 네비게이션 */
+@media (min-width: 1024px) {
+    .desktop-nav {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        padding: var(--space-3) 0;
+    }
+    
+    .desktop-nav-item {
+        padding: var(--space-2) var(--space-3);
+        color: var(--text-primary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all var(--transition-speed);
+        border-radius: 8px;
+    }
+    
+    .desktop-nav-item:hover {
+        background: var(--bg-gray);
+        color: var(--primary);
+    }
+}
+
+/* ==================== 폼 요소 ==================== */
+input, select, textarea {
+    width: 100%;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--font-body);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-light);
+    color: var(--text-primary);
+    transition: all var(--transition-speed);
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* PC: 큰 폼 요소 */
+@media (min-width: 1024px) {
+    input, select, textarea {
+        padding: var(--space-3) var(--space-4);
+        font-size: 18px;
+    }
+}
+
+/* ==================== 반응형 유틸리티 ==================== */
+
+/* 숨김 클래스 */
+.hide-mobile {
+    display: none;
+}
+
+.hide-tablet {
+    display: none;
+}
+
+.hide-desktop {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .hide-mobile {
+        display: block;
+    }
+    
+    .show-mobile {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+    .hide-tablet {
+        display: none;
+    }
+    
+    .show-tablet {
+        display: block;
+    }
+}
+
+@media (min-width: 1024px) {
+    .hide-desktop {
+        display: none;
+    }
+    
+    .show-desktop {
+        display: block;
+    }
+}
+
+/* ==================== 스크롤 영역 ==================== */
+.scroll-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 모바일: 가로 스크롤 */
+@media (max-width: 767px) {
+    .scroll-x-mobile {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    
+    .scroll-x-mobile::-webkit-scrollbar {
+        height: 4px;
+    }
+    
+    .scroll-x-mobile::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 4px;
+    }
+}
+
+/* ==================== 애니메이션 ==================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s var(--transition-easing);
+}
+
+/* ==================== Progressive Disclosure 패턴 ==================== */
+
+/* 접힌 상태 */
+.disclosure-collapsed {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s var(--transition-easing),
+                opacity 0.3s var(--transition-easing);
+}
+
+/* 펼쳐진 상태 */
+.disclosure-expanded {
+    max-height: 2000px;
+    opacity: 1;
+}
+
+/* 더보기 버튼 */
+.show-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--primary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.show-more-btn:hover {
+    gap: var(--space-2);
+}
+
+/* ==================== 반응형 이미지 ==================== */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* ==================== 반응형 간격 ==================== */
+
+/* 모바일: 작은 간격 */
+@media (max-width: 767px) {
+    .section {
+        padding: var(--space-4) 0;
+    }
+    
+    .mb-responsive {
+        margin-bottom: var(--space-2);
+    }
+}
+
+/* PC: 큰 간격 */
+@media (min-width: 1024px) {
+    .section {
+        padding: var(--space-8) 0;
+    }
+    
+    .mb-responsive {
+        margin-bottom: var(--space-4);
+    }
+}
+
+/* ==================== 프린트 스타일 ==================== */
+@media print {
+    body {
+        font-size: 12pt;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+}

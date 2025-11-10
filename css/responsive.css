@@ -1,0 +1,431 @@
+/* ========================================
+   AI 마케팅 자동화 플랫폼 - 반응형 스타일
+   ======================================== */
+
+/* ========================================
+   모바일 (< 640px)
+   ======================================== */
+@media (max-width: 640px) {
+    /* 헤더 */
+    header h1 {
+        font-size: 1.5rem !important;
+    }
+    
+    header p {
+        font-size: 0.875rem !important;
+    }
+    
+    /* 버튼 그룹 */
+    .button-group {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .button-group button {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* 통계 카드 */
+    .stats-card {
+        padding: 1rem !important;
+    }
+    
+    .stats-card p.text-4xl {
+        font-size: 2rem !important;
+    }
+    
+    /* 봇 카드 */
+    .bot-card {
+        padding: 1rem !important;
+    }
+    
+    .bot-card h4 {
+        font-size: 0.875rem !important;
+    }
+    
+    /* 테이블 */
+    table {
+        font-size: 0.75rem;
+    }
+    
+    th, td {
+        padding: 0.5rem !important;
+    }
+    
+    /* 차트 컨테이너 */
+    .chart-container {
+        height: 250px !important;
+    }
+    
+    /* 모달 */
+    .modal-content {
+        width: 95% !important;
+        padding: 1rem !important;
+    }
+    
+    /* 폼 입력 */
+    input, select, textarea {
+        font-size: 16px !important; /* iOS zoom 방지 */
+    }
+    
+    /* 네비게이션 */
+    nav {
+        flex-direction: column;
+    }
+    
+    nav a {
+        width: 100%;
+        text-align: center;
+        padding: 1rem;
+    }
+}
+
+/* ========================================
+   태블릿 세로 (640px - 768px)
+   ======================================== */
+@media (min-width: 640px) and (max-width: 768px) {
+    /* 헤더 */
+    header h1 {
+        font-size: 2rem !important;
+    }
+    
+    /* 그리드 레이아웃 */
+    .grid-cols-3 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    .grid-cols-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    /* 차트 */
+    .chart-container {
+        height: 300px !important;
+    }
+    
+    /* 버튼 */
+    button {
+        padding: 0.75rem 1.5rem;
+    }
+}
+
+/* ========================================
+   태블릿 가로 (768px - 1024px)
+   ======================================== */
+@media (min-width: 768px) and (max-width: 1024px) {
+    /* 헤더 */
+    header h1 {
+        font-size: 2.5rem !important;
+    }
+    
+    /* 그리드 */
+    .grid-cols-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    /* 사이드바 */
+    .sidebar {
+        width: 250px;
+    }
+    
+    /* 차트 */
+    .chart-container {
+        height: 350px !important;
+    }
+}
+
+/* ========================================
+   데스크톱 (> 1024px)
+   ======================================== */
+@media (min-width: 1024px) {
+    /* 컨테이너 최대 너비 */
+    .container-xl {
+        max-width: 1280px;
+        margin: 0 auto;
+    }
+    
+    /* 사이드바 레이아웃 */
+    .sidebar-layout {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 2rem;
+    }
+    
+    /* 차트 */
+    .chart-container {
+        height: 400px !important;
+    }
+    
+    /* 호버 효과 강화 */
+    .hover-lift:hover {
+        transform: translateY(-10px);
+    }
+}
+
+/* ========================================
+   대형 데스크톱 (> 1536px)
+   ======================================== */
+@media (min-width: 1536px) {
+    /* 컨테이너 */
+    .container-2xl {
+        max-width: 1536px;
+        margin: 0 auto;
+    }
+    
+    /* 폰트 크기 증가 */
+    body {
+        font-size: 18px;
+    }
+    
+    /* 그리드 컬럼 증가 */
+    .grid-responsive {
+        grid-template-columns: repeat(5, 1fr);
+    }
+    
+    /* 차트 */
+    .chart-container {
+        height: 500px !important;
+    }
+}
+
+/* ========================================
+   가로 모드 (모바일/태블릿)
+   ======================================== */
+@media (max-width: 1024px) and (orientation: landscape) {
+    /* 헤더 높이 조정 */
+    header {
+        padding: 1rem !important;
+    }
+    
+    /* 차트 높이 조정 */
+    .chart-container {
+        height: 250px !important;
+    }
+    
+    /* 모달 최대 높이 */
+    .modal-content {
+        max-height: 70vh !important;
+    }
+}
+
+/* ========================================
+   터치 디바이스
+   ======================================== */
+@media (hover: none) and (pointer: coarse) {
+    /* 터치 영역 확대 */
+    button, a, input {
+        min-height: 44px;
+        min-width: 44px;
+    }
+    
+    /* 호버 효과 제거 */
+    .hover-effect:hover {
+        transform: none;
+    }
+    
+    /* 터치 피드백 */
+    button:active, a:active {
+        opacity: 0.7;
+    }
+}
+
+/* ========================================
+   고해상도 디스플레이
+   ======================================== */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* 이미지 최적화 */
+    img {
+        image-rendering: -webkit-optimize-contrast;
+    }
+    
+    /* 아이콘 선명도 */
+    .icon {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* ========================================
+   접근성 - 모션 감소 선호
+   ======================================== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========================================
+   인쇄 최적화
+   ======================================== */
+@media print {
+    /* 페이지 설정 */
+    @page {
+        margin: 2cm;
+        size: A4;
+    }
+    
+    /* 배경 제거 */
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    /* 불필요한 요소 숨김 */
+    header, footer, nav, button, .no-print {
+        display: none !important;
+    }
+    
+    /* 페이지 나누기 */
+    section {
+        page-break-inside: avoid;
+    }
+    
+    /* 링크 표시 */
+    a::after {
+        content: " (" attr(href) ")";
+    }
+    
+    /* 차트 크기 조정 */
+    .chart-container {
+        height: 300px !important;
+    }
+}
+
+/* ========================================
+   다크 모드
+   ======================================== */
+@media (prefers-color-scheme: dark) {
+    /* 변수 재정의 */
+    :root {
+        --glass-bg: rgba(0, 0, 0, 0.4);
+        --glass-border: rgba(255, 255, 255, 0.1);
+    }
+    
+    /* 텍스트 대비 */
+    body {
+        color: #f0f0f0;
+    }
+    
+    /* 카드 배경 */
+    .card {
+        background: rgba(0, 0, 0, 0.3);
+    }
+    
+    /* 입력 필드 */
+    input, select, textarea {
+        background: rgba(0, 0, 0, 0.4);
+        color: white;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+}
+
+/* ========================================
+   컨테이너 쿼리 (실험적 기능)
+   ======================================== */
+@container (min-width: 400px) {
+    .card-responsive {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* ========================================
+   반응형 폰트
+   ======================================== */
+html {
+    font-size: 14px;
+}
+
+@media (min-width: 640px) {
+    html { font-size: 15px; }
+}
+
+@media (min-width: 768px) {
+    html { font-size: 16px; }
+}
+
+@media (min-width: 1024px) {
+    html { font-size: 16px; }
+}
+
+@media (min-width: 1536px) {
+    html { font-size: 18px; }
+}
+
+/* ========================================
+   반응형 여백
+   ======================================== */
+.responsive-padding {
+    padding: 1rem;
+}
+
+@media (min-width: 640px) {
+    .responsive-padding { padding: 1.5rem; }
+}
+
+@media (min-width: 1024px) {
+    .responsive-padding { padding: 2rem; }
+}
+
+/* ========================================
+   반응형 그리드
+   ======================================== */
+.responsive-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .responsive-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1024px) {
+    .responsive-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1536px) {
+    .responsive-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ========================================
+   유틸리티 클래스
+   ======================================== */
+.mobile-only {
+    display: block;
+}
+
+@media (min-width: 768px) {
+    .mobile-only {
+        display: none;
+    }
+}
+
+.desktop-only {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .desktop-only {
+        display: block;
+    }
+}
+
+.tablet-only {
+    display: none;
+}
+
+@media (min-width: 640px) and (max-width: 1024px) {
+    .tablet-only {
+        display: block;
+    }
+}

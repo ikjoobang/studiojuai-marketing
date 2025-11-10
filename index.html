@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studiojuai</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- PptxGenJS - PPT 생성 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <!-- 반응형 디자인 시스템 -->
+    <link rel="stylesheet" href="css/responsive-system.css">
+    
+    <style>
+        /* ========================================
+           UX/UI 표준 디자인 시스템
+           8px 그리드 기반, 반응형 타이포그래피
+        ======================================== */
+        
+        :root {
+            /* 색상 시스템 - 다크모드 (GenSpark 스타일) */
+            --bg-primary: #000000;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #F8F9FB;
+            --text-primary: #FFFFFF;
+            --text-secondary: #CCCCCC;
+            --text-disabled: #666666;
+            --border-color: #333333;
+            
+            /* 주황 포인트 컬러 */
+            --accent-primary: #FF6B35;
+            --accent-secondary: #FF8C42;
+            --accent-gradient: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
+            
+            /* 카드 스타일 */
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --card-border: rgba(255, 255, 255, 0.1);
+            
+            /* 8px 그리드 시스템 */
+            --spacing-xs: 8px;
+            --spacing-sm: 16px;
+            --spacing-md: 24px;
+            --spacing-lg: 32px;
+            --spacing-xl: 48px;
+            
+            /* 타이포그래피 (모바일 기본) */
+            --font-title: 20px;        /* 모바일 제목 20-28pt */
+            --font-subtitle: 17px;     /* 모바일 부제목 */
+            --font-body: 15px;         /* 모바일 본문 14-17pt */
+            --font-small: 13px;        /* 모바일 작은 글씨 */
+            
+            /* 줄높이 1.3-1.5배 */
+            --line-height-tight: 1.3;
+            --line-height-normal: 1.4;
+            --line-height-relaxed: 1.5;
+        }
+        
+        /* 라이트 모드 */
+        [data-theme="light"] {
+            --bg-primary: #F8F9FB;
+            --bg-secondary: #FFFFFF;
+            --text-primary: #000000;
+            --text-secondary: #666666;
+            --text-disabled: #999999;
+            --border-color: #E5E5E5;
+            --accent-primary: #FF6B35;
+            --accent-secondary: #FF8C42;
+            --accent-gradient: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
+            --card-bg: #FFFFFF;
+            --card-border: rgba(0, 0, 0, 0.08);
+        }
+        
+        /* PC 반응형 타이포그래피 */
+        @media (min-width: 768px) {
+            :root {
+                --font-title: 32px;
+                --font-subtitle: 20px;
+                --font-body: 16px;
+                --font-small: 14px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            :root {
+                --font-title: 40px;
+                --font-subtitle: 22px;
+                --font-body: 17px;
+                --font-small: 15px;
+            }
+        }
+        
+        /* 기본 스타일 */
+        * { 
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Noto Sans KR', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            font-size: var(--font-body);
+            line-height: var(--line-height-normal);
+            margin: 0;
+            padding: var(--spacing-sm);
+        }
+        
+        @media (min-width: 768px) {
+            body {
+                padding: var(--spacing-lg);
+            }
+        }
+        
+        /* 타이포그래피 */
+        h1 {
+            font-size: var(--font-title);
+            line-height: var(--line-height-tight);
+            margin: 0;
+            font-weight: 700;
+        }
+        
+        h2 {
+            font-size: var(--font-subtitle);
+            line-height: var(--line-height-normal);
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        p {
+            font-size: var(--font-body);
+            line-height: var(--line-height-relaxed);
+            margin: 0;
+        }
+        
+        small {
+            font-size: var(--font-small);
+            line-height: var(--line-height-normal);
+        }
+        
+        /* 카드 시스템 (8px 그리드) */
+        .glass-effect {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--spacing-sm);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        @media (min-width: 768px) {
+            .glass-effect {
+                padding: var(--spacing-lg);
+                margin-bottom: var(--spacing-lg);
+            }
+        }
+        
+        /* 봇 카드 */
+        .bot-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            padding: var(--spacing-md);
+            border-radius: var(--spacing-sm);
+        }
+        
+        .bot-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
+        }
+        
+        /* 버튼 (8px 그리드) */
+        .industry-btn {
+            transition: all 0.3s ease;
+            padding: var(--spacing-sm);
+            border-radius: var(--spacing-sm);
+            font-size: var(--font-body);
+            line-height: var(--line-height-normal);
+        }
+        
+        .industry-btn.active {
+            background: var(--accent-color);
+            color: white;
+            transform: scale(1.02);
+        }
+        
+        /* 테마 토글 */
+        .theme-toggle {
+            position: fixed;
+            top: var(--spacing-sm);
+            right: var(--spacing-sm);
+            z-index: 1000;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            padding: 12px 16px;
+            border-radius: var(--spacing-sm);
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        @media (min-width: 768px) {
+            .theme-toggle {
+                top: var(--spacing-md);
+                right: var(--spacing-md);
+            }
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        /* 애니메이션 */
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* 그리드 시스템 (8px 기반) */
+        .grid-spacing {
+            gap: var(--spacing-sm);
+        }
+        
+        @media (min-width: 768px) {
+            .grid-spacing {
+                gap: var(--spacing-md);
+            }
+        }
+        
+        /* 설정 모달 스타일 */
+        #settingsModal input:focus {
+            background: rgba(255,255,255,0.2) !important;
+            border-color: rgba(255,255,255,0.8) !important;
+            outline: none;
+        }
+        
+        #settingsModal button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+        
+        #settingsModal button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    
+    <!-- 테마 토글 버튼 -->
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+        🌙
+    </button>
+    
+    <!-- 헤더 -->
+    <header class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+            <div class="mb-4 md:mb-0">
+                <h1 class="text-3xl md:text-4xl font-bold flex items-center">
+                    <i class="fas fa-robot mr-3"></i>
+                    Studiojuai
+                </h1>
+                <p class="text-sm md:text-base mt-2 opacity-90">AI 마케팅 자동화 플랫폼</p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="location.href='pages/bot-dashboard.html'" class="bg-white text-purple-700 px-4 py-2 rounded-lg font-bold hover:bg-opacity-90 transition">
+                    <i class="fas fa-th-large mr-2"></i>봇 관리
+                </button>
+                <button onclick="location.href='pages/multi-store.html'" class="bg-white text-purple-700 px-4 py-2 rounded-lg font-bold hover:bg-opacity-90 transition">
+                    <i class="fas fa-store mr-2"></i>매장 관리
+                </button>
+                <button onclick="showSettings()" class="bg-white text-purple-700 px-4 py-2 rounded-lg font-bold hover:bg-opacity-90 transition" id="settingsBtn">
+                    <i class="fas fa-cog mr-2"></i>설정
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 히어로 섹션 - 가치 제안 -->
+    <section class="mb-6" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 48px 32px; text-align: center; color: white;">
+        <h2 class="text-4xl md:text-5xl font-bold mb-4">
+            🚀 5분만에 완성되는<br>AI 마케팅 분석 보고서
+        </h2>
+        <p class="text-lg md:text-xl mb-6 opacity-90">
+            30개 AI 봇이 당신의 매장을 자동으로 분석하고<br>
+            <strong>37페이지 전문 마케팅 보고서(PPT)</strong>를 즉시 생성합니다
+        </p>
+        
+        <!-- 핵심 가치 3가지 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 16px; padding: 24px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">⚡</div>
+                <h3 class="text-xl font-bold mb-2">5-10분 자동 분석</h3>
+                <p class="text-sm opacity-80">매장 정보만 입력하면<br>30개 AI 봇이 자동으로<br>시장·경쟁사·고객 분석</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 16px; padding: 24px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">📊</div>
+                <h3 class="text-xl font-bold mb-2">37페이지 PPT 보고서</h3>
+                <p class="text-sm opacity-80">시장 분석, 마케팅 전략,<br>콘텐츠 제안, 운영 최적화<br>전문가 수준의 보고서</p>
+            </div>
+            <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 16px; padding: 24px;">
+                <div style="font-size: 48px; margin-bottom: 16px;">🎯</div>
+                <h3 class="text-xl font-bold mb-2">업종별 맞춤 분석</h3>
+                <p class="text-sm opacity-80">카페·치킨·한식·미용실 등<br>업종 특성에 맞는<br>실전 마케팅 솔루션</p>
+            </div>
+        </div>
+
+        <!-- CTA 버튼 -->
+        <div class="mt-8">
+            <a href="#start-section" class="inline-block bg-white text-purple-700 px-8 py-4 rounded-full font-bold text-lg hover:shadow-2xl transition transform hover:scale-105">
+                <i class="fas fa-rocket mr-2"></i>지금 무료로 시작하기
+            </a>
+        </div>
+    </section>
+
+    <!-- 고객이 받는 것 (What You Get) -->
+    <section class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <h2 class="text-3xl font-bold mb-6 text-center">
+            <i class="fas fa-gift mr-3"></i>
+            이 플랫폼에서 받을 수 있는 것
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- 시장 분석 -->
+            <div style="background: rgba(59, 130, 246, 0.2); border-left: 4px solid #3B82F6; padding: 24px; border-radius: 12px;">
+                <h3 class="text-xl font-bold mb-3 flex items-center">
+                    <i class="fas fa-chart-line mr-2" style="color: #3B82F6;"></i>
+                    시장 분석 (8개 봇)
+                </h3>
+                <ul class="space-y-2 text-sm">
+                    <li>✓ 네이버 플레이스 자동 분석 및 최적화 방안</li>
+                    <li>✓ 경쟁사 벤치마킹 (가격·메뉴·리뷰 비교)</li>
+                    <li>✓ 상권 분석 (유동인구·소비패턴)</li>
+                    <li>✓ 타겟 고객 프로파일링</li>
+                    <li>✓ SEO 키워드 전략</li>
+                    <li>✓ 업종 트렌드 분석</li>
+                    <li>✓ 가격 전략 제안</li>
+                    <li>✓ 매출 예측 리포트</li>
+                </ul>
+            </div>
+
+            <!-- 콘텐츠 자동화 -->
+            <div style="background: rgba(34, 197, 94, 0.2); border-left: 4px solid #22C55E; padding: 24px; border-radius: 12px;">
+                <h3 class="text-xl font-bold mb-3 flex items-center">
+                    <i class="fas fa-pen-fancy mr-2" style="color: #22C55E;"></i>
+                    콘텐츠 생성 (8개 봇)
+                </h3>
+                <ul class="space-y-2 text-sm">
+                    <li>✓ 마케팅 제안서 자동 작성</li>
+                    <li>✓ 서비스 견적서 생성</li>
+                    <li>✓ 브랜드 스토리 작성</li>
+                    <li>✓ 메뉴 최적화 및 네이밍</li>
+                    <li>✓ 시즌별 마케팅 캠페인</li>
+                    <li>✓ SNS 콘텐츠 자동 생성</li>
+                    <li>✓ 광고 카피 및 슬로건</li>
+                    <li>✓ 프로모션 이벤트 기획</li>
+                </ul>
+            </div>
+
+            <!-- 크리에이티브 -->
+            <div style="background: rgba(168, 85, 247, 0.2); border-left: 4px solid #A855F7; padding: 24px; border-radius: 12px;">
+                <h3 class="text-xl font-bold mb-3 flex items-center">
+                    <i class="fas fa-palette mr-2" style="color: #A855F7;"></i>
+                    크리에이티브 (6개 봇)
+                </h3>
+                <ul class="space-y-2 text-sm">
+                    <li>✓ AI 마케팅 이미지 생성 콘셉트</li>
+                    <li>✓ 로고 디자인 가이드</li>
+                    <li>✓ 프로모션 포스터 레이아웃</li>
+                    <li>✓ 메뉴판 디자인 설계</li>
+                    <li>✓ 마케팅 영상 기획</li>
+                    <li>✓ 패키지/굿즈 디자인 제안</li>
+                </ul>
+            </div>
+
+            <!-- 운영 최적화 -->
+            <div style="background: rgba(251, 146, 60, 0.2); border-left: 4px solid #FB923C; padding: 24px; border-radius: 12px;">
+                <h3 class="text-xl font-bold mb-3 flex items-center">
+                    <i class="fas fa-cogs mr-2" style="color: #FB923C;"></i>
+                    운영 최적화 (8개 봇)
+                </h3>
+                <ul class="space-y-2 text-sm">
+                    <li>✓ 네이버 플레이스 최적화 가이드</li>
+                    <li>✓ 리뷰 자동 응답 템플릿</li>
+                    <li>✓ 예약 시스템 최적화</li>
+                    <li>✓ 고객 상담 FAQ 작성</li>
+                    <li>✓ 재고/원자재 관리 시스템</li>
+                    <li>✓ 배달 서비스 최적화</li>
+                    <li>✓ 성과 측정 KPI 설정</li>
+                    <li>✓ 실시간 대시보드 설계</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- 사용 방법 (How It Works) -->
+    <section class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <h2 class="text-3xl font-bold mb-6 text-center">
+            <i class="fas fa-question-circle mr-3"></i>
+            사용 방법 (3단계)
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="text-center">
+                <div style="background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 32px; font-weight: bold;">1</div>
+                <h3 class="text-xl font-bold mb-2">매장 정보 입력</h3>
+                <p class="text-sm opacity-80">업종 선택 + 매장명, 지역, 타겟층,<br>네이버 플레이스 URL 입력<br>(2분 소요)</p>
+            </div>
+            <div class="text-center">
+                <div style="background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 32px; font-weight: bold;">2</div>
+                <h3 class="text-xl font-bold mb-2">AI 봇 자동 실행</h3>
+                <p class="text-sm opacity-80">"전체 봇 실행" 버튼 클릭<br>30개 AI 봇이 자동 분석<br>(5-10분 소요)</p>
+            </div>
+            <div class="text-center">
+                <div style="background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 32px; font-weight: bold;">3</div>
+                <h3 class="text-xl font-bold mb-2">PPT 보고서 다운로드</h3>
+                <p class="text-sm opacity-80">분석 완료 후 우측 하단<br>PPT 버튼 클릭하여<br>37페이지 보고서 다운로드</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 시작 섹션 (실제 입력 폼) -->
+    <div id="start-section"></div>
+
+    <!-- 업종 선택 -->
+    <section class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <h2 class="text-2xl font-bold mb-4 flex items-center">
+            <i class="fas fa-store-alt mr-3"></i>
+            업종 선택
+        </h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3" id="industrySelector">
+            <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="cafe">
+                <i class="fas fa-coffee text-3xl mb-2"></i>
+                <p class="font-bold">카페</p>
+            </button>
+            <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="chicken">
+                <i class="fas fa-drumstick-bite text-3xl mb-2"></i>
+                <p class="font-bold">치킨</p>
+            </button>
+            <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="korean">
+                <i class="fas fa-utensils text-3xl mb-2"></i>
+                <p class="font-bold">한식</p>
+            </button>
+            <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="beauty">
+                <i class="fas fa-cut text-3xl mb-2"></i>
+                <p class="font-bold">미용실</p>
+            </button>
+            <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="pizza">
+                <i class="fas fa-pizza-slice text-3xl mb-2"></i>
+                <p class="font-bold">피자</p>
+            </button>
+            <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="dessert">
+                <i class="fas fa-ice-cream text-3xl mb-2"></i>
+                <p class="font-bold">디저트</p>
+            </button>
+            <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="other">
+                <i class="fas fa-ellipsis-h text-3xl mb-2"></i>
+                <p class="font-bold">기타</p>
+            </button>
+        </div>
+    </section>
+
+    <!-- 매장 정보 입력 -->
+    <section class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <h2 class="text-2xl font-bold mb-4 flex items-center">
+            <i class="fas fa-info-circle mr-3"></i>
+            매장 정보 입력
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+                <label class="block mb-2 font-bold">매장명</label>
+                <input type="text" id="storeName" class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white" placeholder="매장명을 입력해주세요">
+            </div>
+            <div>
+                <label class="block mb-2 font-bold">지역 상권</label>
+                <input type="text" id="location" class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white" placeholder="서울 강남구 ㅇㅇ동">
+            </div>
+            <div>
+                <label class="block mb-2 font-bold">타겟층</label>
+                <select id="targetAge" class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white">
+                    <option value="">선택하세요</option>
+                    <option value="10대">10대</option>
+                    <option value="20대">20대</option>
+                    <option value="30대">30대</option>
+                    <option value="40대">40대</option>
+                    <option value="50대 이상">50대 이상</option>
+                    <option value="전연령">전연령</option>
+                </select>
+            </div>
+            <div>
+                <label class="block mb-2 font-bold">객단가</label>
+                <select id="avgPrice" class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white">
+                    <option value="">선택하세요</option>
+                    <option value="1만원 이하">1만원 이하</option>
+                    <option value="1-3만원">1-3만원</option>
+                    <option value="3-5만원">3-5만원</option>
+                    <option value="5-10만원">5-10만원</option>
+                    <option value="10만원 이상">10만원 이상</option>
+                </select>
+            </div>
+            <div>
+                <label class="block mb-2 font-bold">경쟁사 수</label>
+                <input type="number" id="competitors" class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white" placeholder="예: 5" min="0">
+            </div>
+            <div>
+                <label class="block mb-2 font-bold">네이버 플레이스 URL</label>
+                <input type="url" id="naverUrl" class="w-full p-3 rounded-lg bg-white bg-opacity-20 border border-white border-opacity-30 focus:outline-none focus:ring-2 focus:ring-white" placeholder="https://naver.me/xxxxx">
+            </div>
+        </div>
+        <div class="mt-4 flex gap-3">
+            <button onclick="saveStoreInfo()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold transition flex flex-col items-center justify-center">
+                <i class="fas fa-save text-xl mb-1"></i>
+                <span class="text-sm">매장 정보<br>저장</span>
+            </button>
+            <button onclick="runAllBots()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg font-bold transition flex flex-col items-center justify-center">
+                <i class="fas fa-play text-xl mb-1"></i>
+                <span class="text-sm">전체 봇<br>실행</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- 30개 AI 봇 시스템 -->
+    <section class="mb-6">
+        <h2 class="text-3xl font-bold mb-6 text-white text-center">
+            <i class="fas fa-robot mr-3"></i>
+            30개 AI 봇 시스템
+        </h2>
+        
+        <!-- 시장 분석 봇 (8개) -->
+        <div class="mb-6">
+            <h3 class="text-xl font-bold mb-4 text-white flex items-center">
+                <i class="fas fa-chart-line mr-2"></i>
+                시장 분석
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="marketBots">
+                <!-- 봇 카드는 JS로 동적 생성 -->
+            </div>
+        </div>
+
+        <!-- 콘텐츠 자동화 봇 (8개) -->
+        <div class="mb-6">
+            <h3 class="text-xl font-bold mb-4 text-white flex items-center">
+                <i class="fas fa-pen-fancy mr-2"></i>
+                콘텐츠 자동화
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="contentBots">
+                <!-- 봇 카드는 JS로 동적 생성 -->
+            </div>
+        </div>
+
+        <!-- 크리에이티브 봇 (6개) -->
+        <div class="mb-6">
+            <h3 class="text-xl font-bold mb-4 text-white flex items-center">
+                <i class="fas fa-palette mr-2"></i>
+                크리에이티브
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="creativeBots">
+                <!-- 봇 카드는 JS로 동적 생성 -->
+            </div>
+        </div>
+
+        <!-- 운영 자동화 봇 (8개) -->
+        <div class="mb-6">
+            <h3 class="text-xl font-bold mb-4 text-white flex items-center">
+                <i class="fas fa-cogs mr-2"></i>
+                운영 자동화
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="operationsBots">
+                <!-- 봇 카드는 JS로 동적 생성 -->
+            </div>
+        </div>
+    </section>
+
+    <!-- 실시간 실행 상태 대시보드 -->
+    <section class="glass-effect rounded-2xl p-6 mb-6 text-white">
+        <h2 class="text-2xl font-bold mb-4 flex items-center">
+            <i class="fas fa-chart-bar mr-3"></i>
+            실시간 실행 상태
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white bg-opacity-20 p-4 rounded-xl">
+                <p class="text-sm opacity-80">실행된 봇</p>
+                <p class="text-3xl font-bold" id="executedBots">0 / 30</p>
+            </div>
+            <div class="bg-white bg-opacity-20 p-4 rounded-xl">
+                <p class="text-sm opacity-80">완료된 봇</p>
+                <p class="text-3xl font-bold text-green-300" id="completedBots">0</p>
+            </div>
+            <div class="bg-white bg-opacity-20 p-4 rounded-xl">
+                <p class="text-sm opacity-80">평균 실행 시간</p>
+                <p class="text-3xl font-bold" id="avgExecutionTime">0s</p>
+            </div>
+            <div class="bg-white bg-opacity-20 p-4 rounded-xl">
+                <p class="text-sm opacity-80">실행 성공률</p>
+                <p class="text-3xl font-bold" id="successRate">0%</p>
+            </div>
+        </div>
+        <div style="height: 400px;">
+            <canvas id="performanceChart"></canvas>
+        </div>
+    </section>
+
+    <!-- 설정 모달 -->
+    <div id="settingsModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 40px; max-width: 600px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <h2 style="color: white; font-size: 28px; font-weight: bold; margin: 0;">
+                    <i class="fas fa-cog"></i> API 설정
+                </h2>
+                <button onclick="closeSettings()" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 20px; cursor: pointer; transition: all 0.3s;">
+                    ✕
+                </button>
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 16px;">
+                    <i class="fas fa-key"></i> GPT API 키
+                </label>
+                <input type="password" id="gptApiKeyInput" placeholder="sk-proj-xxxxxxxxxxxxxxxx" style="width: 100%; padding: 15px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.3); background: rgba(255,255,255,0.1); color: white; font-size: 14px; transition: all 0.3s;">
+                <p style="color: rgba(255,255,255,0.7); font-size: 13px; margin-top: 8px;">
+                    OpenAI API 키를 입력하세요. 암호화되어 LocalStorage에 저장됩니다.
+                </p>
+            </div>
+            
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; color: white; font-weight: bold; margin-bottom: 10px; font-size: 16px;">
+                    <i class="fas fa-info-circle"></i> 네이버 API 상태
+                </label>
+                <div style="background: rgba(0,255,0,0.2); padding: 15px; border-radius: 10px; border: 2px solid rgba(0,255,0,0.5);">
+                    <p style="color: white; margin: 0; font-size: 14px;">
+                        ✅ 네이버 API 키가 이미 설정되어 있습니다.
+                    </p>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 15px;">
+                <button onclick="saveApiKey()" style="flex: 1; background: rgba(255,255,255,0.9); color: #667eea; border: none; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: all 0.3s;">
+                    <i class="fas fa-save"></i> 저장
+                </button>
+                <button onclick="testApiKey()" style="flex: 1; background: rgba(255,255,255,0.2); color: white; border: 2px solid white; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 16px; cursor: pointer; transition: all 0.3s;">
+                    <i class="fas fa-flask"></i> 테스트
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="text-center text-white opacity-80 mt-8" style="padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 40px;">
+        <p class="text-sm" style="margin-bottom: 10px;">
+            <a href="https://www.studiojuai.com" target="_blank" rel="noopener" class="hover:text-white transition" style="color: #FF6B35; text-decoration: none;">
+                https://www.studiojuai.com
+            </a>
+            <span style="margin: 0 8px;">|</span>
+            <a href="https://twitter.com/STUDIO_JU_AI" target="_blank" rel="noopener" class="hover:text-white transition" style="color: #FF6B35; text-decoration: none;">
+                @STUDIO_JU_AI
+            </a>
+        </p>
+        <p class="text-xs" style="opacity: 0.7;">
+            © 2025. ALL RIGHTS RESERVED.
+            <span style="margin: 0 8px;">|</span>
+            <a href="mailto:ikjoobang@gmail.com" class="hover:text-white transition" style="color: #FF6B35; text-decoration: none;">
+                ikjoobang@gmail.com
+            </a>
+        </p>
+    </footer>
+
+    <!-- JavaScript 로드 -->
+    <!-- 보안 모듈 (가장 먼저 로드) -->
+    <script src="js/security.js"></script>
+    
+    <!-- 데이터베이스 모듈 (로컬 저장소용) -->
+    <script src="js/database.js"></script>
+    
+    <!-- API 클라이언트 (백엔드 통신) -->
+    <script src="js/api-client.js"></script>
+    
+    <!-- 봇 시스템 (main.js보다 먼저 로드되어야 함!) -->
+    <script src="js/bot-system.js"></script>
+    
+    <!-- 데이터 관리 (레거시 - 백업용) -->
+    <script src="js/data-manager.js"></script>
+    
+    <!-- 메인 로직 (봇 시스템 다음에 로드) -->
+    <script src="js/main.js"></script>
+    
+    <!-- PPT 생성 시스템 -->
+    <script src="js/report-data.js"></script>
+    <script src="js/ppt-generator.js"></script>
+    <script src="js/ppt-generator-premium.js"></script>
+    
+    <!-- 반응형 시스템 -->
+    <script src="js/progressive-disclosure.js"></script>
+    
+    <script>
+        // 테마 토글 함수
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme === 'light' ? 'light' : null);
+            localStorage.setItem('theme', newTheme);
+            
+            // 토글 버튼 아이콘 변경
+            document.getElementById('themeToggle').textContent = newTheme === 'light' ? '☀️' : '🌙';
+        }
+        
+        // 페이지 로드 시 저장된 테마 적용
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            if (savedTheme === 'light') {
+                document.documentElement.setAttribute('data-theme', 'light');
+                document.getElementById('themeToggle').textContent = '☀️';
+            } else {
+                document.getElementById('themeToggle').textContent = '🌙';
+            }
+        });
+    </script>
+
+</body>
+</html>

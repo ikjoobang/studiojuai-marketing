@@ -146,13 +146,13 @@ router.post('/api/gpt/analyze', async (request, env) => {
                 'Authorization': `Bearer ${env.OPENAI_API_KEY}`
             },
             body: JSON.stringify({
-                model: options?.model || 'gpt-4',
+                model: options?.model || 'gpt-3.5-turbo',
                 messages: [
                     { role: 'system', content: systemPrompt || '당신은 마케팅 전문가입니다.' },
                     { role: 'user', content: prompt }
                 ],
                 temperature: options?.temperature || 0.7,
-                max_tokens: options?.maxTokens || 2000
+                max_tokens: options?.maxTokens || 1500
             })
         });
         
@@ -211,13 +211,13 @@ router.post('/api/bots/execute', async (request, env) => {
                 'Authorization': `Bearer ${env.OPENAI_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'gpt-4',
+                model: 'gpt-3.5-turbo',
                 messages: [
                     { role: 'system', content: `당신은 ${store.industry} 업종 전문 마케팅 AI입니다.` },
                     { role: 'user', content: prompt }
                 ],
                 temperature: 0.7,
-                max_tokens: 2000
+                max_tokens: 1500
             })
         });
         
@@ -323,13 +323,13 @@ async function handleBotExecution(botId, storeId, env) {
             'Authorization': `Bearer ${env.OPENAI_API_KEY}`
         },
         body: JSON.stringify({
-            model: 'gpt-4',
+            model: 'gpt-3.5-turbo',
             messages: [
                 { role: 'system', content: `당신은 ${store.industry} 업종 전문 마케팅 AI입니다.` },
                 { role: 'user', content: prompt }
             ],
             temperature: 0.7,
-            max_tokens: 2000
+            max_tokens: 1500
         })
     });
     

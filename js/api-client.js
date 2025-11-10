@@ -6,9 +6,10 @@
 
 class APIClient {
     constructor() {
-        // 데모 모드 활성화
-        this.demoMode = true;
-        console.log(`🎭 데모 모드 활성화 (백엔드 없이 시뮬레이션)`);
+        // 백엔드 API 사용
+        this.demoMode = false;
+        this.baseURL = '';
+        console.log(`🔗 API 클라이언트 초기화 (백엔드 연동)`);
     }
 
     /**
@@ -64,22 +65,6 @@ class APIClient {
      * 매장 생성
      */
     async createStore(storeData) {
-        // 데모 모드: localStorage에 저장
-        if (this.demoMode) {
-            const storeId = Date.now().toString();
-            const store = {
-                id: storeId,
-                ...storeData,
-                createdAt: new Date().toISOString()
-            };
-            localStorage.setItem('currentStore', JSON.stringify(store));
-            return {
-                success: true,
-                storeId: storeId,
-                message: '매장이 생성되었습니다 (데모 모드)'
-            };
-        }
-        
         return this.request('/api/stores', {
             method: 'POST',
             body: JSON.stringify(storeData)
@@ -136,50 +121,10 @@ class APIClient {
      * 개별 봇 실행
      */
     async executeBot(botId, storeId) {
-        // 데모 모드: 시뮬레이션된 응답 반환
-        if (this.demoMode) {
-            await this.sleep(300); // 실제처럼 지연
-            return {
-                success: true,
-                botId: botId,
-                botName: `AI 봇 #${botId}`,
-                result: this.generateDemoResult(botId, storeId)
-            };
-        }
-        
         return this.request('/api/bots/execute', {
             method: 'POST',
             body: JSON.stringify({ botId, storeId })
         });
-    }
-    
-    /**
-     * 데모 결과 생성
-     */
-    generateDemoResult(botId, storeId) {
-        const botCategories = {
-            1: '매장 정보 분석',
-            2: '경쟁사 벤치마킹',
-            3: '키워드 최적화',
-            4: '고객 리뷰 분석',
-            5: '가격 전략 제안'
-        };
-        
-        const category = botCategories[botId] || `마케팅 전략 ${botId}`;
-        
-        return `✅ ${category} 완료!\n\n` +
-               `📊 분석 결과:\n` +
-               `- 현재 상태: 양호\n` +
-               `- 개선 포인트: 3가지 발견\n` +
-               `- 추천 액션: 즉시 실행 가능\n\n` +
-               `💡 주요 인사이트:\n` +
-               `1. 타겟 고객층 확대 가능\n` +
-               `2. 가격 경쟁력 강화 필요\n` +
-               `3. 온라인 마케팅 강화 권장\n\n` +
-               `🎯 다음 단계:\n` +
-               `- 상세 분석 리포트 확인\n` +
-               `- 실행 계획 수립\n` +
-               `- ROI 측정 및 모니터링`;
     }
 
     /**

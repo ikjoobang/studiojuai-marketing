@@ -148,8 +148,18 @@ async function saveStoreInfo() {
             // LocalStorage 백업
             localStorage.setItem('currentStore', JSON.stringify(currentStore));
             
+            // 매장 목록에 추가
+            let stores = JSON.parse(localStorage.getItem('stores') || '[]');
+            stores.push(currentStore);
+            localStorage.setItem('stores', JSON.stringify(stores));
+            
             showNotification('✅ 매장 정보가 저장되었습니다! 이제 봇을 실행할 수 있습니다.', 'success');
             console.log('✅ 매장 정보 저장 완료:', currentStore);
+            
+            // 봇 대시보드 섹션으로 스크롤
+            setTimeout(() => {
+                document.getElementById('botDashboard')?.scrollIntoView({ behavior: 'smooth' });
+            }, 1000);
         } else {
             throw new Error(result.message || '저장 실패');
         }

@@ -1,11 +1,13 @@
-name = "studiojuai"
+# Cloudflare Pages Configuration
+name = "studiojuai-platform"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "."
 
-# Cloudflare Pages configuration
-# This is a static site deployment
+# D1 Database Binding
+[[d1_databases]]
+binding = "DB"
+database_name = "studiojuai-db"
+database_id = "7ddd2e70-d78f-4f21-b4ba-bc691d215a08"
 
-# Environment Variables for Naver API
-[vars]
-NAVER_CLIENT_ID = "fUhHJ1HWyF6fFw_aBfkg"
-NAVER_CLIENT_SECRET = "gA4jUFDYK0"
+# Note: Environment variables (OPENAI_API_KEY, NAVER_CLIENT_ID, NAVER_CLIENT_SECRET)
+# are configured in Cloudflare Dashboard

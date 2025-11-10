@@ -268,13 +268,71 @@ async function downloadPPTReport() {
     try {
         showNotification('📊 PPT 생성 중... 잠시만 기다려주세요', 'info');
         
-        // PPT 생성
-        await generatePPTReport(currentStore.id);
+        // 간단한 PPT 생성
+        const pptx = new PptxGenJS();
+        
+        // 표지 슬라이드
+        let slide = pptx.addSlide();
+        slide.background = { color: '000000' };
+        slide.addText('Studiojuai 마케팅 분석 보고서', {
+            x: 1, y: 2, w: 8, h: 1,
+            fontSize: 44,
+            bold: true,
+            color: 'FF6B35',
+            align: 'center'
+        });
+        slide.addText(`${currentStore.name} - ${currentStore.location}`, {
+            x: 1, y: 3.5, w: 8, h: 0.5,
+            fontSize: 24,
+            color: 'FFFFFF',
+            align: 'center'
+        });
+        slide.addText(new Date().toLocaleDateString('ko-KR'), {
+            x: 1, y: 5, w: 8, h: 0.3,
+            fontSize: 16,
+            color: 'CCCCCC',
+            align: 'center'
+        });
+        
+        // 매장 정보 슬라이드
+        slide = pptx.addSlide();
+        slide.background = { color: '1a1a1a' };
+        slide.addText('매장 기본 정보', {
+            x: 0.5, y: 0.5, w: 9, h: 0.6,
+            fontSize: 32,
+            bold: true,
+            color: 'FF6B35'
+        });
+        
+        const storeInfo = [
+            ['항목', '내용'],
+            ['매장명', currentStore.name],
+            ['업종', currentStore.industry],
+            ['위치', currentStore.location],
+            ['타겟층', currentStore.targetAge || 'N/A'],
+            ['객단가', currentStore.avgPrice || 'N/A'],
+            ['경쟁사 수', currentStore.competitors + '개']
+        ];
+        
+        slide.addTable(storeInfo, {
+            x: 1, y: 1.5, w: 8, h: 3,
+            fontSize: 16,
+            color: 'FFFFFF',
+            fill: { color: '2a2a2a' },
+            border: { pt: 1, color: '444444' }
+        });
+        
+        // PPT 파일명
+        const fileName = `Studiojuai_${currentStore.name}_${new Date().toISOString().split('T')[0]}.pptx`;
+        
+        // 다운로드
+        await pptx.writeFile({ fileName });
         
         showNotification('✅ PPT 다운로드가 완료되었습니다!', 'success');
         
     } catch (error) {
         console.error('PPT 생성 오류:', error);
+        alert(`❌ PPT 생성 실패\n\n에러: ${error.message}\n\nPptxGenJS 라이브러리가 로드되었는지 확인해주세요.`);
         showNotification('❌ PPT 생성에 실패했습니다: ' + error.message, 'error');
     }
 }

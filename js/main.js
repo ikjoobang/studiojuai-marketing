@@ -260,12 +260,24 @@ function showPPTDownloadButton() {
 // PPT 보고서 다운로드
 // ========================================
 async function downloadPPTReport() {
+    console.log('🔵 downloadPPTReport 호출됨!');
+    alert('✅ PPT 다운로드 함수 호출됨!');
+    
     if (!currentStore) {
+        alert('❌ 매장 정보 없음!');
         showNotification('매장 정보가 없습니다!', 'error');
         return;
     }
     
+    // PptxGenJS 로드 확인
+    if (typeof PptxGenJS === 'undefined') {
+        alert('❌ PptxGenJS 라이브러리가 로드되지 않았습니다!');
+        showNotification('❌ PPT 라이브러리 로딩 실패', 'error');
+        return;
+    }
+    
     try {
+        alert('📊 PPT 생성 시작!');
         showNotification('📊 PPT 생성 중... 잠시만 기다려주세요', 'info');
         
         // 간단한 PPT 생성

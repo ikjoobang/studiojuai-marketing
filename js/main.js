@@ -148,6 +148,13 @@ async function saveStoreInfo() {
         
     } catch (error) {
         console.error('❌ 매장 정보 저장 실패:', error);
+        const errorDetail = `
+에러 상세:
+- 메시지: ${error.message}
+- Stack: ${error.stack?.substring(0, 200)}
+- API 엔드포인트: /api/stores
+        `;
+        alert(errorDetail);
         showNotification('❌ 매장 정보 저장에 실패했습니다: ' + error.message, 'error');
     }
 }
@@ -187,6 +194,15 @@ async function runAllBots() {
         }
         
     } catch (error) {
+        const errorDetail = `
+🐛 디버그 정보:
+- 봇 실행 실패
+- 에러: ${error.message}
+- 현재 매장 ID: ${currentStore?.id}
+- API 엔드포인트: /api/bots/execute-all
+        `;
+        alert(errorDetail);
+        console.error('❌ 전체 봇 실행 실패:', error);
         console.error('❌ 전체 봇 실행 실패:', error);
         showNotification('❌ 봇 실행 중 오류가 발생했습니다: ' + error.message, 'error');
     }

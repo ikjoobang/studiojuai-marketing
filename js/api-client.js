@@ -42,17 +42,27 @@ class APIClient {
             }
         };
 
+        console.log(`🔗 API 요청: ${endpoint}`, { url, config });
+
         try {
             const response = await fetch(url, config);
+            console.log(`📡 API 응답: ${endpoint}`, { status: response.status, ok: response.ok });
+            
             const data = await response.json();
+            console.log(`📦 API 데이터: ${endpoint}`, data);
 
             if (!response.ok) {
+                const errorMsg = `API 에러 (${response.status}): ${data.error || '알 수 없는 에러'}`;
+                alert(`🚨 ${errorMsg}\n\n엔드포인트: ${endpoint}`);
                 throw new Error(data.error || '요청 실패');
             }
 
             return data;
         } catch (error) {
             console.error(`❌ API 요청 실패 (${endpoint}):`, error);
+            if (!error.message.includes('API 에러')) {
+                alert(`🚨 네트워크 에러\n\n엔드포인트: ${endpoint}\n에러: ${error.message}`);
+            }
             throw error;
         }
     }

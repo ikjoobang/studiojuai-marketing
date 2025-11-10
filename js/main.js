@@ -96,6 +96,9 @@ function getIndustryName(industry) {
 // 매장 정보 저장
 // ========================================
 async function saveStoreInfo() {
+    console.log('🔵 saveStoreInfo 함수 호출됨!');
+    alert('✅ 매장 정보 저장 시작!');
+    
     const storeName = document.getElementById('storeName').value;
     const location = document.getElementById('location').value;
     const targetAge = document.getElementById('targetAge').value;
@@ -103,11 +106,16 @@ async function saveStoreInfo() {
     const competitors = document.getElementById('competitors').value;
     const naverUrl = document.getElementById('naverUrl').value;
     
+    console.log('📝 입력값:', { storeName, location, targetAge, avgPrice, competitors, naverUrl });
+    
     // 유효성 검사
     if (!storeName || !location) {
+        alert('❌ 매장명과 지역을 입력해주세요!');
         showNotification('매장명과 지역은 필수 입력 항목입니다!', 'error');
         return;
     }
+    
+    alert(`✅ 유효성 검사 통과!\n매장명: ${storeName}\n지역: ${location}`);
     
     try {
         showNotification('매장 정보를 저장하는 중...', 'info');

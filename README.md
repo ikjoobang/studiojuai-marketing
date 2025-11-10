@@ -780,3 +780,4 @@ const gptResult = await apiManager.callGPT(prompt);
 **🚀 Let's Automate Marketing with AI!**
 
 Last updated: Mon Nov 10 11:22:25 UTC 2025
+# Studiojuai Marketing Platform - Deployment trigger

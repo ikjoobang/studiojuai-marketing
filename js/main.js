@@ -730,7 +730,7 @@ function saveApiKey() {
     
     try {
         // 보안 시스템을 통해 암호화하여 저장
-        securityManager.setApiKey('gpt', apiKey);
+        securityManager.saveApiKey('gpt', apiKey);
         
         showNotification('✅ GPT API 키가 저장되었습니다!', 'success');
         

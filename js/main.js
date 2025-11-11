@@ -354,12 +354,12 @@ async function downloadPPTReport() {
         
         const storeInfo = [
             ['항목', '내용'],
-            ['매장명', currentStore.name],
-            ['업종', currentStore.industry],
-            ['위치', currentStore.location],
+            ['매장명', currentStore.name || 'N/A'],
+            ['업종', currentStore.industry || 'N/A'],
+            ['위치', currentStore.location || 'N/A'],
             ['타겟층', currentStore.targetAge || 'N/A'],
             ['객단가', currentStore.avgPrice || 'N/A'],
-            ['경쟁사 수', currentStore.competitors + '개']
+            ['경쟁사 수', (currentStore.competitors || 0) + '개']
         ];
         
         slide.addTable(storeInfo, {

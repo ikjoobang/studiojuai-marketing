@@ -70,6 +70,27 @@ router.post('/api/stores', async (request, env) => {
     }
 });
 
+// 매장 조회
+router.get('/api/stores/:id', async (request, env) => {
+    try {
+        const url = new URL(request.url);
+        const id = url.pathname.split('/').pop();
+        
+        const store = await env.DB.prepare(`
+            SELECT * FROM stores WHERE id = ?
+        `).bind(id).first();
+        
+        if (!store) {
+            return jsonResponse({ error: '매장을 찾을 수 없습니다.' }, 404);
+        }
+        
+        return jsonResponse({ success: true, data: store });
+        
+    } catch (error) {
+        return jsonResponse({ error: error.message }, 500);
+    }
+});
+
 // 봇 실행
 router.post('/api/bots/execute', async (request, env) => {
     try {

@@ -261,7 +261,7 @@
         }
     </style>
 </head>
-<body class="p-4 md:p-8" style="background-color: var(--bg-primary); color: var(--text-primary); min-height: 100vh;">
+<body class="p-4 md:p-8">
     
     <!-- 테마 토글 버튼 -->
     <button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
@@ -709,10 +709,11 @@
         // 테마 토글 함수
         function toggleTheme() {
             const html = document.documentElement;
-            const currentTheme = html.getAttribute('data-theme');
+            const currentTheme = html.getAttribute('data-theme') || 'dark';
             const newTheme = currentTheme === 'light' ? 'dark' : 'light';
             
-            html.setAttribute('data-theme', newTheme === 'light' ? 'light' : null);
+            // 🔥 수정: 다크 모드일 때도 'dark'를 명시적으로 설정
+            html.setAttribute('data-theme', newTheme);
             localStorage.setItem('theme', newTheme);
             
             // 토글 버튼 아이콘 변경
@@ -722,12 +723,9 @@
         // 페이지 로드 시 저장된 테마 적용
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('theme') || 'dark';
-            if (savedTheme === 'light') {
-                document.documentElement.setAttribute('data-theme', 'light');
-                document.getElementById('themeToggle').textContent = '☀️';
-            } else {
-                document.getElementById('themeToggle').textContent = '🌙';
-            }
+            // 🔥 수정: 다크 모드도 명시적으로 설정
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeToggle').textContent = savedTheme === 'light' ? '☀️' : '🌙';
         });
     </script>
 

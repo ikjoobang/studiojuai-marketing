@@ -168,6 +168,27 @@ router.post('/api/bots/execute', async (request, env) => {
     }
 });
 
+// 매장의 모든 봇 실행 결과 조회
+router.get('/api/stores/:id/executions', async (request, env) => {
+    try {
+        const url = new URL(request.url);
+        const storeId = url.pathname.split('/')[3];
+        
+        const executions = await env.DB.prepare(`
+            SELECT * FROM bot_executions WHERE storeId = ? ORDER BY createdAt DESC
+        `).bind(storeId).all();
+        
+        return jsonResponse({
+            success: true,
+            count: executions.results.length,
+            executions: executions.results
+        });
+        
+    } catch (error) {
+        return jsonResponse({ error: error.message }, 500);
+    }
+});
+
 // Export middleware
 export async function onRequest(context) {
     return router.handle(context.request, context.env);

@@ -17,10 +17,10 @@ export const BOT_DEFINITIONS = {
     },
     2: {
         id: 2,
-        name: '경쟁사 벤치마킹 봇',
+        name: '경쟁사 벤치마킹 봇 (반경 1km)',
         category: 'market',
         icon: 'fa-users',
-        prompt: '같은 상권의 경쟁 업체들을 분석하고, 우리 매장과 비교하여 차별화 포인트와 개선 사항을 제안해주세요.'
+        prompt: '위에 제공된 반경 내 경쟁사 실제 데이터를 바탕으로, 우리 매장과 비교 분석하세요. 경쟁사의 위치, 카테고리, 전화번호 등 실제 데이터를 활용하여 구체적인 차별화 포인트와 개선 사항을 제안해주세요.'
     },
     3: {
         id: 3,
@@ -38,10 +38,10 @@ export const BOT_DEFINITIONS = {
     },
     5: {
         id: 5,
-        name: '키워드 분석 봇',
+        name: 'SEO/AEO/GEO 최적화 봇',
         category: 'market',
         icon: 'fa-search',
-        prompt: '이 업종과 지역에 최적화된 검색 키워드를 찾고, 네이버 플레이스 상위 노출 전략을 제시해주세요.'
+        prompt: '네이버 플레이스 실제 데이터를 바탕으로 SEO(검색엔진최적화), AEO(Answer Engine Optimization), GEO(지역검색최적화) 전략을 제시해주세요. 키워드 순위 개선, C-RANK(카테고리 순위) 향상, 리뷰 관리, 사진 최적화 등 구체적이고 실행 가능한 방안을 제안해주세요.'
     },
     6: {
         id: 6,

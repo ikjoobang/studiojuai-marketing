@@ -959,3 +959,71 @@ async function saveBotExecution(execution) {
 }
 
 console.log('✅ main.js 로드 완료');
+
+// ========================================
+// TXT 다운로드 기능
+// ========================================
+function downloadAllResultsAsTXT() {
+    if (!currentStore) {
+        alert('먼저 매장을 생성해주세요.');
+        return;
+    }
+    
+    // D1에서 실행 결과 가져오기
+    fetch(`/api/stores/${currentStore.id}/executions`)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success || data.results.length === 0) {
+                alert('아직 실행된 봇이 없습니다. 먼저 봇을 실행해주세요.');
+                return;
+            }
+            
+            // TXT 파일 내용 생성
+            let txtContent = '';
+            txtContent += '='.repeat(80) + '\n';
+            txtContent += `Studiojuai_${currentStore.industry}_Analysis\n`;
+            txtContent += '='.repeat(80) + '\n\n';
+            
+            txtContent += `❶ 매장 정보\n`;
+            txtContent += `■ 매장명: ${currentStore.name}\n`;
+            txtContent += `■ 업종: ${currentStore.industry}\n`;
+            txtContent += `■ 위치: ${currentStore.location}\n`;
+            txtContent += `■ 타겟 연령대: ${currentStore.targetAge}\n`;
+            txtContent += `■ 평균 객단가: ${currentStore.avgPrice}\n`;
+            txtContent += `■ 생성일: ${new Date().toLocaleDateString('ko-KR')}\n\n`;
+            txtContent += '='.repeat(80) + '\n\n';
+            
+            // 각 봇 결과 추가
+            data.results.forEach((execution, index) => {
+                txtContent += `\n\n❷ ${execution.botName}\n`;
+                txtContent += '-'.repeat(80) + '\n';
+                txtContent += execution.result + '\n';
+                txtContent += '-'.repeat(80) + '\n';
+            });
+            
+            // 푸터
+            txtContent += '\n\n' + '='.repeat(80) + '\n';
+            txtContent += `✔️ 보고서 생성일: ${new Date().toLocaleString('ko-KR')}\n`;
+            txtContent += `✔️ 생성 플랫폼: Studiojuai Marketing Platform\n`;
+            txtContent += `✔️ 웹사이트: https://www.studiojuai.com\n`;
+            txtContent += `✔️ 이메일: ikjoobang@gmail.com\n`;
+            txtContent += '='.repeat(80) + '\n';
+            
+            // Blob 생성 및 다운로드
+            const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Studiojuai_${currentStore.industry}_${currentStore.name}_${new Date().getTime()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            console.log('✅ TXT 파일 다운로드 완료!');
+        })
+        .catch(error => {
+            console.error('TXT 다운로드 오류:', error);
+            alert('TXT 파일 생성 중 오류가 발생했습니다.');
+        });
+}

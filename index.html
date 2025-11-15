@@ -49,23 +49,23 @@
             --card-bg: rgba(255, 255, 255, 0.05);
             --card-border: rgba(255, 255, 255, 0.1);
             
-            /* 8px 그리드 시스템 */
-            --spacing-xs: 8px;
-            --spacing-sm: 16px;
-            --spacing-md: 24px;
-            --spacing-lg: 32px;
-            --spacing-xl: 48px;
+            /* 간격 시스템 - 넓게 */
+            --spacing-xs: 12px;
+            --spacing-sm: 20px;
+            --spacing-md: 32px;
+            --spacing-lg: 48px;
+            --spacing-xl: 64px;
             
-            /* 타이포그래피 (모바일 기본) */
-            --font-title: 20px;        /* 모바일 제목 20-28pt */
-            --font-subtitle: 17px;     /* 모바일 부제목 */
-            --font-body: 15px;         /* 모바일 본문 14-17pt */
-            --font-small: 13px;        /* 모바일 작은 글씨 */
+            /* 타이포그래피 - 모바일 (크고 읽기 쉽게) */
+            --font-title: 28px;
+            --font-subtitle: 20px;
+            --font-body: 17px;
+            --font-small: 15px;
             
-            /* 줄높이 1.3-1.5배 */
-            --line-height-tight: 1.3;
-            --line-height-normal: 1.4;
-            --line-height-relaxed: 1.5;
+            /* 줄간격 - 넓게 (가독성 우선) */
+            --line-height-tight: 1.4;
+            --line-height-normal: 1.6;
+            --line-height-relaxed: 1.8;
         }
         
         /* 라이트 모드 */
@@ -83,22 +83,22 @@
             --card-border: rgba(0, 0, 0, 0.08);
         }
         
-        /* PC 반응형 타이포그래피 */
+        /* PC 반응형 타이포그래피 - 더 크게 */
         @media (min-width: 768px) {
             :root {
-                --font-title: 32px;
-                --font-subtitle: 20px;
-                --font-body: 16px;
-                --font-small: 14px;
+                --font-title: 36px;
+                --font-subtitle: 24px;
+                --font-body: 18px;
+                --font-small: 16px;
             }
         }
         
         @media (min-width: 1024px) {
             :root {
-                --font-title: 40px;
-                --font-subtitle: 22px;
-                --font-body: 17px;
-                --font-small: 15px;
+                --font-title: 48px;
+                --font-subtitle: 28px;
+                --font-body: 20px;
+                --font-small: 18px;
             }
         }
         
@@ -125,30 +125,45 @@
             }
         }
         
-        /* 타이포그래피 */
+        /* 타이포그래피 - 일률적 적용 */
+        h1, h2, h3, h4, h5, h6 {
+            line-height: var(--line-height-tight);
+            margin: 0 0 var(--spacing-sm) 0;
+            font-weight: 700;
+        }
+        
         h1 {
             font-size: var(--font-title);
-            line-height: var(--line-height-tight);
-            margin: 0;
-            font-weight: 700;
         }
         
         h2 {
             font-size: var(--font-subtitle);
-            line-height: var(--line-height-normal);
-            margin: 0;
+        }
+        
+        h3 {
+            font-size: var(--font-body);
             font-weight: 600;
         }
         
-        p {
+        p, li, div {
             font-size: var(--font-body);
             line-height: var(--line-height-relaxed);
-            margin: 0;
+            margin: 0 0 var(--spacing-sm) 0;
         }
         
-        small {
+        small, .{
             font-size: var(--font-small);
             line-height: var(--line-height-normal);
+        }
+        
+        /* 모든 텍스트 요소에 일률적 간격 */
+        ul, ol {
+            padding-left: var(--spacing-md);
+            margin: 0 0 var(--spacing-md) 0;
+        }
+        
+        li {
+            margin-bottom: var(--spacing-xs);
         }
         
         /* 카드 시스템 (8px 그리드) */
@@ -272,10 +287,10 @@
     <header class="glass-effect rounded-2xl p-6 mb-6">
         <div class="flex flex-col md:flex-row justify-between items-center">
             <div class="mb-4 md:mb-0">
-                <h1 class="text-3xl md:text-4xl font-bold flex items-center">
+                <h1 class="font-bold flex items-center">
                     Studiojuai_Marketing_Platform
                 </h1>
-                <p class="text-sm md:text-base mt-2 opacity-90">AI 마케팅 자동화 플랫폼</p>
+                <p class="mt-2 opacity-90">AI 마케팅 자동화 플랫폼</p>
             </div>
             <div class="flex gap-3">
                 <button onclick="location.href='pages/bot-dashboard.html'" class="bg-white text-purple-700 px-4 py-2 rounded-lg font-bold hover:bg-opacity-90 transition">
@@ -293,10 +308,10 @@
 
     <!-- 히어로 섹션 - 가치 제안 -->
     <section class="mb-6" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 48px 32px; text-align: center; color: white;">
-        <h2 class="text-4xl md:text-5xl font-bold mb-4">
+        <h2 class="font-bold mb-4" style="font-size: var(--font-title); line-height: var(--line-height-tight);">
             5분만에 완성되는<br>AI 마케팅 분석 보고서
         </h2>
-        <p class="text-lg md:text-xl mb-6 opacity-90">
+        <p class="mb-6 opacity-90" style="font-size: var(--font-subtitle); line-height: var(--line-height-normal);">
             30개 AI 봇이 당신의 매장을 자동으로 분석하고<br>
             <strong>37페이지 전문 마케팅 보고서(PPT)</strong>를 즉시 생성합니다
         </p>
@@ -305,24 +320,24 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 16px; padding: 24px;">
                 <div style="font-size: 48px; margin-bottom: 16px; display: none;"></div>
-                <h3 class="text-xl font-bold mb-2">5-10분 자동 분석</h3>
-                <p class="text-sm opacity-80">매장 정보만 입력하면<br>30개 AI 봇이 자동으로<br>시장·경쟁사·고객 분석</p>
+                <h3 class="font-bold mb-2" style="font-size: var(--font-subtitle);">5-10분 자동 분석</h3>
+                <p class="opacity-80" style="font-size: var(--font-body); line-height: var(--line-height-relaxed);">매장 정보만 입력하면<br>30개 AI 봇이 자동으로<br>시장·경쟁사·고객 분석</p>
             </div>
             <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 16px; padding: 24px;">
                 <div style="font-size: 48px; margin-bottom: 16px; display: none;"></div>
-                <h3 class="text-xl font-bold mb-2">37페이지 PPT 보고서</h3>
-                <p class="text-sm opacity-80">시장 분석, 마케팅 전략,<br>콘텐츠 제안, 운영 최적화<br>전문가 수준의 보고서</p>
+                <h3 class="font-bold mb-2" style="font-size: var(--font-subtitle);">37페이지 PPT 보고서</h3>
+                <p class="opacity-80" style="font-size: var(--font-body); line-height: var(--line-height-relaxed);">시장 분석, 마케팅 전략,<br>콘텐츠 제안, 운영 최적화<br>전문가 수준의 보고서</p>
             </div>
             <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); border-radius: 16px; padding: 24px;">
                 <div style="font-size: 48px; margin-bottom: 16px; display: none;"></div>
-                <h3 class="text-xl font-bold mb-2">업종별 맞춤 분석</h3>
-                <p class="text-sm opacity-80">카페·치킨·한식·미용실 등<br>업종 특성에 맞는<br>실전 마케팅 솔루션</p>
+                <h3 class="font-bold mb-2" style="font-size: var(--font-subtitle);">업종별 맞춤 분석</h3>
+                <p class="opacity-80" style="font-size: var(--font-body); line-height: var(--line-height-relaxed);">카페·치킨·한식·미용실 등<br>업종 특성에 맞는<br>실전 마케팅 솔루션</p>
             </div>
         </div>
 
         <!-- CTA 버튼 -->
         <div class="mt-8">
-            <a href="#start-section" class="inline-block bg-white text-purple-700 px-8 py-4 rounded-full font-bold text-lg hover:shadow-2xl transition transform hover:scale-105">
+            <a href="#start-section" class="inline-block bg-white text-purple-700 px-8 py-4 rounded-full font-bold hover:shadow-2xl transition transform hover:scale-105" style="font-size: var(--font-subtitle);">
                 지금 무료로 시작하기
             </a>
         </div>
@@ -330,14 +345,14 @@
 
     <!-- 고객이 받는 것 (What You Get) -->
     <section class="glass-effect rounded-2xl p-6 mb-6">
-        <h2 class="text-3xl font-bold mb-6 text-center">
+        <h2 class="font-bold mb-6 text-center">
             <i class="fas fa-gift mr-3"></i>
             이 플랫폼에서 받을 수 있는 것
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- 시장 분석 -->
             <div style="background: rgba(59, 130, 246, 0.2); border-left: 4px solid #3B82F6; padding: 24px; border-radius: 12px;">
-                <h3 class="text-xl font-bold mb-3 flex items-center">
+                <h3 class="font-bold mb-3 flex items-center">
                     <i class="fas fa-chart-line mr-2" style="color: #3B82F6;"></i>
                     시장 분석 (8개 봇)
                 </h3>
@@ -355,7 +370,7 @@
 
             <!-- 콘텐츠 자동화 -->
             <div style="background: rgba(34, 197, 94, 0.2); border-left: 4px solid #22C55E; padding: 24px; border-radius: 12px;">
-                <h3 class="text-xl font-bold mb-3 flex items-center">
+                <h3 class="font-bold mb-3 flex items-center">
                     <i class="fas fa-pen-fancy mr-2" style="color: #22C55E;"></i>
                     콘텐츠 생성 (8개 봇)
                 </h3>
@@ -373,7 +388,7 @@
 
             <!-- 크리에이티브 -->
             <div style="background: rgba(168, 85, 247, 0.2); border-left: 4px solid #A855F7; padding: 24px; border-radius: 12px;">
-                <h3 class="text-xl font-bold mb-3 flex items-center">
+                <h3 class="font-bold mb-3 flex items-center">
                     <i class="fas fa-palette mr-2" style="color: #A855F7;"></i>
                     크리에이티브 (6개 봇)
                 </h3>
@@ -389,7 +404,7 @@
 
             <!-- 운영 최적화 -->
             <div style="background: rgba(251, 146, 60, 0.2); border-left: 4px solid #FB923C; padding: 24px; border-radius: 12px;">
-                <h3 class="text-xl font-bold mb-3 flex items-center">
+                <h3 class="font-bold mb-3 flex items-center">
                     <i class="fas fa-cogs mr-2" style="color: #FB923C;"></i>
                     운영 최적화 (8개 봇)
                 </h3>
@@ -409,25 +424,25 @@
 
     <!-- 사용 방법 (How It Works) -->
     <section class="glass-effect rounded-2xl p-6 mb-6">
-        <h2 class="text-3xl font-bold mb-6 text-center">
+        <h2 class="font-bold mb-6 text-center">
             <i class="fas fa-question-circle mr-3"></i>
             사용 방법 (3단계)
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="text-center">
                 <div style="background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 32px; font-weight: bold;">1</div>
-                <h3 class="text-xl font-bold mb-2">매장 정보 입력</h3>
-                <p class="text-sm opacity-80">업종 선택 + 매장명, 지역, 타겟층,<br>네이버 플레이스 URL 입력<br>(2분 소요)</p>
+                <h3 class="font-bold mb-2">매장 정보 입력</h3>
+                <p class="opacity-80">업종 선택 + 매장명, 지역, 타겟층,<br>네이버 플레이스 URL 입력<br>(2분 소요)</p>
             </div>
             <div class="text-center">
                 <div style="background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 32px; font-weight: bold;">2</div>
-                <h3 class="text-xl font-bold mb-2">AI 봇 자동 실행</h3>
-                <p class="text-sm opacity-80">"전체 봇 실행" 버튼 클릭<br>30개 AI 봇이 자동 분석<br>(5-10분 소요)</p>
+                <h3 class="font-bold mb-2">AI 봇 자동 실행</h3>
+                <p class="opacity-80">"전체 봇 실행" 버튼 클릭<br>30개 AI 봇이 자동 분석<br>(5-10분 소요)</p>
             </div>
             <div class="text-center">
                 <div style="background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 32px; font-weight: bold;">3</div>
-                <h3 class="text-xl font-bold mb-2">PPT 보고서 다운로드</h3>
-                <p class="text-sm opacity-80">분석 완료 후 우측 하단<br>PPT 버튼 클릭하여<br>37페이지 보고서 다운로드</p>
+                <h3 class="font-bold mb-2">PPT 보고서 다운로드</h3>
+                <p class="opacity-80">분석 완료 후 우측 하단<br>PPT 버튼 클릭하여<br>37페이지 보고서 다운로드</p>
             </div>
         </div>
     </section>
@@ -437,37 +452,37 @@
 
     <!-- 업종 선택 -->
     <section class="glass-effect rounded-2xl p-6 mb-6">
-        <h2 class="text-2xl font-bold mb-4 flex items-center">
+        <h2 class="font-bold mb-4 flex items-center">
             <i class="fas fa-store-alt mr-3"></i>
             업종 선택
         </h2>
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3" id="industrySelector">
             <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="cafe">
-                <i class="fas fa-coffee text-3xl mb-2"></i>
+                <i class="fas fa-coffee mb-2"></i>
                 <p class="font-bold">카페</p>
             </button>
             <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="chicken">
-                <i class="fas fa-drumstick-bite text-3xl mb-2"></i>
+                <i class="fas fa-drumstick-bite mb-2"></i>
                 <p class="font-bold">치킨</p>
             </button>
             <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="korean">
-                <i class="fas fa-utensils text-3xl mb-2"></i>
+                <i class="fas fa-utensils mb-2"></i>
                 <p class="font-bold">한식</p>
             </button>
             <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="beauty">
-                <i class="fas fa-cut text-3xl mb-2"></i>
+                <i class="fas fa-cut mb-2"></i>
                 <p class="font-bold">미용실</p>
             </button>
             <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="pizza">
-                <i class="fas fa-pizza-slice text-3xl mb-2"></i>
+                <i class="fas fa-pizza-slice mb-2"></i>
                 <p class="font-bold">피자</p>
             </button>
             <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="dessert">
-                <i class="fas fa-ice-cream text-3xl mb-2"></i>
+                <i class="fas fa-ice-cream mb-2"></i>
                 <p class="font-bold">디저트</p>
             </button>
             <button class="industry-btn bg-white bg-opacity-20 p-4 rounded-xl text-center hover:bg-opacity-30" data-industry="other">
-                <i class="fas fa-ellipsis-h text-3xl mb-2"></i>
+                <i class="fas fa-ellipsis-h mb-2"></i>
                 <p class="font-bold">기타</p>
             </button>
         </div>
@@ -475,7 +490,7 @@
 
     <!-- 매장 정보 입력 -->
     <section class="glass-effect rounded-2xl p-6 mb-6">
-        <h2 class="text-2xl font-bold mb-4 flex items-center">
+        <h2 class="font-bold mb-4 flex items-center">
             <i class="fas fa-info-circle mr-3"></i>
             매장 정보 입력
         </h2>
@@ -522,11 +537,11 @@
         </div>
         <div class="mt-4 flex gap-3">
             <button onclick="saveStoreInfo()" class="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold transition flex flex-col items-center justify-center">
-                <i class="fas fa-save text-xl mb-1"></i>
+                <i class="fas fa-save mb-1"></i>
                 <span class="text-sm">매장 정보<br>저장</span>
             </button>
             <button onclick="runAllBots()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-3 rounded-lg font-bold transition flex flex-col items-center justify-center">
-                <i class="fas fa-play text-xl mb-1"></i>
+                <i class="fas fa-play mb-1"></i>
                 <span class="text-sm">전체 봇<br>실행</span>
             </button>
         </div>
@@ -534,14 +549,14 @@
 
     <!-- 30개 AI 봇 시스템 -->
     <section class="mb-6">
-        <h2 class="text-3xl font-bold mb-6 text-center">
+        <h2 class="font-bold mb-6 text-center">
             <i class="fas fa-robot mr-3"></i>
             30개 AI 봇 시스템
         </h2>
         
         <!-- 시장 분석 봇 (8개) -->
         <div class="mb-6">
-            <h3 class="text-xl font-bold mb-4 flex items-center">
+            <h3 class="font-bold mb-4 flex items-center">
                 <i class="fas fa-chart-line mr-2"></i>
                 시장 분석
             </h3>
@@ -552,7 +567,7 @@
 
         <!-- 콘텐츠 자동화 봇 (8개) -->
         <div class="mb-6">
-            <h3 class="text-xl font-bold mb-4 flex items-center">
+            <h3 class="font-bold mb-4 flex items-center">
                 <i class="fas fa-pen-fancy mr-2"></i>
                 콘텐츠 자동화
             </h3>
@@ -563,7 +578,7 @@
 
         <!-- 크리에이티브 봇 (6개) -->
         <div class="mb-6">
-            <h3 class="text-xl font-bold mb-4 flex items-center">
+            <h3 class="font-bold mb-4 flex items-center">
                 <i class="fas fa-palette mr-2"></i>
                 크리에이티브
             </h3>
@@ -574,7 +589,7 @@
 
         <!-- 운영 자동화 봇 (8개) -->
         <div class="mb-6">
-            <h3 class="text-xl font-bold mb-4 flex items-center">
+            <h3 class="font-bold mb-4 flex items-center">
                 <i class="fas fa-cogs mr-2"></i>
                 운영 자동화
             </h3>
@@ -586,26 +601,26 @@
 
     <!-- 실시간 실행 상태 대시보드 -->
     <section class="glass-effect rounded-2xl p-6 mb-6">
-        <h2 class="text-2xl font-bold mb-4 flex items-center">
+        <h2 class="font-bold mb-4 flex items-center">
             <i class="fas fa-chart-bar mr-3"></i>
             실시간 실행 상태
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div class="bg-white bg-opacity-20 p-4 rounded-xl">
-                <p class="text-sm opacity-80">실행된 봇</p>
-                <p class="text-3xl font-bold" id="executedBots">0 / 30</p>
+                <p class="opacity-80">실행된 봇</p>
+                <p class="font-bold" id="executedBots">0 / 30</p>
             </div>
             <div class="bg-white bg-opacity-20 p-4 rounded-xl">
-                <p class="text-sm opacity-80">완료된 봇</p>
-                <p class="text-3xl font-bold text-green-300" id="completedBots">0</p>
+                <p class="opacity-80">완료된 봇</p>
+                <p class="font-bold text-green-300" id="completedBots">0</p>
             </div>
             <div class="bg-white bg-opacity-20 p-4 rounded-xl">
-                <p class="text-sm opacity-80">평균 실행 시간</p>
-                <p class="text-3xl font-bold" id="avgExecutionTime">0s</p>
+                <p class="opacity-80">평균 실행 시간</p>
+                <p class="font-bold" id="avgExecutionTime">0s</p>
             </div>
             <div class="bg-white bg-opacity-20 p-4 rounded-xl">
-                <p class="text-sm opacity-80">실행 성공률</p>
-                <p class="text-3xl font-bold" id="successRate">0%</p>
+                <p class="opacity-80">실행 성공률</p>
+                <p class="font-bold" id="successRate">0%</p>
             </div>
         </div>
         <div style="height: 400px;">

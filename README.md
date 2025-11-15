@@ -1,153 +1,199 @@
-# Studiojuai_Marketing_Platform
+# Studiojuai 마케팅 최적화 플랫폼
 
-## ✔️ 완료된 핵심 기능
+> AI 기반 소상공인 마케팅 자동화 플랫폼
 
-■ **네이버 API 실제 연동**
-  → 네이버 로컬 검색 API 실시간 호출
-  → 매장 정보 자동 수집 (주소, 전화번호, 좌표, 카테고리)
-  → API 엔드포인트: `/api/naver/search`, `/api/naver/place`
+## 🎯 프로젝트 개요
 
-■ **반경 내 경쟁사 검색 (1km)**
-  → 같은 업종 경쟁사 5개 자동 검색
-  → 실제 데이터 제공: 경쟁사 매장명, 카테고리, 주소, 전화번호, 좌표
-  → 봇 실행 시 자동으로 경쟁사 데이터 수집 및 GPT 분석
+**Studiojuai 마케팅 최적화 플랫폼**은 소상공인을 위한 AI 기반 마케팅 자동화 솔루션입니다. 30개의 AI 봇이 네이버 플레이스 실제 데이터를 분석하여 맞춤형 마케팅 전략을 제공합니다.
 
-■ **SEO/AEO/GEO/C-RANK 최적화**
-  → 실제 키워드 순위 확인 (매장명, 지역+업종, 근처 검색)
-  → SEO 점수 자동 계산 (0-100점)
-  → C-RANK (카테고리 순위) 분석 및 개선안 제시
-  → 최적화 제안: 키워드, 지역 SEO, 리뷰 관리, 사진 등록
+## ✨ 주요 기능
 
-■ **AI 봇 시스템 (30개)**
-  → GPT-3.5-turbo 기반 실제 분석
-  → **할루시네이션 방지**: 실제 네이버 데이터만 사용
-  → 데이터 없으면 "데이터 없음" 명시
-  → 구체적인 실제 업체명, 주소 인용
+### ❶ 30개 AI 마케팅 봇
+- **시장 분석 봇 (8개)**: 매장 정보, 경쟁사 벤치마킹, 상권 분석, SEO/AEO/GEO/C-RANK 최적화 등
+- **콘텐츠 자동화 봇 (8개)**: 제안서 생성, 브랜드 스토리, SNS 콘텐츠, 블로그 포스팅 등
+- **크리에이티브 봇 (6개)**: 로고 디자인, 메뉴판 제작, 간판 디자인 등
+- **운영 최적화 봇 (8개)**: 예약 시스템, 리뷰 관리, 재고 최적화 등
 
-## 📡 API 엔드포인트
+### ❷ 네이버 API 실시간 데이터 수집
+- ✅ **실제 데이터만 사용** (환각 방지)
+- ✅ 네이버 로컬 검색 API 연동
+- ✅ 경쟁사 분석 (반경 1km 내 실제 업체)
+- ✅ GPT-3.5-turbo 기반 분석 (Temperature 0.3)
 
-### 매장 관리
-- `POST /api/stores` - 매장 생성
-- `GET /api/stores/:id` - 매장 조회
+### ❸ 37페이지 PPT 자동 생성
+- 📊 표지, 목차, 요약, 핵심 지표
+- 📊 30개 봇 실행 결과
+- 📊 경쟁사 분석, 액션 플랜
+- 📊 PptxGenJS 라이브러리 사용
 
-### 봇 실행
-- `POST /api/bots/execute` - 봇 실행 (네이버 데이터 자동 수집)
-- `GET /api/stores/:id/executions` - 실행 결과 조회
+### ❹ TXT 다운로드
+- 📝 모든 봇 실행 결과를 텍스트로 다운로드
+- 📝 업종별 맞춤 구조화
 
-### 네이버 API
-- `POST /api/naver/search` - 로컬 검색 (경쟁사 검색)
-- `POST /api/naver/place` - 매장 상세 정보
+### ❺ 업종별 지원
+- ☕ 카페
+- 🍗 치킨
+- 🍚 한식
+- 💇 미용실
+- 🍕 피자
+- 🍰 디저트
 
-### SEO 분석
-- `POST /api/seo/analyze` - SEO/AEO/GEO 최적화 분석
-
-## 🔧 기술 스택
-
-### Backend
-- **Cloudflare Workers** - 서버리스 API
-- **Cloudflare D1** - SQLite 데이터베이스
-- **Hono** - 라우팅 프레임워크
-- **OpenAI GPT-3.5-turbo** - AI 분석
-- **Naver Local API** - 실시간 매장 데이터
+## 🏗️ 기술 스택
 
 ### Frontend
-- **HTML/CSS/JavaScript**
-- **Tailwind CSS**
-- **PptxGenJS** - PPT 생성
+- HTML5, CSS3 (TailwindCSS CDN)
+- JavaScript (ES6+)
+- PptxGenJS (PPT 생성)
+- Chart.js (데이터 시각화)
 
-## 📊 데이터 흐름
+### Backend
+- Cloudflare Pages Functions
+- Hono Framework
+- Cloudflare D1 (SQLite Database)
+- OpenAI GPT-3.5-turbo
+- Naver Local Search API
 
+### Deployment
+- Cloudflare Pages
+- PM2 (로컬 개발)
+- Git Version Control
+
+## 📊 데이터 구조
+
+### Cloudflare D1 Database
+
+**stores 테이블**
+```sql
+CREATE TABLE stores (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    industry TEXT NOT NULL,
+    location TEXT NOT NULL,
+    targetAge TEXT,
+    avgPrice TEXT,
+    competitors INTEGER,
+    naverUrl TEXT,
+    createdAt TEXT
+);
 ```
-1. 사용자 매장 정보 입력
-   ↓
-2. 봇 실행 버튼 클릭
-   ↓
-3. 네이버 API 호출
-   - 매장 정보 검색
-   - 경쟁사 10개 검색
-   ↓
-4. 실제 데이터 수집
-   - 주소, 전화번호, 좌표
-   - 카테고리, 도로명주소
-   ↓
-5. GPT에게 실제 데이터 전달
-   ↓
-6. AI 분석 결과 생성
-   ↓
-7. D1 데이터베이스 저장
-   ↓
-8. 사용자에게 결과 표시
+
+**bot_executions 테이블**
+```sql
+CREATE TABLE bot_executions (
+    id TEXT PRIMARY KEY,
+    storeId TEXT NOT NULL,
+    storeName TEXT NOT NULL,
+    botId INTEGER NOT NULL,
+    botName TEXT NOT NULL,
+    industry TEXT NOT NULL,
+    status TEXT NOT NULL,
+    result TEXT,
+    createdAt TEXT,
+    FOREIGN KEY (storeId) REFERENCES stores(id)
+);
 ```
 
-## 🚀 배포 정보
+## 🚀 로컬 실행
 
-- **Production URL**: https://496d92c4.studiojuai-platform.pages.dev/
-- **GitHub**: https://github.com/ikjoobang/studiojuai-marketing
-- **Database**: Cloudflare D1
-- **API Keys**: 
-  - OpenAI (GPT-3.5-turbo)
-  - Naver Client ID/Secret (ZC7V52kktFt2BWhWHpbX)
-
-## 📊 테스트 결과
-
-■ **로컬 테스트**: ✅ 정상 작동
-  → 매장 생성, 봇 실행, 실제 네이버 데이터 수집 확인
-  → 경쟁사 5개 실제 데이터 (썸띵어바웃커피, 더달달, 베이커스트 브라운 등)
-
-■ **프로덕션 테스트**: ✅ 정상 작동
-  → Health Check: OK
-  → 매장 생성: 성공
-  → 봇 실행: 실제 경쟁사 데이터 수집 및 분석 정상
-
-■ **할루시네이션 체크**: ✅ 없음
-  → GPT가 실제 업체명, 주소만 사용
-  → 상상으로 데이터 생성하지 않음
-
-## 📝 환경 변수
-
-```.env
+### 1. 환경 변수 설정
+```bash
+# .dev.vars 파일 생성
 OPENAI_API_KEY=sk-...
-NAVER_CLIENT_ID=...
-NAVER_CLIENT_SECRET=...
+NAVER_CLIENT_ID=your-client-id
+NAVER_CLIENT_SECRET=your-client-secret
 ```
 
-## 📋 최근 업데이트
+### 2. 의존성 설치
+```bash
+cd /home/user/webapp
+npm install
+```
 
-❶ **2025-11-15 최종 가독성 개선 및 TXT 다운로드 추가**
-■ CSS 변수 통일 - 일률적 글씨 크기 및 줄간격
-■ 모바일: 28px 제목, 20px 부제목, 17px 본문
-■ PC: 48px 제목, 28px 부제목, 20px 본문
-■ TXT 다운로드 기능 추가 (downloadAllResultsAsTXT)
-■ 전체 시스템 테스트 완료
+### 3. D1 데이터베이스 마이그레이션
+```bash
+# 로컬 D1 초기화
+npm run db:migrate:local
 
-❷ **2025-11-15 할루시네이션 제거 및 SEO 최적화**
-■ GPT 프롬프트 재작성 - 실제 데이터만 사용하도록 강제
-■ SEO/AEO/GEO/C-RANK 최적화 프롬프트 개선
-■ 네이버 API 키 갱신 및 정상 작동 확인
-■ 봇 응답에서 실제 경쟁사 데이터 인용 확인 (예: 썸띵어바웃커피, 더달달 등)
+# 테스트 데이터 삽입 (선택사항)
+npm run db:seed
+```
 
-❷ **2025-11-11 네이버 API 연동**
-■ 네이버 로컬 검색 API 실제 연동
-■ 반경 내 경쟁사 자동 검색 (5개)
-■ SEO/AEO/GEO 최적화 분석 시스템
-■ 실제 데이터 기반 GPT 분석
+### 4. 개발 서버 실행
+```bash
+# 빌드
+npm run build
 
-## ⚠️ 주의사항
+# PM2로 실행
+pm2 start ecosystem.config.cjs
 
-❶ **API 제한**
-■ 네이버 API: 일 25,000회
-■ OpenAI API: 사용량 기반 과금
+# 서비스 확인
+curl http://localhost:3000/api/health
+```
 
-❷ **데이터 정확도**
-■ 네이버 API 검색 결과에 의존
-■ 실시간 데이터이므로 변동 가능
+## 🌐 프로덕션 URL
 
-❸ **비용**
-■ GPT-3.5-turbo: 약 $0.002/봇
-■ 30개 봇 실행: 약 $0.06
+**Production**: https://studiojuai-platform.pages.dev
+
+**API Endpoints**:
+- `GET /api/health` - Health check
+- `GET /api/stores` - 모든 매장 조회
+- `POST /api/stores` - 매장 생성
+- `GET /api/stores/:id` - 매장 상세 조회
+- `POST /api/bots/execute` - 봇 실행
+- `GET /api/stores/:id/executions` - 봇 실행 결과 조회
+
+## ✅ 검증 완료 사항
+
+### 환각(Hallucination) 방지
+- ✅ 모든 경쟁사 데이터는 네이버 API 실제 검색 결과
+- ✅ GPT 시스템 프롬프트에 "실제 데이터만 사용" 명시
+- ✅ Temperature 0.3으로 환각 최소화
+
+### 테스트 완료
+- ✅ API 정상 동작 (health, stores, executions)
+- ✅ D1 데이터베이스 연동 확인
+- ✅ 실제 경쟁사 데이터 5개 이상 수집 확인
+- ✅ 필드명 수정 (`data.results` → `data.executions`)
+
+## 📁 프로젝트 구조
+
+```
+webapp/
+├── index.html                 # 메인 페이지
+├── js/
+│   ├── main.js               # 메인 JavaScript
+│   ├── api-client.js         # API 클라이언트
+│   ├── bot-system.js         # 봇 시스템
+│   ├── ppt-generator.js      # PPT 생성기
+│   └── report-data.js        # 보고서 데이터 수집
+├── functions/
+│   └── api/
+│       └── _middleware.js    # Cloudflare Functions API
+├── worker/
+│   └── bot-definitions.js    # 30개 봇 정의
+├── migrations/
+│   └── 0001_initial_schema.sql  # D1 마이그레이션
+├── sample-data-generator.js  # 업종별 샘플 데이터
+├── wrangler.toml             # Cloudflare 설정
+├── ecosystem.config.cjs      # PM2 설정
+└── package.json              # 의존성
+```
+
+## 🔧 주요 개선사항
+
+### 2025-11-15
+- ✅ 업종별 샘플 데이터 생성 (카페/치킨/한식/미용실/피자/디저트)
+- ✅ PPT 폰트 크기 증가 (가독성 향상)
+- ✅ TXT/PPT 다운로드 필드명 수정 (`data.executions`)
+- ✅ 환각 방지 검증 완료
+- ✅ API 점검 완료
 
 ## 📞 문의
 
-- **Email**: ikjoobang@gmail.com
-- **Twitter**: @STUDIO_JU_AI
-- **Website**: https://www.studiojuai.com
+- **이메일**: ikjoobang@gmail.com
+- **웹사이트**: https://www.studiojuai.com
+- **프로젝트**: https://studiojuai-platform.pages.dev
+
+---
+
+**Made with ❤️ for 소상공인**

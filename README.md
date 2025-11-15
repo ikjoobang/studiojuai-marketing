@@ -81,12 +81,12 @@
 
 ## 🚀 배포 정보
 
-- **Production URL**: https://f33420cc.studiojuai-platform.pages.dev/
+- **Production URL**: https://496d92c4.studiojuai-platform.pages.dev/
 - **GitHub**: https://github.com/ikjoobang/studiojuai-marketing
 - **Database**: Cloudflare D1
 - **API Keys**: 
   - OpenAI (GPT-3.5-turbo)
-  - Naver Client ID/Secret
+  - Naver Client ID/Secret (ZC7V52kktFt2BWhWHpbX)
 
 ## 📊 테스트 결과
 
@@ -113,7 +113,14 @@ NAVER_CLIENT_SECRET=...
 
 ## 📋 최근 업데이트
 
-❶ **2025-11-15 할루시네이션 제거 및 SEO 최적화**
+❶ **2025-11-15 최종 가독성 개선 및 TXT 다운로드 추가**
+■ CSS 변수 통일 - 일률적 글씨 크기 및 줄간격
+■ 모바일: 28px 제목, 20px 부제목, 17px 본문
+■ PC: 48px 제목, 28px 부제목, 20px 본문
+■ TXT 다운로드 기능 추가 (downloadAllResultsAsTXT)
+■ 전체 시스템 테스트 완료
+
+❷ **2025-11-15 할루시네이션 제거 및 SEO 최적화**
 ■ GPT 프롬프트 재작성 - 실제 데이터만 사용하도록 강제
 ■ SEO/AEO/GEO/C-RANK 최적화 프롬프트 개선
 ■ 네이버 API 키 갱신 및 정상 작동 확인

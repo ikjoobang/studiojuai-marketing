@@ -81,12 +81,27 @@
 
 ## 🚀 배포 정보
 
-- **Production URL**: https://65a873e2.studiojuai-platform.pages.dev/
+- **Production URL**: https://f33420cc.studiojuai-platform.pages.dev/
 - **GitHub**: https://github.com/ikjoobang/studiojuai-marketing
 - **Database**: Cloudflare D1
 - **API Keys**: 
   - OpenAI (GPT-3.5-turbo)
   - Naver Client ID/Secret
+
+## 📊 테스트 결과
+
+■ **로컬 테스트**: ✅ 정상 작동
+  → 매장 생성, 봇 실행, 실제 네이버 데이터 수집 확인
+  → 경쟁사 5개 실제 데이터 (썸띵어바웃커피, 더달달, 베이커스트 브라운 등)
+
+■ **프로덕션 테스트**: ✅ 정상 작동
+  → Health Check: OK
+  → 매장 생성: 성공
+  → 봇 실행: 실제 경쟁사 데이터 수집 및 분석 정상
+
+■ **할루시네이션 체크**: ✅ 없음
+  → GPT가 실제 업체명, 주소만 사용
+  → 상상으로 데이터 생성하지 않음
 
 ## 📝 환경 변수
 

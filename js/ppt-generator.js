@@ -34,26 +34,26 @@ class PPTGenerator {
             },
             fonts: {
                 title: { 
-                    face: 'Noto Sans KR', 
-                    size: 32, 
+                    face: 'Malgun Gothic', 
+                    size: 36, 
                     bold: true,
                     color: 'FFFFFF'
                 },
                 subtitle: { 
-                    face: 'Noto Sans KR', 
-                    size: 20, 
+                    face: 'Malgun Gothic', 
+                    size: 24, 
                     bold: true,
                     color: 'FFFFFF'
                 },
                 body: { 
-                    face: 'Noto Sans KR', 
-                    size: 14,
+                    face: 'Malgun Gothic', 
+                    size: 16,
                     color: 'FFFFFF'
                 },
                 small: { 
-                    face: 'Noto Sans KR', 
-                    size: 11,
-                    color: 'B0B0B0'
+                    face: 'Malgun Gothic', 
+                    size: 12,
+                    color: 'CCCCCC'
                 }
             },
             layout: {

@@ -148,7 +148,13 @@ router.post('/api/bots/execute', async (request, env) => {
             }
         } catch (error) {
             console.error('네이버 API 호출 오류:', error);
+            // 에러 발생 시에도 계속 진행 (GPT에게 데이터 없음을 알림)
         }
+        
+        // 디버그: 데이터 수집 상태 로깅
+        console.log('=== 데이터 수집 결과 ===');
+        console.log('naverData:', naverData ? 'O' : 'X');
+        console.log('competitorsData:', competitorsData ? `${competitorsData.length}개` : 'X');
         
         // 프롬프트 생성 (실제 데이터 포함)
         let prompt = `[매장 기본 정보]\n`;
@@ -184,6 +190,18 @@ router.post('/api/bots/execute', async (request, env) => {
         prompt += `[분석 요청]\n${bot.prompt}`;
         
         // GPT 분석
+        const systemPrompt = `당신은 ${store.industry} 업종 전문 마케팅 AI입니다.
+
+❌ 절대 금지 사항:
+■ 상상으로 데이터를 만들지 마세요
+■ 존재하지 않는 업체명, 주소, 전화번호를 생성하지 마세요
+■ 제공된 실제 데이터가 없으면 "데이터 없음"이라고 명시하세요
+
+✔️ 필수 준수 사항:
+■ 반드시 제공된 [네이버 플레이스 실제 데이터]와 [반경 내 경쟁사]의 정보만 사용하세요
+■ 실제 업체명, 주소, 카테고리, 전화번호를 그대로 인용하세요
+■ 데이터가 부족하면 "추가 데이터 수집 필요"라고 언급하세요`;
+
         const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -193,11 +211,11 @@ router.post('/api/bots/execute', async (request, env) => {
             body: JSON.stringify({
                 model: 'gpt-3.5-turbo',
                 messages: [
-                    { role: 'system', content: `당신은 ${store.industry} 업종 전문 마케팅 AI입니다.` },
+                    { role: 'system', content: systemPrompt },
                     { role: 'user', content: prompt }
                 ],
-                temperature: 0.7,
-                max_tokens: 1500
+                temperature: 0.3,
+                max_tokens: 2000
             })
         });
         

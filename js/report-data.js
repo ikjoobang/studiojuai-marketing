@@ -79,9 +79,48 @@ class ReportDataCollector {
     }
 
     /**
-     * AI 봇 실행 결과 조회
+     * AI 봇 실행 결과 조회 (D1 데이터베이스)
      */
     async getBotResults(storeId) {
+        console.log(`🔵 D1에서 실제 봇 실행 결과 조회: ${storeId}`);
+        
+        try {
+            // D1 데이터베이스에서 실제 실행 결과 가져오기
+            const response = await fetch(`/api/stores/${storeId}/executions`);
+            const data = await response.json();
+            
+            if (!data.success || !data.executions || data.executions.length === 0) {
+                console.warn('⚠️ D1에 실행 결과 없음, 모의 데이터 사용');
+                return this.getBotResultsFallback(storeId);
+            }
+            
+            console.log(`✅ D1에서 ${data.executions.length}개 봇 결과 조회 성공`);
+            
+            // D1 데이터를 PPT 형식으로 변환
+            const results = data.executions.map((execution, index) => ({
+                id: execution.botId || (index + 1),
+                name: execution.botName || `봇 #${index + 1}`,
+                description: execution.botName ? `${execution.botName} 실행 결과` : '봇 실행 결과',
+                category: this.getBotCategory(execution.botId),
+                status: execution.status || 'completed',
+                executedAt: new Date(execution.createdAt || Date.now()),
+                result: execution.result || '결과 없음',
+                impact: this.calculateBotImpact({ id: execution.botId }),
+                nextAction: this.suggestNextAction({ id: execution.botId, name: execution.botName }, { name: execution.storeName })
+            }));
+            
+            return results;
+            
+        } catch (error) {
+            console.error('❌ D1 조회 실패, 모의 데이터 사용:', error);
+            return this.getBotResultsFallback(storeId);
+        }
+    }
+    
+    /**
+     * 모의 데이터 생성 (D1 실패 시)
+     */
+    async getBotResultsFallback(storeId) {
         const allBots = this.botSystem.bots;
         const store = await this.getStoreInfo(storeId);
         
@@ -103,6 +142,17 @@ class ReportDataCollector {
         });
         
         return results;
+    }
+    
+    /**
+     * 봇 ID로 카테고리 추론
+     */
+    getBotCategory(botId) {
+        if (botId <= 10) return 'analysis';
+        if (botId <= 20) return 'content';
+        if (botId <= 25) return 'marketing';
+        if (botId <= 28) return 'customer';
+        return 'performance';
     }
 
     /**

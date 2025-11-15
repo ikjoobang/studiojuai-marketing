@@ -33,6 +33,24 @@ router.get('/api/health', () => {
     });
 });
 
+// 모든 매장 조회
+router.get('/api/stores', async (request, env) => {
+    try {
+        const stores = await env.DB.prepare(`
+            SELECT * FROM stores ORDER BY createdAt DESC
+        `).all();
+        
+        return jsonResponse({
+            success: true,
+            count: stores.results.length,
+            stores: stores.results
+        });
+        
+    } catch (error) {
+        return jsonResponse({ error: error.message }, 500);
+    }
+});
+
 // 매장 생성
 router.post('/api/stores', async (request, env) => {
     try {

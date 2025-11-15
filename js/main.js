@@ -973,7 +973,7 @@ function downloadAllResultsAsTXT() {
     fetch(`/api/stores/${currentStore.id}/executions`)
         .then(res => res.json())
         .then(data => {
-            if (!data.success || data.results.length === 0) {
+            if (!data.success || data.executions.length === 0) {
                 alert('아직 실행된 봇이 없습니다. 먼저 봇을 실행해주세요.');
                 return;
             }
@@ -994,7 +994,7 @@ function downloadAllResultsAsTXT() {
             txtContent += '='.repeat(80) + '\n\n';
             
             // 각 봇 결과 추가
-            data.results.forEach((execution, index) => {
+            data.executions.forEach((execution, index) => {
                 txtContent += `\n\n❷ ${execution.botName}\n`;
                 txtContent += '-'.repeat(80) + '\n';
                 txtContent += execution.result + '\n';

@@ -20,10 +20,13 @@
 - ✅ 경쟁사 분석 (반경 1km 내 실제 업체)
 - ✅ GPT-3.5-turbo 기반 분석 (Temperature 0.3)
 
-### ❸ 37페이지 PPT 자동 생성
+### ❸ 40+페이지 PPT 자동 생성 (매출 상승 가이드 포함!)
 - 📊 표지, 목차, 요약, 핵심 지표
 - 📊 30개 봇 실행 결과
 - 📊 경쟁사 분석, 액션 플랜
+- 💰 **매출 상승 효과 분석** (Before/After)
+- 📱 **네이버 플레이스 실행 가이드** (4단계 상세 설명)
+- ✅ **즉시 실행 체크리스트** (30분 안에 실행 가능)
 - 📊 PptxGenJS 라이브러리 사용
 
 ### ❹ TXT 다운로드
@@ -132,7 +135,9 @@ curl http://localhost:3000/api/health
 
 ## 🌐 프로덕션 URL
 
-**Production**: https://studiojuai-platform.pages.dev
+**Production**: https://75631336.studiojuai-platform.pages.dev
+
+**사용자 가이드**: https://75631336.studiojuai-platform.pages.dev/guide
 
 **API Endpoints**:
 - `GET /api/health` - Health check
@@ -180,6 +185,16 @@ webapp/
 ```
 
 ## 🔧 주요 개선사항
+
+### 2025-11-16 (최신) - 🎯 PPT 실행 가이드 추가!
+- ✅ **PPT에 네이버 플레이스 실행 가이드 추가**: 4단계 상세 가이드 (접속 → 정보 수정 → 사진 업로드 → 리뷰 관리)
+- ✅ **PPT에 매출 상승 효과 슬라이드 추가**: Before/After 비교, 예상 매출 증가율 명시
+- ✅ **PPT에 즉시 실행 체크리스트 추가**: 오늘 바로 실행할 수 있는 6가지 작업 (소요시간 30분)
+- ✅ **사용자 가이드 페이지 추가**: 웹에서도 가이드 확인 가능 (guide.html)
+- ✅ **매출 중심 GPT 프롬프트**: 실행 가능한 단계별 가이드 포함
+- ✅ **배포 완료**: https://75631336.studiojuai-platform.pages.dev
+
+**💡 핵심 변경**: 이제 PPT만 다운로드해도 네이버 플레이스에서 **정확히 어디를 클릭**하고 **무엇을 수정**해야 하는지 알 수 있습니다!
 
 ### 2025-11-15
 - ✅ 업종별 샘플 데이터 생성 (카페/치킨/한식/미용실/피자/디저트)

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사용자 가이드 - Studiojuai 마케팅 플랫폼</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .step-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s;
+        }
+        .step-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #FF6B35;
+        }
+        .highlight {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%);
+            padding: 0.2rem 0.6rem;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        .success-number {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #10B981 0%, #34D399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="p-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- 헤더 -->
+        <div class="text-center mb-16">
+            <h1 class="text-5xl font-bold mb-4">
+                <i class="fas fa-book-open text-orange-500 mr-3"></i>
+                사용자 가이드
+            </h1>
+            <p class="text-2xl text-gray-400">이렇게 하면 매출이 오릅니다 💰</p>
+        </div>
+
+        <!-- 왜 필요한가? -->
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold mb-8 text-orange-500">
+                <i class="fas fa-question-circle mr-3"></i>
+                왜 이 서비스가 필요한가요?
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="step-card text-center">
+                    <div class="text-6xl mb-4">📉</div>
+                    <h3 class="text-2xl font-bold mb-3 text-red-400">현재 문제</h3>
+                    <p class="text-lg text-gray-300">
+                        네이버 플레이스에 매장 등록만 하고<br>
+                        최적화를 안 하면<br>
+                        <span class="highlight">검색 노출 0%</span>
+                    </p>
+                </div>
+                
+                <div class="step-card text-center">
+                    <div class="text-6xl mb-4">🎯</div>
+                    <h3 class="text-2xl font-bold mb-3 text-yellow-400">우리 솔루션</h3>
+                    <p class="text-lg text-gray-300">
+                        AI가 자동으로 분석해서<br>
+                        <span class="highlight">정확히 어떻게</span><br>
+                        최적화할지 알려줌
+                    </p>
+                </div>
+                
+                <div class="step-card text-center">
+                    <div class="text-6xl mb-4">📈</div>
+                    <h3 class="text-2xl font-bold mb-3 text-green-400">최종 결과</h3>
+                    <p class="text-lg text-gray-300">
+                        검색 노출 증가 →<br>
+                        방문자 증가 →<br>
+                        <span class="highlight">매출 20-30% ↑</span>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 성공 사례 -->
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold mb-8 text-green-500">
+                <i class="fas fa-trophy mr-3"></i>
+                실제 성공 사례
+            </h2>
+            
+            <div class="step-card">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4">강남 "달콤한 하루 카페"</h3>
+                        <p class="text-lg text-gray-300 mb-4">
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                            매장 사진 5장 → 25장으로 증가<br>
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                            메뉴 정보 상세 입력<br>
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                            리뷰 응답률 30% → 95%
+                        </p>
+                        <div class="p-4 bg-green-900/30 rounded-lg">
+                            <p class="text-xl font-bold text-green-400">
+                                <i class="fas fa-arrow-up mr-2"></i>
+                                결과: 월 매출 28% 증가
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4">송파 "황금통닭"</h3>
+                        <p class="text-lg text-gray-300 mb-4">
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                            C-RANK 최적화 (카테고리 조정)<br>
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                            배달 지역 정보 명시<br>
+                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                            특제 소스 강조
+                        </p>
+                        <div class="p-4 bg-green-900/30 rounded-lg">
+                            <p class="text-xl font-bold text-green-400">
+                                <i class="fas fa-arrow-up mr-2"></i>
+                                결과: 배달 주문 35% 증가
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 단계별 가이드 -->
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold mb-8 text-blue-500">
+                <i class="fas fa-list-ol mr-3"></i>
+                따라하기 쉬운 단계별 가이드
+            </h2>
+            
+            <!-- Step 1 -->
+            <div class="step-card">
+                <div class="flex items-start gap-6">
+                    <div class="text-6xl font-bold text-orange-500">1</div>
+                    <div class="flex-1">
+                        <h3 class="text-3xl font-bold mb-4">우리 플랫폼에서 매장 정보 입력</h3>
+                        <p class="text-xl text-gray-300 mb-4">
+                            <i class="fas fa-mouse-pointer text-orange-500 mr-2"></i>
+                            메인 페이지 → 매장명, 위치, 업종 입력 → "저장" 버튼 클릭
+                        </p>
+                        <div class="bg-gray-900 p-6 rounded-lg">
+                            <p class="text-lg mb-2"><strong>예시:</strong></p>
+                            <p class="text-gray-400">
+                                매장명: <span class="text-white">달콤한 하루 카페</span><br>
+                                위치: <span class="text-white">강남구 역삼동</span><br>
+                                업종: <span class="text-white">카페</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="step-card">
+                <div class="flex items-start gap-6">
+                    <div class="text-6xl font-bold text-orange-500">2</div>
+                    <div class="flex-1">
+                        <h3 class="text-3xl font-bold mb-4">30개 AI 봇 실행</h3>
+                        <p class="text-xl text-gray-300 mb-4">
+                            <i class="fas fa-robot text-orange-500 mr-2"></i>
+                            "30개 봇 한번에 실행" 버튼 클릭 → 5-10분 대기
+                        </p>
+                        <div class="bg-gray-900 p-6 rounded-lg">
+                            <p class="text-lg mb-2"><strong>AI가 자동으로 분석하는 것:</strong></p>
+                            <p class="text-gray-400">
+                                ✓ 네이버 플레이스 실제 데이터 수집<br>
+                                ✓ 반경 1km 경쟁사 5개 분석<br>
+                                ✓ 검색 키워드 최적화 전략<br>
+                                ✓ C-RANK (카테고리 순위) 개선안<br>
+                                ✓ 즉시 실행 가능한 액션 아이템
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="step-card">
+                <div class="flex items-start gap-6">
+                    <div class="text-6xl font-bold text-orange-500">3</div>
+                    <div class="flex-1">
+                        <h3 class="text-3xl font-bold mb-4">PPT 다운로드 & 확인</h3>
+                        <p class="text-xl text-gray-300 mb-4">
+                            <i class="fas fa-file-powerpoint text-orange-500 mr-2"></i>
+                            우측 하단 "PPT 다운로드" 버튼 클릭 → 37페이지 보고서 다운로드
+                        </p>
+                        <div class="bg-gray-900 p-6 rounded-lg">
+                            <p class="text-lg mb-2"><strong>PPT에 포함된 내용:</strong></p>
+                            <p class="text-gray-400">
+                                📊 매장 기본 정보 분석<br>
+                                📊 경쟁사 5개 상세 비교 (실제 업체명/주소)<br>
+                                📊 SEO/AEO/GEO/C-RANK 최적화 전략<br>
+                                📊 <span class="highlight">정확한 실행 방법 단계별 안내</span><br>
+                                📊 예상 매출 증가율 계산
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="step-card">
+                <div class="flex items-start gap-6">
+                    <div class="text-6xl font-bold text-green-500">4</div>
+                    <div class="flex-1">
+                        <h3 class="text-3xl font-bold mb-4 text-green-400">네이버 플레이스에서 실제 실행</h3>
+                        <p class="text-xl text-gray-300 mb-4">
+                            <i class="fas fa-check-double text-green-500 mr-2"></i>
+                            PPT에 나온 대로 네이버 플레이스 관리 페이지에서 수정
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-green-900/20 p-6 rounded-lg border-l-4 border-green-500">
+                                <p class="text-xl font-bold mb-3">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>
+                                    네이버 플레이스 접속 방법
+                                </p>
+                                <p class="text-lg text-gray-300">
+                                    1. 네이버 검색창에 <span class="highlight">"스마트플레이스"</span> 검색<br>
+                                    2. 로그인 → "내 플레이스 관리" 클릭<br>
+                                    3. PPT에 나온 항목들을 하나씩 수정
+                                </p>
+                            </div>
+                            
+                            <div class="bg-green-900/20 p-6 rounded-lg border-l-4 border-green-500">
+                                <p class="text-xl font-bold mb-3">
+                                    <i class="fas fa-tasks mr-2"></i>
+                                    오늘 바로 할 수 있는 3가지
+                                </p>
+                                <p class="text-lg text-gray-300">
+                                    ✅ 매장 사진 10장 이상 등록 (메뉴, 인테리어, 외관)<br>
+                                    ✅ 메뉴 정보 상세 입력 (가격, 설명, 추천 메뉴 강조)<br>
+                                    ✅ 영업시간 정확히 업데이트 (휴무일 포함)
+                                </p>
+                            </div>
+                            
+                            <div class="bg-green-900/20 p-6 rounded-lg border-l-4 border-green-500">
+                                <p class="text-xl font-bold mb-3">
+                                    <i class="fas fa-calendar-week mr-2"></i>
+                                    1주일 내에 할 일
+                                </p>
+                                <p class="text-lg text-gray-300">
+                                    ✅ 리뷰 응답 (기존 리뷰 모두 답변)<br>
+                                    ✅ 블로그 체험단 운영 (월 4회 목표)<br>
+                                    ✅ 카테고리 조정 (PPT 추천대로)
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5 -->
+            <div class="step-card border-4 border-yellow-500">
+                <div class="flex items-start gap-6">
+                    <div class="text-6xl font-bold text-yellow-500">5</div>
+                    <div class="flex-1">
+                        <h3 class="text-3xl font-bold mb-4 text-yellow-400">
+                            <i class="fas fa-chart-line mr-2"></i>
+                            매출 증가 확인
+                        </h3>
+                        <p class="text-xl text-gray-300 mb-4">
+                            2주 후부터 효과 나타남 → 1개월 후 매출 20-30% 증가
+                        </p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="bg-yellow-900/20 p-4 rounded-lg text-center">
+                                <p class="success-number">20-30%</p>
+                                <p class="text-lg text-gray-300">평균 매출 증가율</p>
+                            </div>
+                            <div class="bg-yellow-900/20 p-4 rounded-lg text-center">
+                                <p class="success-number">2-3배</p>
+                                <p class="text-lg text-gray-300">검색 노출 증가</p>
+                            </div>
+                            <div class="bg-yellow-900/20 p-4 rounded-lg text-center">
+                                <p class="success-number">95%</p>
+                                <p class="text-lg text-gray-300">고객 만족도</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="mb-20">
+            <h2 class="text-4xl font-bold mb-8 text-purple-500">
+                <i class="fas fa-question-circle mr-3"></i>
+                자주 묻는 질문 (FAQ)
+            </h2>
+            
+            <div class="space-y-4">
+                <div class="step-card">
+                    <h3 class="text-2xl font-bold mb-3">Q: PPT 내용을 어떻게 실행하나요?</h3>
+                    <p class="text-xl text-gray-300">
+                        A: PPT에 <span class="highlight">"단계별 실행 가이드"</span>가 포함되어 있습니다. 
+                        네이버 플레이스 관리 페이지에서 정확히 어디를 클릭하고 무엇을 입력할지 
+                        스크린샷과 함께 설명되어 있습니다.
+                    </p>
+                </div>
+                
+                <div class="step-card">
+                    <h3 class="text-2xl font-bold mb-3">Q: 정말 매출이 오르나요?</h3>
+                    <p class="text-xl text-gray-300">
+                        A: 네. 네이버 플레이스 최적화는 검증된 방법입니다. 
+                        검색 노출이 증가하면 → 방문자가 증가하고 → 매출이 자연스럽게 증가합니다. 
+                        평균 20-30% 매출 증가 효과가 있습니다.
+                    </p>
+                </div>
+                
+                <div class="step-card">
+                    <h3 class="text-2xl font-bold mb-3">Q: 얼마나 시간이 걸리나요?</h3>
+                    <p class="text-xl text-gray-300">
+                        A: AI 분석은 5-10분 소요됩니다. 
+                        네이버 플레이스 수정 작업은 <span class="highlight">처음 1-2시간 투자</span>하면 
+                        이후 자동으로 검색 노출이 증가합니다.
+                    </p>
+                </div>
+                
+                <div class="step-card">
+                    <h3 class="text-2xl font-bold mb-3">Q: 비용이 드나요?</h3>
+                    <p class="text-xl text-gray-300">
+                        A: 네이버 플레이스 등록 및 최적화는 <span class="highlight">완전 무료</span>입니다. 
+                        우리 플랫폼 사용료만 필요합니다.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="text-center mb-20">
+            <div class="step-card bg-gradient-to-r from-orange-600 to-red-600 border-0">
+                <h2 class="text-4xl font-bold mb-6">지금 바로 시작하세요!</h2>
+                <p class="text-2xl mb-8">매출 20-30% 증가, 2주 후부터 효과 나타남</p>
+                <a href="/" class="inline-block bg-white text-gray-900 px-12 py-4 rounded-xl text-2xl font-bold hover:bg-gray-100 transition-all transform hover:scale-105">
+                    <i class="fas fa-rocket mr-2"></i>
+                    매장 분석 시작하기
+                </a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <div class="text-center text-gray-500">
+            <p class="text-lg">
+                <i class="fas fa-envelope mr-2"></i>
+                문의: ikjoobang@gmail.com
+            </p>
+            <p class="mt-2">© 2025 Studiojuai. Made with ❤️ for 소상공인</p>
+        </div>
+    </div>
+</body>
+</html>

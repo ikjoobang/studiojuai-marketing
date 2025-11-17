@@ -205,6 +205,28 @@ router.post('/api/bots/execute', async (request, env) => {
             prompt += '\n';
         }
         
+        // RAG: 선행 봇 결과 가져오기
+        let previousResults = '';
+        try {
+            const executions = await env.DB.prepare(`
+                SELECT botId, botName, result FROM bot_executions 
+                WHERE storeId = ? AND status = 'completed'
+                ORDER BY createdAt ASC
+            `).bind(storeId).all();
+            
+            if (executions.results.length > 0) {
+                previousResults = `[3. 선행 봇 분석 결과 (Previous Analysis)]\n`;
+                executions.results.forEach(exec => {
+                    // 결과를 요약 (첫 500자만)
+                    const summary = exec.result.substring(0, 500) + (exec.result.length > 500 ? '...' : '');
+                    previousResults += `■ 봇 #${exec.botId} (${exec.botName}) 요약:\n${summary}\n\n`;
+                });
+            }
+        } catch (error) {
+            console.error('선행 봇 결과 조회 오류:', error);
+        }
+        
+        prompt += previousResults;
         prompt += `[분석 요청]\n${bot.prompt}`;
         
         // System Prompt Templates

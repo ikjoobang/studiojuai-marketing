@@ -317,6 +317,7 @@ export const BOT_DEFINITIONS = {
         name: '메뉴판 디자인 봇',
         category: 'creative',
         temperature: 0.7,
+        expertise: '메뉴판 레이아웃 및 비주얼 디자인',
         icon: 'fa-clipboard-list',
         prompt: '매력적이고 판매를 높이는 메뉴판 디자인을 제안해주세요. 레이아웃, 카테고리 구성, 비주얼 요소를 포함해주세요.'
     },
@@ -325,6 +326,7 @@ export const BOT_DEFINITIONS = {
         name: '영상 기획 봇',
         category: 'creative',
         temperature: 0.7,
+        expertise: '홍보 영상 스토리보드 기획',
         icon: 'fa-video',
         prompt: '매장 홍보 영상의 스토리보드, 촬영 가이드, 편집 방향을 상세히 기획해주세요.'
     },
@@ -333,6 +335,7 @@ export const BOT_DEFINITIONS = {
         name: '패키지 디자인 봇',
         category: 'creative',
         temperature: 0.7,
+        expertise: '포장 디자인 및 굿즈 기획',
         icon: 'fa-box',
         prompt: '브랜드 아이덴티티를 담은 포장 디자인과 굿즈 아이디어를 제안해주세요.'
     },
@@ -345,6 +348,7 @@ export const BOT_DEFINITIONS = {
         name: '네이버 플레이스 최적화 봇',
         category: 'operations',
         temperature: 0.3,
+        expertise: '네이버 플레이스 완성도 극대화',
         icon: 'fa-map-marker-alt',
         prompt: `네이버 플레이스 실제 데이터를 기반으로 모든 항목을 최적화하세요:
 
@@ -393,6 +397,7 @@ export const BOT_DEFINITIONS = {
         name: '리뷰 관리 봇',
         category: 'operations',
         temperature: 0.3,
+        expertise: '고객 리뷰 대응 및 평판 관리',
         icon: 'fa-comments',
         prompt: '고객 리뷰에 대한 친절하고 전문적인 답변을 작성해주세요. 긍정/부정 리뷰별로 다르게 응대해주세요.'
     },
@@ -401,6 +406,7 @@ export const BOT_DEFINITIONS = {
         name: '예약 시스템 봇',
         category: 'operations',
         temperature: 0.3,
+        expertise: '예약 프로세스 최적화',
         icon: 'fa-calendar-check',
         prompt: '예약 시스템을 효율적으로 운영할 수 있는 방안과 고객 안내 문구를 작성해주세요.'
     },
@@ -409,6 +415,7 @@ export const BOT_DEFINITIONS = {
         name: '고객 상담 봇',
         category: 'operations',
         temperature: 0.3,
+        expertise: 'FAQ 및 고객 응대 시나리오',
         icon: 'fa-headset',
         prompt: '자주 묻는 질문(FAQ)을 정리하고, 고객 상담 시나리오별 응대 방법을 작성해주세요.'
     },
@@ -417,6 +424,7 @@ export const BOT_DEFINITIONS = {
         name: '재고 관리 봇',
         category: 'operations',
         temperature: 0.3,
+        expertise: '재고 최적화 및 발주 관리',
         icon: 'fa-boxes',
         prompt: '재고 관리 시스템을 제안하고, 발주 타이밍과 수량을 최적화하는 방법을 알려주세요.'
     },
@@ -425,6 +433,7 @@ export const BOT_DEFINITIONS = {
         name: '배달 최적화 봇',
         category: 'operations',
         temperature: 0.3,
+        expertise: '배달 서비스 최적화',
         icon: 'fa-motorcycle',
         prompt: '배달 서비스를 최적화할 수 있는 방안을 제시해주세요. 배달 반경, 시간, 포장 등을 고려해주세요.'
     },
@@ -433,6 +442,7 @@ export const BOT_DEFINITIONS = {
         name: '성과 측정 봇',
         category: 'operations',
         temperature: 0.3,
+        expertise: 'KPI 설정 및 ROI 분석',
         icon: 'fa-chart-bar',
         prompt: '마케팅 성과를 측정할 수 있는 KPI를 설정하고, ROI를 계산하는 방법을 제시해주세요.'
     },
@@ -441,6 +451,7 @@ export const BOT_DEFINITIONS = {
         name: '종합 대시보드 봇',
         category: 'operations',
         temperature: 0.3,
+        expertise: '운영 지표 대시보드 기획',
         icon: 'fa-tachometer-alt',
         prompt: '매장 운영의 모든 지표를 한눈에 볼 수 있는 대시보드 구성을 제안해주세요.'
     }

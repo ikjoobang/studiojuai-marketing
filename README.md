@@ -18,7 +18,7 @@
 - ✅ **실제 데이터만 사용** (환각 방지)
 - ✅ 네이버 로컬 검색 API 연동
 - ✅ 경쟁사 분석 (반경 1km 내 실제 업체)
-- ✅ GPT-3.5-turbo 기반 분석 (Temperature 0.3)
+- ✅ **GPT-4o-mini** 기반 분석 (카테고리별 Temperature 0.3/0.5/0.7)
 
 ### ❸ 40+페이지 PPT 자동 생성 (매출 상승 가이드 포함!)
 - 📊 표지, 목차, 요약, 핵심 지표
@@ -53,8 +53,9 @@
 - Cloudflare Pages Functions
 - Hono Framework
 - Cloudflare D1 (SQLite Database)
-- OpenAI GPT-3.5-turbo
+- OpenAI GPT-4o-mini (카테고리별 Temperature)
 - Naver Local Search API
+- RAG System (선행 봇 결과 참조)
 
 ### Deployment
 - Cloudflare Pages
@@ -135,9 +136,9 @@ curl http://localhost:3000/api/health
 
 ## 🌐 프로덕션 URL
 
-**Production**: https://75631336.studiojuai-platform.pages.dev
+**Production**: https://014a4381.studiojuai-platform.pages.dev
 
-**사용자 가이드**: https://75631336.studiojuai-platform.pages.dev/guide
+**사용자 가이드**: https://014a4381.studiojuai-platform.pages.dev/guide
 
 **API Endpoints**:
 - `GET /api/health` - Health check
@@ -151,8 +152,9 @@ curl http://localhost:3000/api/health
 
 ### 환각(Hallucination) 방지
 - ✅ 모든 경쟁사 데이터는 네이버 API 실제 검색 결과
-- ✅ GPT 시스템 프롬프트에 "실제 데이터만 사용" 명시
-- ✅ Temperature 0.3으로 환각 최소화
+- ✅ **3종 System Prompt** (Analytical/Strategic/Creative)
+- ✅ 카테고리별 Temperature (Analytical: 0.3, Strategic: 0.5, Creative: 0.7)
+- ✅ 구체적 매출액 예측 금지 (KPI 중심 제시)
 
 ### 테스트 완료
 - ✅ API 정상 동작 (health, stores, executions)
@@ -186,7 +188,30 @@ webapp/
 
 ## 🔧 주요 개선사항
 
-### 2025-11-16 (최신) - 🎯 PPT 실행 가이드 추가!
+### 2025-11-17 (최신) - 🚀 GPT-4o-mini 업그레이드 및 RAG 시스템 적용!
+- ✅ **GPT-4o-mini 적용**: 기존 gpt-3.5-turbo에서 성능 향상
+- ✅ **카테고리별 Temperature 설정**:
+  - Analytical (시장/운영 봇): 0.3 (정확성 최우선)
+  - Strategic (콘텐츠 봇): 0.5 (균형)
+  - Creative (크리에이티브 봇): 0.7 (창의성)
+- ✅ **3종 System Prompt 템플릿**:
+  - Analytical Prompt: 데이터 기반 분석, 단계별 실행 가이드
+  - Strategic Prompt: 전략 수립, 즉시 사용 가능한 콘텐츠
+  - Creative Prompt: 디자인 가이드, 구체적 시각 요소
+- ✅ **RAG 시스템 구현**: 선행 봇 결과를 후속 봇에 제공 (Context 강화)
+- ✅ **봇 #8 변경**: "매출 예측 봇" → "목표 설정 및 잠재력 분석 봇"
+  - 구체적 매출액 예측 제거 (법적/윤리적 이슈 방지)
+  - KPI 중심 목표 설정 (방문객 수, 객단가, 재방문율)
+- ✅ **30개 봇 프롬프트 전면 개선**:
+  - 모든 봇에 expertise 필드 추가
+  - 봇 #1, #2, #8: 사용자 문서 기반 상세 프롬프트 적용
+  - 봇 #3-7, 9-30: 구조화된 프롬프트 및 전문성 정의
+- ✅ **Cache Busting 적용**: 모든 JS 파일에 버전 파라미터 (v=2.0.1)
+- ✅ **배포 완료**: https://014a4381.studiojuai-platform.pages.dev
+
+**💡 핵심 변경**: AI 성능 대폭 향상, 할루시네이션 방지 강화, 봇 간 Context 공유로 더 정교한 분석 제공!
+
+### 2025-11-16 - 🎯 PPT 실행 가이드 추가!
 - ✅ **PPT에 네이버 플레이스 실행 가이드 추가**: 4단계 상세 가이드 (접속 → 정보 수정 → 사진 업로드 → 리뷰 관리)
 - ✅ **PPT에 매출 상승 효과 슬라이드 추가**: Before/After 비교, 예상 매출 증가율 명시
 - ✅ **PPT에 즉시 실행 체크리스트 추가**: 오늘 바로 실행할 수 있는 6가지 작업 (소요시간 30분)

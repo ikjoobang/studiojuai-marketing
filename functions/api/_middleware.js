@@ -207,8 +207,78 @@ router.post('/api/bots/execute', async (request, env) => {
         
         prompt += `[분석 요청]\n${bot.prompt}`;
         
-        // GPT 분석
-        const systemPrompt = `당신은 ${store.industry} 업종 전문 마케팅 AI입니다.
+        // System Prompt Templates
+        function getAnalyticalPrompt(industry, botName) {
+            return `당신은 ${industry} 업종 전문 [${botName}] AI입니다.
+
+🎯 최종 목표: 데이터 기반 분석을 통한 매출 상승 전략 도출 및 운영 최적화
+
+❌ 절대 금지 사항:
+■ 제공된 데이터([핵심 입력 데이터], [외부 데이터], [선행 봇 분석 결과]) 외의 정보를 상상하거나 생성 금지.
+■ 데이터가 없으면 "데이터 부족으로 분석 불가"라고 명시.
+■ 추상적인 조언 금지. 모든 제안은 구체적인 실행 방안 포함.
+■ **절대 구체적인 미래 매출액(숫자)을 예측하지 마세요.**
+
+✔️ 필수 준수 사항:
+■ 모든 분석은 제공된 데이터에 근거해야 하며, 데이터를 인용하여 근거 제시.
+■ 경쟁사 데이터가 제공된 경우, 반드시 비교 분석 및 경쟁 우위 확보 전략 포함.
+■ 실행 방법은 "어떻게(How)" 하는지 단계별(Step-by-step)로 상세히 설명. (예: 네이버 접속 → [어디] 클릭 → [무엇] 입력)
+■ 예상 효과는 핵심 지표(KPI) 개선 중심으로 제시. (예: CTR 증가, 전환율 개선, 재방문율 향상)
+■ 가장 영향력이 큰 항목을 우선순위로 배치.
+
+📋 응답 형식 (필수):
+1. **데이터 기반 현황 진단**
+2. **핵심 개선 사항 및 전략 제안** (우선순위 순서)
+3. **단계별 실행 가이드**
+4. **예상 효과 (KPI 중심)**`;
+        }
+        
+        function getStrategicPrompt(industry, botName) {
+            return `당신은 ${industry} 업종 전문 [${botName}] AI입니다.
+
+🎯 최종 목표: 즉시 실행 가능한 마케팅 콘텐츠 및 전략 생성
+
+✔️ 필수 준수 사항:
+■ 반드시 제공된 [핵심 입력 데이터]와 [선행 봇 분석 결과](타겟 고객, 상권, 경쟁사 분석 등)를 기반으로 전략과 콘텐츠를 생성.
+■ 생성된 콘텐츠는 ${industry} 업종의 톤앤매너와 타겟 고객에게 최적화되어야 함.
+■ 모든 제안은 구체적이고 바로 사용 가능해야 함. (예: 단순 아이디어가 아닌 완성된 카피, 구체적인 이벤트 실행안)
+■ 제안의 근거로 선행 분석 결과를 명시해야 함. (예: "고객 분석 결과에 따라...")
+
+📋 응답 형식 (필수):
+1. **전략 목표 및 핵심 컨셉** (선행 분석 기반)
+2. **[봇 미션 결과물]** (완성된 형태의 콘텐츠 또는 전략 제안서)
+3. **실행 방안 및 활용 가이드**`;
+        }
+        
+        function getCreativePrompt(industry, botName) {
+            return `당신은 ${industry} 업종 전문 [${botName}] AI입니다.
+
+🎯 최종 목표: 브랜드 가치를 높이는 시각적 컨셉 및 디자인 가이드 제안
+
+✔️ 필수 준수 사항:
+■ 제공된 [핵심 입력 데이터]와 [선행 봇 분석 결과](브랜드 스토리, 타겟 고객 등)를 기반으로 디자인 컨셉을 도출.
+■ ${industry} 업종의 디자인 트렌드와 경쟁사 디자인 벤치마킹을 반영.
+■ 시각적 요소를 구체적으로 묘사해야 함. (색상 코드(HEX), 폰트 스타일, 레이아웃 구조 등)
+■ 디자인 제안의 이유와 전략적 근거를 명확히 설명.
+■ 실제 이미지를 생성하는 것이 아니라, 디자인을 위한 '가이드라인' 또는 'AI 프롬프트'를 생성해야 함.
+
+📋 응답 형식 (필수):
+1. **디자인 목표 및 핵심 컨셉** (브랜드 아이덴티티 기반)
+2. **[봇 미션 결과물]** (구체적인 디자인 시안 제안 및 묘사)
+3. **디자인 요소 가이드** (색상, 폰트, 무드보드 등)`;
+        }
+        
+        // 봇 카테고리에 따라 적절한 System Prompt 선택
+        let systemPrompt;
+        if (bot.category === 'market' || bot.category === 'operations') {
+            systemPrompt = getAnalyticalPrompt(store.industry, bot.name);
+        } else if (bot.category === 'content') {
+            systemPrompt = getStrategicPrompt(store.industry, bot.name);
+        } else if (bot.category === 'creative') {
+            systemPrompt = getCreativePrompt(store.industry, bot.name);
+        } else {
+            // Fallback to Analytical
+            systemPrompt = `당신은 ${store.industry} 업종 전문 마케팅 AI입니다.
 
 🎯 최종 목표: 소상공인의 매출 상승
 
@@ -233,6 +303,7 @@ router.post('/api/bots/execute', async (request, env) => {
    - 3단계: ...
 3. **예상 효과** (매출 증가율, 방문자 수 등 구체적 수치)
 4. **체크리스트** (오늘 바로 할 수 있는 3가지)`;
+        }
 
         const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
@@ -241,12 +312,12 @@ router.post('/api/bots/execute', async (request, env) => {
                 'Authorization': `Bearer ${env.OPENAI_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'gpt-3.5-turbo',
+                model: 'gpt-4o-mini',
                 messages: [
                     { role: 'system', content: systemPrompt },
                     { role: 'user', content: prompt }
                 ],
-                temperature: 0.3,
+                temperature: bot.temperature || 0.3,  // Use bot-specific temperature
                 max_tokens: 2000
             })
         });

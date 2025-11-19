@@ -238,14 +238,21 @@
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
         
-        /* Select 드롭다운 스타일 */
+        /* Select 드롭다운 스타일 - 강제 검정색 */
         select {
-            color: black !important;
+            color: #000000 !important;
+            background-color: #FFFFFF !important;
         }
         
         select option {
-            background-color: white !important;
-            color: black !important;
+            background-color: #FFFFFF !important;
+            color: #000000 !important;
+        }
+        
+        /* Placeholder 스타일도 검정색 */
+        select::placeholder {
+            color: #000000 !important;
+            opacity: 0.7;
         }
         
         /* 애니메이션 */

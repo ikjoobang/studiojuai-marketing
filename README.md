@@ -237,3 +237,5 @@ webapp/
 ---
 
 **Made with ❤️ for 소상공인**
+
+**Last Updated**: 2025-11-17 12:50 UTC

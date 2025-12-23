@@ -5,71 +5,131 @@
 - **Goal**: 30개 전문 AI 봇을 활용한 자영업자 마케팅 자동화
 - **Features**: 먼저 다가가는 영업사원처럼, 고객 응대부터 SNS 마케팅까지 AI가 대신합니다.
 
-## 공개 URL
-- **개발 서버**: https://3000-i7jwbakbmjgj46loxkf55-5185f4aa.sandbox.novita.ai
-- **Production**: (Cloudflare Pages 배포 후 URL 추가 예정)
+---
 
-## 주요 기능
-✅ **완료된 기능**
-- 30개 전문 AI 봇 (6개 카테고리)
-  - 고객응대 (5): 첫인사, 메뉴추천, 이벤트안내, 리뷰요청, SNS홍보
-  - 콘텐츠 (5): 블로그, 키워드분석, 경쟁사분석, 지역마케팅, 시즌마케팅
-  - 고객관계 (5): 단골관리, 업셀링, 소개유도, 피드백수집, 불만대응
-  - 소셜미디어 (5): 스토리콘텐츠, 비주얼기획, 해시태그전략, 인플루언서협업, 커뮤니티관리
-  - 디지털마케팅 (5): 이메일, SMS, 푸시알림, 리타겟팅, 제휴마케팅
-  - 전략분석 (5): 가격전략, 번들기획, 플래시세일, 멤버십기획, 성과분석
-- Gemini 2.0 Flash API 연동
-- 매장 정보 입력 및 저장 (localStorage)
-- 개별 봇 실행 및 전체 봇 순차 실행
-- 결과 내보내기 (Markdown)
-- 다크모드 지원
-- 반응형 디자인 (PC/모바일)
+## 🌐 Production URLs
 
-## 페이지 구조
+### ■ 프론트엔드
+| 페이지 | URL |
+|--------|-----|
+| **메인** | https://studiojuai.pages.dev |
+| **대시보드** | https://studiojuai.pages.dev/dashboard |
+| **분석** | https://studiojuai.pages.dev/analytics |
+| **설정 (어드민)** | https://studiojuai.pages.dev/settings |
 
-| 경로 | 설명 |
-|------|------|
-| `/` | 메인 페이지 - 업종 선택, 매장 정보 입력, 봇 미리보기 |
-| `/dashboard` | 대시보드 - 30개 봇 관리 및 실행 |
-| `/analytics` | 분석 페이지 - 실행 현황 및 통계 |
-| `/settings` | 설정 페이지 - API 키, 매장 정보, 데이터 관리 |
+### ■ 백엔드 API
+| 엔드포인트 | URL |
+|------------|-----|
+| **API 서버** | https://studiojuai.pages.dev/api |
+| **봇 목록** | https://studiojuai.pages.dev/api/bots |
+| **봇 실행** | https://studiojuai.pages.dev/api/bot/execute |
+| **전체 봇 실행** | https://studiojuai.pages.dev/api/bot/execute-all |
+| **API 키 검증** | https://studiojuai.pages.dev/api/validate-key |
+| **Health Check** | https://studiojuai.pages.dev/api/bots?industry=cafe |
 
-## API 엔드포인트
+### ■ GitHub 저장소
+| 저장소 | URL |
+|--------|-----|
+| **Backend/Frontend** | https://github.com/ikjoobang/studiojuai-marketing |
 
-| 메서드 | 경로 | 설명 |
-|--------|------|------|
-| GET | `/api/bots?industry=cafe` | 봇 목록 조회 |
-| POST | `/api/bot/execute` | 개별 봇 실행 |
-| POST | `/api/bot/execute-all` | 전체 봇 실행 |
-| POST | `/api/validate-key` | API 키 검증 |
+---
 
-## 기술 스택
+## ✅ 테스트 결과
+
+| 테스트 항목 | 상태 | 설명 |
+|-------------|------|------|
+| 프론트엔드 메인 | ✅ 200 OK | 페이지 정상 로드 |
+| 프론트엔드 대시보드 | ✅ 200 OK | 페이지 정상 로드 |
+| 프론트엔드 분석 | ✅ 200 OK | 페이지 정상 로드 |
+| 프론트엔드 설정 | ✅ 200 OK | 페이지 정상 로드 |
+| API 봇 목록 | ✅ 200 OK | 30개 봇 반환 |
+| API 키 검증 | ✅ 작동 | 에러 핸들링 정상 |
+| CORS 미들웨어 | ✅ 작동 | access-control-allow-origin: * |
+| Static CSS | ✅ 200 OK | 파일 정상 서빙 |
+| TXT 내보내기 | ✅ 작동 | Markdown 다운로드 |
+| JSON 내보내기 | ✅ 작동 | 설정 백업 |
+
+---
+
+## 🤖 30개 AI 봇 목록
+
+### 고객응대 (5)
+- 👋 첫인사 봇 - 신규 고객 환영 메시지
+- 🍽️ 메뉴추천 봇 - 맞춤 메뉴 추천
+- 🎉 이벤트 안내 봇 - 프로모션 홍보
+- ⭐ 리뷰 요청 봇 - 리뷰 작성 유도
+- 📱 SNS 홍보 봇 - SNS 홍보 문구
+
+### 콘텐츠 (5)
+- 📝 블로그 콘텐츠 봇 - 블로그 글 작성
+- 🔍 키워드 분석 봇 - 검색 키워드 발굴
+- 🎯 경쟁사 분석 봇 - 경쟁 분석
+- 📍 지역 마케팅 봇 - 지역 타겟 전략
+- 🗓️ 시즌 마케팅 봇 - 시즌별 프로모션
+
+### 고객관계 (5)
+- 💎 단골 관리 봇 - VIP 고객 관리
+- 📈 업셀링 봇 - 추가 구매 유도
+- 🤝 소개 유도 봇 - 지인 소개 프로그램
+- 💬 피드백 수집 봇 - 고객 의견 수집
+- 🆘 불만 대응 봇 - 불만 고객 응대
+
+### 소셜미디어 (5)
+- 📸 스토리 콘텐츠 봇 - 인스타 스토리 기획
+- 🎬 비주얼 기획 봇 - 사진/영상 가이드
+- #️⃣ 해시태그 전략 봇 - 해시태그 조합
+- 🌟 인플루언서 협업 봇 - 인플루언서 전략
+- 👥 커뮤니티 관리 봇 - 커뮤니티 활동
+
+### 디지털마케팅 (5)
+- 📧 이메일 마케팅 봇 - 이메일 캠페인
+- 💌 SMS 마케팅 봇 - 문자 메시지
+- 🔔 푸시 알림 봇 - 푸시 알림 작성
+- 🔄 리타겟팅 봇 - 이탈 고객 재유입
+- 🤜 제휴 마케팅 봇 - 업체 간 제휴
+
+### 전략분석 (5)
+- 💰 가격 전략 봇 - 가격 책정 전략
+- 📦 번들 기획 봇 - 세트 상품 기획
+- ⚡ 플래시 세일 봇 - 긴급 할인 이벤트
+- 🏆 멤버십 기획 봇 - 고객 등급제 설계
+- 📊 성과 분석 봇 - 마케팅 성과 분석
+
+---
+
+## 🛠️ 기술 스택
+
 - **Frontend**: Hono JSX + TailwindCSS CDN + FontAwesome
 - **Backend**: Hono (Cloudflare Workers)
 - **AI**: Google Gemini 2.0 Flash API
 - **Build**: Vite + @hono/vite-cloudflare-pages
 - **Deploy**: Cloudflare Pages
+- **Version Control**: GitHub
 
-## 데이터 구조
+---
 
-### 매장 정보 (localStorage: `store_info`)
-```typescript
-interface StoreInfo {
-  name: string;        // 매장명
-  location: string;    // 위치
-  industry: string;    // 업종 (cafe, chicken, korean, salon, restaurant, retail)
-  mainProduct: string; // 대표 메뉴/서비스
-  priceRange: string;  // 평균 가격대
-  targetCustomer: string; // 타겟 고객
-  specialNote: string; // 특이사항/강점
-}
-```
+## 📖 사용 가이드
 
-### API 키 (localStorage: `gemini_api_key`)
-- 브라우저에 로컬 저장
-- 서버로 전송 시 `X-Gemini-Key` 헤더 사용
+### 1. API 키 설정
+- 설정 페이지 또는 상단 'API 설정' 버튼 클릭
+- [Google AI Studio](https://aistudio.google.com/app/apikey)에서 Gemini API 키 발급
+- 키 입력 후 '검증' → '저장'
 
-## 로컬 개발
+### 2. 매장 정보 입력
+- 메인 페이지에서 업종 선택 (카페, 치킨집, 한식당 등)
+- 매장명, 위치, 대표 메뉴, 타겟 고객 등 입력
+
+### 3. 봇 실행
+- **개별 실행**: 봇 카드 클릭 또는 대시보드에서 '실행' 버튼
+- **전체 실행**: '전체 봇 실행' 버튼 (순차 실행)
+
+### 4. 결과 확인 및 내보내기
+- 대시보드에서 결과 확인
+- '내보내기' 버튼으로 Markdown/JSON 다운로드
+
+---
+
+## 🔧 개발 환경
 
 ```bash
 # 의존성 설치
@@ -78,43 +138,31 @@ npm install
 # 빌드
 npm run build
 
-# 개발 서버 시작 (PM2)
+# 로컬 개발 서버 (PM2)
 pm2 start ecosystem.config.cjs
 
-# 또는 직접 실행
-npm run dev:sandbox
-```
-
-## 배포
-
-```bash
 # Cloudflare Pages 배포
-npm run deploy:prod
+CLOUDFLARE_API_TOKEN="your-token" npm run deploy:prod
 ```
 
-## 사용 가이드
+---
 
-1. **API 키 설정**: 설정 페이지 또는 상단 'API 설정' 버튼 클릭
-   - [Google AI Studio](https://aistudio.google.com/app/apikey)에서 발급
-   
-2. **매장 정보 입력**: 메인 페이지에서 업종 선택 후 매장 정보 입력
+## 📝 업데이트 내역
 
-3. **봇 실행**:
-   - 개별 실행: 봇 카드 클릭 또는 대시보드에서 '실행' 버튼
-   - 전체 실행: '전체 봇 실행' 버튼 (순차 실행, 약 15-30분 소요)
-
-4. **결과 확인**: 대시보드에서 결과 확인 및 내보내기
-
-## 업데이트 내역
+### 2024-12-23
+- Cloudflare Pages 프로덕션 배포 완료
+- GitHub 저장소 연동 완료
+- 전체 테스트 통과
 
 ### 2024-12-11
 - settings.tsx 페이지 생성
 - style.css 반응형 스타일 완성
 - PM2 ecosystem.config.cjs 설정
-- 로컬 개발 서버 테스트 완료
 
-## 라이선스
+---
+
+## 📄 라이선스
 MIT License
 
-## 개발자
+## 👨‍💻 개발자
 STUDIOJUAI Team

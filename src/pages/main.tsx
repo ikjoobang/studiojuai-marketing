@@ -7,7 +7,7 @@ export const mainPage = (c: Context) => {
     <head>
       <meta charset="UTF-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      <title>STUDIOJUAI - AI 마케팅 자동화</title>
+      <title>XIΛIX_30 Robots - AI 마케팅 자동화</title>
       <script src="https://cdn.tailwindcss.com"></script>
       <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
       <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
@@ -120,6 +120,35 @@ export const mainPage = (c: Context) => {
         .footer-link:hover {
           text-decoration: underline;
         }
+        
+        /* 보안: 텍스트 선택 방지 */
+        * {
+          -webkit-user-select: none;
+          -moz-user-select: none;
+          -ms-user-select: none;
+          user-select: none;
+        }
+        input, textarea {
+          -webkit-user-select: text;
+          -moz-user-select: text;
+          -ms-user-select: text;
+          user-select: text;
+        }
+        
+        /* 보안: 이미지 드래그 방지 */
+        img {
+          -webkit-user-drag: none;
+          -khtml-user-drag: none;
+          -moz-user-drag: none;
+          -o-user-drag: none;
+          user-drag: none;
+          pointer-events: none;
+        }
+        
+        /* 보안: 인쇄 방지 */
+        @media print {
+          body { display: none !important; }
+        }
       </style>
     </head>
     <body class="bg-gray-50 min-h-screen">
@@ -131,7 +160,7 @@ export const mainPage = (c: Context) => {
             <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center">
               <i class="fas fa-robot text-white"></i>
             </div>
-            <span class="text-xl font-bold text-gray-800">STUDIOJUAI</span>
+            <span class="text-xl font-bold text-gray-800">XIΛIX_30 Robots</span>
           </div>
           <button onclick="openApiModal()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium transition">
             <i class="fas fa-key mr-2"></i>API 설정
@@ -294,10 +323,73 @@ export const mainPage = (c: Context) => {
       <!-- 푸터 -->
       <footer class="bg-white border-t border-gray-200 mt-12">
         <div class="max-w-7xl mx-auto px-4 py-6 text-center">
-          <a href="https://xivix.kr/" target="_blank" class="footer-link text-lg">@XIΛIXㅣ</a>
+          <a href="https://xivix.kr/" target="_blank" class="footer-link text-lg font-bold">@<strong>XIΛIX</strong>ㅣ</a>
           <p class="text-sm text-gray-500 mt-2">© 2026. ALL RIGHTS RESERVED.</p>
         </div>
       </footer>
+      
+      <!-- 휴대폰 인증 모달 -->
+      <div id="phone-auth-modal" class="hidden fixed inset-0 bg-black/70 z-[100] flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-6 max-w-sm mx-4 w-full shadow-2xl">
+          <div class="text-center mb-6">
+            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-mobile-alt text-3xl text-emerald-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800">📱 휴대폰 인증</h3>
+            <p class="text-sm text-gray-500 mt-2">무료 체험을 위해 휴대폰 인증이 필요합니다</p>
+            <p class="text-xs text-emerald-600 mt-1">✨ 계정당 1회 무료 체험 제공!</p>
+          </div>
+          
+          <div id="phone-step-1">
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">휴대폰 번호</label>
+              <input type="tel" id="phone-number" placeholder="01012345678" maxlength="11"
+                class="w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-center text-lg tracking-wider" />
+            </div>
+            <button onclick="sendVerificationCode()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition">
+              <i class="fas fa-paper-plane mr-2"></i>인증번호 받기
+            </button>
+          </div>
+          
+          <div id="phone-step-2" class="hidden">
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-1">인증번호 6자리</label>
+              <input type="text" id="verification-code" placeholder="000000" maxlength="6"
+                class="w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-center text-2xl tracking-widest font-bold" />
+            </div>
+            <button onclick="verifyCode()" class="w-full py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition">
+              <i class="fas fa-check mr-2"></i>인증 확인
+            </button>
+            <button onclick="resetPhoneAuth()" class="w-full mt-2 py-2 text-gray-500 hover:text-gray-700 text-sm">
+              <i class="fas fa-redo mr-1"></i>다시 입력하기
+            </button>
+          </div>
+          
+          <div class="mt-4 pt-4 border-t border-gray-200 text-center">
+            <p class="text-xs text-gray-400">무료 체험 후 추가 이용은</p>
+            <a href="https://xivix.kr/" target="_blank" class="text-emerald-600 font-bold hover:underline">xivix.kr</a>
+            <span class="text-xs text-gray-400">에서 가능합니다</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 사용 횟수 소진 모달 -->
+      <div id="usage-exhausted-modal" class="hidden fixed inset-0 bg-black/70 z-[100] flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-6 max-w-sm mx-4 w-full shadow-2xl text-center">
+          <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-exclamation-triangle text-3xl text-red-500"></i>
+          </div>
+          <h3 class="text-xl font-bold text-gray-800">무료 체험 종료</h3>
+          <p class="text-gray-500 mt-2 mb-4">이미 무료 체험을 사용하셨습니다.<br/>추가 이용은 유료 서비스를 이용해주세요.</p>
+          <a href="https://xivix.kr/" target="_blank" 
+            class="block w-full py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-bold rounded-lg transition hover:shadow-lg">
+            <i class="fas fa-crown mr-2"></i>xivix.kr 유료 서비스 이용하기
+          </a>
+          <button onclick="closeUsageExhaustedModal()" class="w-full mt-3 py-2 text-gray-500 hover:text-gray-700 text-sm">
+            닫기
+          </button>
+        </div>
+      </div>
 
       <!-- API 키 모달 -->
       <div id="api-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
@@ -477,6 +569,15 @@ export const mainPage = (c: Context) => {
 
         // 단일 봇 실행
         async function runSingleBot(botId) {
+          // 인증 및 사용량 확인
+          if (!checkAuthStatus()) return;
+          
+          // 무료 사용 횟수 확인 (1회만 허용)
+          if (usageCount >= 1) {
+            showUsageExhaustedModal();
+            return;
+          }
+          
           if (!validateInputs()) return;
           
           const bot = ALL_BOTS.find(b => b.id === botId);
@@ -543,6 +644,9 @@ export const mainPage = (c: Context) => {
             const result = await response.json();
             
             if (result.success) {
+              // 🔒 무료 사용량 증가 (1회만 허용)
+              incrementUsage();
+              
               // 결과 저장
               botResults[botId] = {
                 ...bot,
@@ -636,7 +740,7 @@ export const mainPage = (c: Context) => {
           if (!result) return;
           
           let content = '═'.repeat(50) + '\\n';
-          content += '   STUDIOJUAI - ' + result.name + '\\n';
+          content += '   XIΛIX_30 Robots - ' + result.name + '\\n';
           content += '═'.repeat(50) + '\\n\\n';
           content += '📅 생성일: ' + new Date().toLocaleString('ko-KR') + '\\n';
           content += '📍 매장: ' + (result.storeInfo?.name || '') + '\\n';
@@ -649,7 +753,7 @@ export const mainPage = (c: Context) => {
           content += '   © 2026. ALL RIGHTS RESERVED.\\n';
           content += '═'.repeat(50);
           
-          downloadFile(content, 'STUDIOJUAI_' + result.name.replace(/\\s/g, '_') + '_' + new Date().toISOString().slice(0,10) + '.txt', 'text/plain');
+          downloadFile(content, 'XIΛIX_30 Robots_' + result.name.replace(/\\s/g, '_') + '_' + new Date().toISOString().slice(0,10) + '.txt', 'text/plain');
         }
 
         // 개별 봇 PDF 다운로드
@@ -663,7 +767,7 @@ export const mainPage = (c: Context) => {
             <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>STUDIOJUAI - \${result.name}</title>
+              <title>XIΛIX_30 Robots - \${result.name}</title>
               <style>
                 /* 기본 타이포그래피 설정 */
                 body { 
@@ -740,7 +844,7 @@ export const mainPage = (c: Context) => {
           }
           
           let content = '═'.repeat(60) + '\\n';
-          content += '           STUDIOJUAI AI 마케팅 분석 리포트\\n';
+          content += '           XIΛIX_30 Robots AI 마케팅 분석 리포트\\n';
           content += '═'.repeat(60) + '\\n\\n';
           content += '📅 생성일시: ' + new Date().toLocaleString('ko-KR') + '\\n';
           content += '📊 실행된 봇: ' + results.length + '개\\n\\n';
@@ -766,7 +870,7 @@ export const mainPage = (c: Context) => {
           content += '           © 2026. ALL RIGHTS RESERVED.\\n';
           content += '═'.repeat(60);
           
-          downloadFile(content, 'STUDIOJUAI_전체리포트_' + new Date().toISOString().slice(0,10) + '.txt', 'text/plain');
+          downloadFile(content, 'XIΛIX_30 Robots_전체리포트_' + new Date().toISOString().slice(0,10) + '.txt', 'text/plain');
         }
 
         // 전체 PDF 다운로드
@@ -785,7 +889,7 @@ export const mainPage = (c: Context) => {
             <head>
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>STUDIOJUAI 전체 리포트</title>
+              <title>XIΛIX_30 Robots 전체 리포트</title>
               <style>
                 /* 기본 타이포그래피 설정 */
                 body { 
@@ -829,7 +933,7 @@ export const mainPage = (c: Context) => {
             </head>
             <body>
               <div class="content-wrapper">
-                <h1>🤖 STUDIOJUAI AI 마케팅 분석 리포트</h1>
+                <h1>🤖 XIΛIX_30 Robots AI 마케팅 분석 리포트</h1>
                 <p style="color: #666;">생성일: \${new Date().toLocaleString('ko-KR')} | 실행 봇: \${results.length}개</p>
                 
                 <div class="info">
@@ -914,9 +1018,203 @@ export const mainPage = (c: Context) => {
           closeApiModal();
         }
 
+        // ========================================
+        // 🔒 보안 기능 - 복사/캡처/F12/개발자도구 방지
+        // ========================================
+        
+        // 우클릭 방지
+        document.addEventListener('contextmenu', function(e) {
+          e.preventDefault();
+          alert('⚠️ 우클릭이 비활성화되어 있습니다.');
+          return false;
+        });
+        
+        // 키보드 단축키 방지 (F12, Ctrl+Shift+I, Ctrl+U, Ctrl+S, Ctrl+C, Ctrl+P 등)
+        document.addEventListener('keydown', function(e) {
+          // F12 방지
+          if (e.key === 'F12' || e.keyCode === 123) {
+            e.preventDefault();
+            alert('⚠️ 개발자 도구 사용이 제한되어 있습니다.');
+            return false;
+          }
+          // Ctrl + Shift + I (개발자 도구)
+          if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.keyCode === 73)) {
+            e.preventDefault();
+            return false;
+          }
+          // Ctrl + Shift + J (콘솔)
+          if (e.ctrlKey && e.shiftKey && (e.key === 'J' || e.key === 'j' || e.keyCode === 74)) {
+            e.preventDefault();
+            return false;
+          }
+          // Ctrl + Shift + C (요소 선택)
+          if (e.ctrlKey && e.shiftKey && (e.key === 'C' || e.key === 'c' || e.keyCode === 67)) {
+            e.preventDefault();
+            return false;
+          }
+          // Ctrl + U (소스 보기)
+          if (e.ctrlKey && (e.key === 'U' || e.key === 'u' || e.keyCode === 85)) {
+            e.preventDefault();
+            alert('⚠️ 소스 보기가 제한되어 있습니다.');
+            return false;
+          }
+          // Ctrl + S (저장)
+          if (e.ctrlKey && (e.key === 'S' || e.key === 's' || e.keyCode === 83)) {
+            e.preventDefault();
+            return false;
+          }
+          // Ctrl + P (인쇄)
+          if (e.ctrlKey && (e.key === 'P' || e.key === 'p' || e.keyCode === 80)) {
+            e.preventDefault();
+            alert('⚠️ 인쇄가 제한되어 있습니다.');
+            return false;
+          }
+          // Ctrl + C (복사) - input/textarea 제외
+          if (e.ctrlKey && (e.key === 'C' || e.key === 'c' || e.keyCode === 67)) {
+            const activeEl = document.activeElement;
+            if (activeEl.tagName !== 'INPUT' && activeEl.tagName !== 'TEXTAREA') {
+              e.preventDefault();
+              alert('⚠️ 복사가 제한되어 있습니다.');
+              return false;
+            }
+          }
+        });
+        
+        // 드래그 방지
+        document.addEventListener('dragstart', function(e) {
+          e.preventDefault();
+          return false;
+        });
+        
+        // 개발자 도구 감지 (디버거 방지)
+        (function() {
+          const devtools = { open: false };
+          const threshold = 160;
+          
+          setInterval(function() {
+            const widthThreshold = window.outerWidth - window.innerWidth > threshold;
+            const heightThreshold = window.outerHeight - window.innerHeight > threshold;
+            
+            if (widthThreshold || heightThreshold) {
+              if (!devtools.open) {
+                devtools.open = true;
+                alert('⚠️ 개발자 도구가 감지되었습니다. 보안을 위해 페이지가 제한됩니다.');
+                document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;font-size:24px;color:#666;">⚠️ 접근이 제한되었습니다</div>';
+              }
+            } else {
+              devtools.open = false;
+            }
+          }, 1000);
+        })();
+        
+        // ========================================
+        // 📱 휴대폰 인증 및 사용량 제한
+        // ========================================
+        
+        let verifiedPhone = localStorage.getItem('verified_phone') || null;
+        let usageCount = parseInt(localStorage.getItem('usage_count') || '0');
+        let verificationCodeSent = null;
+        
+        // 인증 상태 확인
+        function checkAuthStatus() {
+          if (!verifiedPhone) {
+            showPhoneAuthModal();
+            return false;
+          }
+          if (usageCount >= 1) {
+            showUsageExhaustedModal();
+            return false;
+          }
+          return true;
+        }
+        
+        // 휴대폰 인증 모달 표시
+        function showPhoneAuthModal() {
+          document.getElementById('phone-auth-modal').classList.remove('hidden');
+        }
+        
+        // 인증번호 발송 (시뮬레이션)
+        function sendVerificationCode() {
+          const phone = document.getElementById('phone-number').value.trim();
+          
+          if (!phone || phone.length < 10) {
+            alert('❌ 올바른 휴대폰 번호를 입력해주세요.');
+            return;
+          }
+          
+          // 이미 사용한 번호인지 확인
+          const usedPhones = JSON.parse(localStorage.getItem('used_phones') || '[]');
+          if (usedPhones.includes(phone)) {
+            alert('❌ 이미 무료 체험을 사용한 번호입니다.\\n유료 서비스는 xivix.kr에서 이용해주세요.');
+            window.open('https://xivix.kr/', '_blank');
+            return;
+          }
+          
+          // 6자리 랜덤 코드 생성
+          verificationCodeSent = Math.floor(100000 + Math.random() * 900000).toString();
+          
+          // 실제로는 SMS API를 호출해야 함
+          alert('✅ 인증번호가 발송되었습니다.\\n(테스트: ' + verificationCodeSent + ')');
+          
+          document.getElementById('phone-step-1').classList.add('hidden');
+          document.getElementById('phone-step-2').classList.remove('hidden');
+        }
+        
+        // 인증번호 확인
+        function verifyCode() {
+          const code = document.getElementById('verification-code').value.trim();
+          const phone = document.getElementById('phone-number').value.trim();
+          
+          if (code === verificationCodeSent) {
+            // 인증 성공
+            verifiedPhone = phone;
+            localStorage.setItem('verified_phone', phone);
+            
+            // 사용한 번호 목록에 추가
+            const usedPhones = JSON.parse(localStorage.getItem('used_phones') || '[]');
+            usedPhones.push(phone);
+            localStorage.setItem('used_phones', JSON.stringify(usedPhones));
+            
+            alert('✅ 인증 완료!\\n무료 체험 1회를 사용하실 수 있습니다.');
+            document.getElementById('phone-auth-modal').classList.add('hidden');
+          } else {
+            alert('❌ 인증번호가 일치하지 않습니다.');
+          }
+        }
+        
+        // 인증 재시작
+        function resetPhoneAuth() {
+          document.getElementById('phone-step-1').classList.remove('hidden');
+          document.getElementById('phone-step-2').classList.add('hidden');
+          document.getElementById('phone-number').value = '';
+          document.getElementById('verification-code').value = '';
+          verificationCodeSent = null;
+        }
+        
+        // 사용량 소진 모달 표시
+        function showUsageExhaustedModal() {
+          document.getElementById('usage-exhausted-modal').classList.remove('hidden');
+        }
+        
+        // 사용량 소진 모달 닫기
+        function closeUsageExhaustedModal() {
+          document.getElementById('usage-exhausted-modal').classList.add('hidden');
+        }
+        
+        // 사용량 증가 (봇 실행 시 호출)
+        function incrementUsage() {
+          usageCount++;
+          localStorage.setItem('usage_count', usageCount.toString());
+        }
+
         // 초기화
         document.addEventListener('DOMContentLoaded', function() {
           renderBotGrid();
+          
+          // 페이지 로드 시 인증 상태 확인
+          setTimeout(function() {
+            checkAuthStatus();
+          }, 500);
         });
       </script>
 

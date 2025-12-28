@@ -12,7 +12,91 @@ export const mainPage = (c: Context) => {
       <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
       <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
       <style>
-        body { font-family: 'Pretendard', sans-serif; }
+        /* 기본 타이포그래피 설정 */
+        body { 
+          font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+          color: #333333;
+          word-break: keep-all; /* 한글 줄바꿈 최적화 */
+          margin: 0;
+        }
+        
+        /* PC 기본 스타일 - 최대 너비 720px 중앙 정렬 */
+        .content-wrapper {
+          max-width: 720px;
+          margin: 0 auto;
+          padding: 0 16px;
+          font-size: 16px;
+          line-height: 1.7;
+        }
+        
+        /* 모바일 스타일 (Mobile First) - 768px 브레이크포인트 */
+        @media (max-width: 768px) {
+          body {
+            font-size: 17px;
+            line-height: 1.65;
+            letter-spacing: -0.02em;
+          }
+          .content-wrapper {
+            padding: 0 16px;
+            font-size: 17px;
+          }
+          .bot-grid-responsive {
+            grid-template-columns: 1fr !important;
+          }
+          .header-responsive {
+            padding: 12px 16px !important;
+          }
+          .main-section {
+            padding: 16px !important;
+          }
+          .mobile-stack {
+            flex-direction: column !important;
+            gap: 8px !important;
+          }
+        }
+        
+        /* 리스트 공통 스타일 */
+        ul.ordered-list, ul.emphasis-list, ul.check-list {
+          list-style: none;
+          padding-left: 0;
+          margin: 12px 0;
+        }
+        ul.ordered-list li, ul.emphasis-list li, ul.check-list li {
+          margin-bottom: 8px;
+          position: relative;
+          padding-left: 0;
+        }
+        
+        /* 링크 스타일 */
+        a.primary-link {
+          color: #03C75A;
+          text-decoration: none;
+          font-weight: 500;
+        }
+        a.primary-link:hover {
+          text-decoration: underline;
+        }
+        a.secondary-link {
+          color: #FF6B35;
+        }
+        
+        /* 핵심 메시지 강조 */
+        strong, b {
+          font-weight: 700;
+          color: #000;
+        }
+        
+        /* 결과물 출력 스타일 */
+        .result-content {
+          font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+          line-height: 1.8;
+          color: #333;
+        }
+        .result-content p {
+          margin-bottom: 12px;
+        }
+        
+        /* 봇 카드 스타일 */
         .bot-card { transition: all 0.2s; }
         .bot-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
         .bot-card.has-result { border-color: #10B981; background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); }
@@ -26,13 +110,23 @@ export const mainPage = (c: Context) => {
         .run-btn:hover { transform: scale(1.05); }
         .result-panel { display: none; }
         .result-panel.show { display: block; }
+        
+        /* 푸터 스타일 */
+        .footer-link {
+          color: #03C75A;
+          text-decoration: none;
+          font-weight: 700;
+        }
+        .footer-link:hover {
+          text-decoration: underline;
+        }
       </style>
     </head>
     <body class="bg-gray-50 min-h-screen">
       
       <!-- 헤더 -->
       <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="header-responsive max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center">
               <i class="fas fa-robot text-white"></i>
@@ -45,7 +139,7 @@ export const mainPage = (c: Context) => {
         </div>
       </header>
 
-      <main class="max-w-7xl mx-auto px-4 py-6">
+      <main class="main-section max-w-7xl mx-auto px-4 py-6">
         
         <!-- 안내 메시지 -->
         <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl p-6 mb-6">
@@ -168,8 +262,8 @@ export const mainPage = (c: Context) => {
             <strong>팁:</strong> 각 봇의 <span class="text-emerald-600 font-bold">▶ 실행</span> 버튼을 클릭하면 해당 봇만 실행됩니다. API 비용을 절약하세요!
           </p>
           
-          <!-- 30개 봇 그리드 -->
-          <div id="bot-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- 30개 봇 그리드 - 반응형 -->
+          <div id="bot-grid" class="bot-grid-responsive grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- JavaScript로 동적 생성 -->
           </div>
         </section>
@@ -196,6 +290,14 @@ export const mainPage = (c: Context) => {
         </section>
 
       </main>
+
+      <!-- 푸터 -->
+      <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 py-6 text-center">
+          <a href="https://xivix.kr/" target="_blank" class="footer-link text-lg">@XIΛIXㅣ</a>
+          <p class="text-sm text-gray-500 mt-2">© 2026. ALL RIGHTS RESERVED.</p>
+        </div>
+      </footer>
 
       <!-- API 키 모달 -->
       <div id="api-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
@@ -335,7 +437,7 @@ export const mainPage = (c: Context) => {
                         </button>
                       </div>
                     </div>
-                    <div id="result-\${bot.id}" class="result-box text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 rounded p-2 max-h-48 overflow-y-auto"></div>
+                    <div id="result-\${bot.id}" class="result-box result-content text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 rounded p-3 max-h-64 overflow-y-auto" style="line-height: 1.8;"></div>
                   </div>
                 </div>
               </div>
@@ -543,7 +645,8 @@ export const mainPage = (c: Context) => {
           content += '─'.repeat(50) + '\\n\\n';
           content += result.result + '\\n\\n';
           content += '═'.repeat(50) + '\\n';
-          content += '   STUDIOJUAI - https://studiojuai.pages.dev\\n';
+          content += '   @XIΛIXㅣ https://xivix.kr/\\n';
+          content += '   © 2026. ALL RIGHTS RESERVED.\\n';
           content += '═'.repeat(50);
           
           downloadFile(content, 'STUDIOJUAI_' + result.name.replace(/\\s/g, '_') + '_' + new Date().toISOString().slice(0,10) + '.txt', 'text/plain');
@@ -559,31 +662,64 @@ export const mainPage = (c: Context) => {
             <html lang="ko">
             <head>
               <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>STUDIOJUAI - \${result.name}</title>
               <style>
-                body { font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif; padding: 40px; line-height: 1.8; max-width: 800px; margin: 0 auto; }
-                h1 { color: #10B981; border-bottom: 3px solid #10B981; padding-bottom: 15px; }
+                /* 기본 타이포그래피 설정 */
+                body { 
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                  color: #333333;
+                  word-break: keep-all;
+                  margin: 0;
+                  padding: 40px;
+                  line-height: 1.7;
+                }
+                .content-wrapper {
+                  max-width: 720px;
+                  margin: 0 auto;
+                }
+                /* 모바일 스타일 */
+                @media (max-width: 768px) {
+                  body {
+                    font-size: 17px;
+                    line-height: 1.65;
+                    letter-spacing: -0.02em;
+                    padding: 20px 16px;
+                  }
+                }
+                h1 { color: #10B981; border-bottom: 3px solid #10B981; padding-bottom: 15px; font-size: 24px; }
                 .info { background: #f0fdf4; padding: 15px; border-radius: 10px; margin: 20px 0; }
                 .info p { margin: 5px 0; }
-                .content { background: #f9fafb; padding: 20px; border-radius: 10px; white-space: pre-wrap; line-height: 2; }
+                /* 리스트 스타일 */
+                ul { list-style: none; padding-left: 0; }
+                ul li { margin-bottom: 8px; }
+                /* 링크 스타일 */
+                a { color: #03C75A; text-decoration: none; font-weight: 500; }
+                a:hover { text-decoration: underline; }
+                strong, b { font-weight: 700; color: #000; }
+                .content { background: #f9fafb; padding: 20px; border-radius: 10px; white-space: pre-wrap; line-height: 1.8; }
                 .footer { text-align: center; margin-top: 40px; color: #666; border-top: 2px solid #10B981; padding-top: 20px; }
+                .footer a { color: #03C75A; font-weight: 700; text-decoration: none; }
+                .footer a:hover { text-decoration: underline; }
               </style>
             </head>
             <body>
-              <h1>\${result.icon} \${result.name}</h1>
-              <p style="color: #666;">\${result.category} | 생성일: \${new Date().toLocaleString('ko-KR')}</p>
-              
-              <div class="info">
-                <p><strong>📍 매장명:</strong> \${result.storeInfo?.name || '-'}</p>
-                <p><strong>📌 위치:</strong> \${result.storeInfo?.location || '-'}</p>
-                <p><strong>🏷️ 업종:</strong> \${result.storeInfo?.industry || '-'}</p>
-              </div>
-              
-              <div class="content">\${escapeHtml(result.result)}</div>
-              
-              <div class="footer">
-                <p><strong style="color:#10B981;">STUDIOJUAI</strong></p>
-                <p>https://studiojuai.pages.dev</p>
+              <div class="content-wrapper">
+                <h1>\${result.icon} \${result.name}</h1>
+                <p style="color: #666;">\${result.category} | 생성일: \${new Date().toLocaleString('ko-KR')}</p>
+                
+                <div class="info">
+                  <p><strong>📍 매장명:</strong> \${result.storeInfo?.name || '-'}</p>
+                  <p><strong>📌 위치:</strong> \${result.storeInfo?.location || '-'}</p>
+                  <p><strong>🏷️ 업종:</strong> \${result.storeInfo?.industry || '-'}</p>
+                </div>
+                
+                <article class="content">\${escapeHtml(result.result)}</article>
+                
+                <div class="footer">
+                  <p><a href="https://xivix.kr/" target="_blank">@XIΛIXㅣ</a></p>
+                  <p>© 2026. ALL RIGHTS RESERVED.</p>
+                </div>
               </div>
             </body>
             </html>
@@ -626,7 +762,8 @@ export const mainPage = (c: Context) => {
           });
           
           content += '\\n' + '═'.repeat(60) + '\\n';
-          content += '           STUDIOJUAI - https://studiojuai.pages.dev\\n';
+          content += '           @XIΛIXㅣ https://xivix.kr/\\n';
+          content += '           © 2026. ALL RIGHTS RESERVED.\\n';
           content += '═'.repeat(60);
           
           downloadFile(content, 'STUDIOJUAI_전체리포트_' + new Date().toISOString().slice(0,10) + '.txt', 'text/plain');
@@ -647,40 +784,73 @@ export const mainPage = (c: Context) => {
             <html lang="ko">
             <head>
               <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>STUDIOJUAI 전체 리포트</title>
               <style>
-                body { font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif; padding: 40px; line-height: 1.8; max-width: 800px; margin: 0 auto; }
-                h1 { color: #10B981; border-bottom: 3px solid #10B981; padding-bottom: 15px; }
-                h2 { color: #333; margin-top: 40px; border-left: 4px solid #10B981; padding-left: 15px; background: #f0fdf4; padding: 10px 15px; }
+                /* 기본 타이포그래피 설정 */
+                body { 
+                  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                  color: #333333;
+                  word-break: keep-all;
+                  margin: 0;
+                  padding: 40px;
+                  line-height: 1.7;
+                }
+                .content-wrapper {
+                  max-width: 720px;
+                  margin: 0 auto;
+                }
+                /* 모바일 스타일 */
+                @media (max-width: 768px) {
+                  body {
+                    font-size: 17px;
+                    line-height: 1.65;
+                    letter-spacing: -0.02em;
+                    padding: 20px 16px;
+                  }
+                }
+                h1 { color: #10B981; border-bottom: 3px solid #10B981; padding-bottom: 15px; font-size: 24px; }
+                h2 { color: #333; margin-top: 40px; border-left: 4px solid #10B981; padding-left: 15px; background: #f0fdf4; padding: 10px 15px; font-size: 18px; }
                 .info { background: #f0fdf4; padding: 15px; border-radius: 10px; margin: 20px 0; }
                 .info p { margin: 5px 0; }
+                /* 리스트 스타일 */
+                ul { list-style: none; padding-left: 0; }
+                ul li { margin-bottom: 8px; }
+                /* 링크 스타일 */
+                a { color: #03C75A; text-decoration: none; font-weight: 500; }
+                a:hover { text-decoration: underline; }
+                strong, b { font-weight: 700; color: #000; }
                 .content { background: #f9fafb; padding: 20px; border-radius: 10px; white-space: pre-wrap; line-height: 1.8; margin-bottom: 30px; page-break-inside: avoid; }
                 .footer { text-align: center; margin-top: 40px; color: #666; border-top: 2px solid #10B981; padding-top: 20px; }
+                .footer a { color: #03C75A; font-weight: 700; text-decoration: none; }
+                .footer a:hover { text-decoration: underline; }
                 @media print { .content { page-break-inside: avoid; } }
               </style>
             </head>
             <body>
-              <h1>🤖 STUDIOJUAI AI 마케팅 분석 리포트</h1>
-              <p style="color: #666;">생성일: \${new Date().toLocaleString('ko-KR')} | 실행 봇: \${results.length}개</p>
-              
-              <div class="info">
-                <p><strong>📍 매장명:</strong> \${storeInfo?.name || '-'}</p>
-                <p><strong>📌 위치:</strong> \${storeInfo?.location || '-'}</p>
-                <p><strong>🏷️ 업종:</strong> \${storeInfo?.industry || '-'}</p>
-              </div>
+              <div class="content-wrapper">
+                <h1>🤖 STUDIOJUAI AI 마케팅 분석 리포트</h1>
+                <p style="color: #666;">생성일: \${new Date().toLocaleString('ko-KR')} | 실행 봇: \${results.length}개</p>
+                
+                <div class="info">
+                  <p><strong>📍 매장명:</strong> \${storeInfo?.name || '-'}</p>
+                  <p><strong>📌 위치:</strong> \${storeInfo?.location || '-'}</p>
+                  <p><strong>🏷️ 업종:</strong> \${storeInfo?.industry || '-'}</p>
+                </div>
           \`;
           
           results.forEach(r => {
             html += \`
               <h2>\${r.icon} \${r.name} <span style="font-size:12px;color:#666;">(\${r.category})</span></h2>
-              <div class="content">\${escapeHtml(r.result)}</div>
+              <article class="content">\${escapeHtml(r.result)}</article>
             \`;
           });
           
           html += \`
-              <div class="footer">
-                <p><strong style="color:#10B981;">STUDIOJUAI</strong></p>
-                <p>https://studiojuai.pages.dev</p>
+                <div class="footer">
+                  <p><a href="https://xivix.kr/" target="_blank">@XIΛIXㅣ</a></p>
+                  <p>© 2026. ALL RIGHTS RESERVED.</p>
+                </div>
               </div>
             </body>
             </html>

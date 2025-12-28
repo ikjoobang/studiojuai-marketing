@@ -13,16 +13,19 @@ export const mainPage = (c: Context) => {
       <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
       <style>
         body { font-family: 'Pretendard', sans-serif; }
-        .bot-card { transition: all 0.2s; cursor: pointer; }
+        .bot-card { transition: all 0.2s; }
         .bot-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-        .bot-card.selected { border-color: #10B981; background: #ECFDF5; }
-        .result-box { max-height: 500px; overflow-y: auto; }
-        .loading { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .bot-card.has-result { border-color: #10B981; background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%); }
+        .bot-card.running { opacity: 0.7; pointer-events: none; }
+        .result-box { max-height: 400px; overflow-y: auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .animate-spin { animation: spin 1s linear infinite; }
         .fade-in { animation: fadeIn 0.3s ease-in; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .run-btn { transition: all 0.2s; }
+        .run-btn:hover { transform: scale(1.05); }
+        .result-panel { display: none; }
+        .result-panel.show { display: block; }
       </style>
     </head>
     <body class="bg-gray-50 min-h-screen">
@@ -46,15 +49,15 @@ export const mainPage = (c: Context) => {
         
         <!-- 안내 메시지 -->
         <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl p-6 mb-6">
-          <h1 class="text-2xl font-bold mb-2">🚀 홈에서 모든 작업 완료!</h1>
-          <p class="text-emerald-100">매장 정보 입력 → 봇 선택 → 실행 → 결과 확인 → PDF/TXT 다운로드</p>
+          <h1 class="text-2xl font-bold mb-2">🎯 필요한 봇만 개별 실행!</h1>
+          <p class="text-emerald-100">매장 정보 입력 → 원하는 봇 클릭 → 결과 확인 → 개별 다운로드 (API 절약!)</p>
         </div>
 
         <!-- STEP 1: 매장 정보 입력 -->
         <section class="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
             <span class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
-            매장 정보 입력
+            매장 정보 입력 <span class="text-sm font-normal text-gray-500">(먼저 입력 후 봇 실행)</span>
           </h2>
           
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -129,7 +132,7 @@ export const mainPage = (c: Context) => {
           <div class="mt-6 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
             <label class="block text-sm font-medium text-gray-700 mb-3">
               <i class="fas fa-map-marker-alt text-emerald-500 mr-1"></i>
-              상권분석 반경
+              상권분석 반경 (상권분석 봇 실행 시 사용)
             </label>
             <div class="flex gap-6">
               <label class="flex items-center gap-2 cursor-pointer">
@@ -148,105 +151,49 @@ export const mainPage = (c: Context) => {
           </div>
         </section>
 
-        <!-- STEP 2: 30개 봇 선택 -->
+        <!-- STEP 2: 30개 봇 - 개별 실행 -->
         <section class="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
               <span class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
-              AI 봇 선택 <span class="text-sm font-normal text-gray-500">(클릭해서 선택)</span>
+              AI 봇 <span class="text-sm font-normal text-emerald-600 bg-emerald-100 px-2 py-1 rounded-full">개별 실행</span>
             </h2>
-            <div class="flex gap-2">
-              <button onclick="selectAllBots()" class="px-3 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-sm transition">전체선택</button>
-              <button onclick="deselectAllBots()" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm transition">선택해제</button>
+            <div class="text-sm text-gray-500">
+              실행된 봇: <span id="executed-count" class="font-bold text-emerald-600">0</span>개
             </div>
           </div>
+          
+          <p class="text-sm text-gray-500 mb-4 bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+            <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
+            <strong>팁:</strong> 각 봇의 <span class="text-emerald-600 font-bold">▶ 실행</span> 버튼을 클릭하면 해당 봇만 실행됩니다. API 비용을 절약하세요!
+          </p>
           
           <!-- 30개 봇 그리드 -->
-          <div id="bot-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
+          <div id="bot-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- JavaScript로 동적 생성 -->
-          </div>
-          
-          <div class="mt-4 text-center">
-            <span class="text-sm text-gray-500">선택된 봇: </span>
-            <span id="selected-count" class="font-bold text-emerald-600 text-lg">0</span>
-            <span class="text-sm text-gray-500">개</span>
           </div>
         </section>
 
-        <!-- STEP 3: 실행 버튼 -->
-        <section class="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl shadow-lg p-6 mb-6">
-          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="text-white text-center sm:text-left">
-              <h2 class="text-xl font-bold">🎯 준비 완료!</h2>
-              <p class="text-emerald-100">매장 정보와 봇을 선택하고 실행하세요</p>
-            </div>
-            <button onclick="executeAnalysis()" id="execute-btn"
-              class="px-8 py-4 bg-white text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition shadow-lg flex items-center gap-2 text-lg">
-              <i class="fas fa-play"></i>
-              <span>상권분석 + 봇 실행</span>
-            </button>
-          </div>
-        </section>
-
-        <!-- STEP 4: 결과 표시 영역 (처음엔 숨김) -->
-        <section id="results-section" class="hidden">
-          
-          <!-- 상권분석 결과 -->
-          <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 fade-in">
-            <div class="flex items-center justify-between mb-4">
-              <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <i class="fas fa-map-marked-alt text-red-500 text-2xl"></i>
-                상권분석 결과
-              </h2>
-              <span id="competitor-count" class="px-4 py-2 bg-red-100 text-red-600 rounded-full text-sm font-bold">
-                경쟁사 0개
-              </span>
-            </div>
-            <div id="trade-area-result" class="result-box bg-gray-50 rounded-xl p-4 whitespace-pre-wrap text-sm font-mono leading-relaxed">
-              분석 결과가 여기에 표시됩니다...
-            </div>
-          </div>
-
-          <!-- 봇 결과들 -->
-          <div id="bot-results" class="space-y-4">
-            <!-- JavaScript로 동적 생성 -->
-          </div>
-
-          <!-- 다운로드 버튼 -->
-          <div class="bg-white rounded-2xl shadow-lg p-6 mt-6 fade-in">
-            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-              <i class="fas fa-download text-blue-500"></i>
-              결과 다운로드
+        <!-- 실행된 결과 모아보기 -->
+        <section id="all-results-section" class="hidden bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+              <i class="fas fa-list-check text-emerald-500"></i>
+              실행된 결과 모아보기
             </h2>
-            <div class="flex flex-wrap gap-4">
-              <button onclick="downloadTXT()" class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium flex items-center gap-2 transition shadow">
-                <i class="fas fa-file-alt"></i>
-                TXT 다운로드
+            <div class="flex gap-2">
+              <button onclick="downloadAllTXT()" class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm transition">
+                <i class="fas fa-file-alt mr-1"></i>전체 TXT
               </button>
-              <button onclick="downloadPDF()" class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium flex items-center gap-2 transition shadow">
-                <i class="fas fa-file-pdf"></i>
-                PDF 다운로드
-              </button>
-              <button onclick="copyAllResults()" class="px-6 py-3 bg-gray-700 hover:bg-gray-800 text-white rounded-lg font-medium flex items-center gap-2 transition shadow">
-                <i class="fas fa-copy"></i>
-                전체 복사
+              <button onclick="downloadAllPDF()" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm transition">
+                <i class="fas fa-file-pdf mr-1"></i>전체 PDF
               </button>
             </div>
+          </div>
+          <div id="all-results-list" class="space-y-2 max-h-60 overflow-y-auto">
+            <!-- 실행된 결과 목록 -->
           </div>
         </section>
-
-        <!-- 로딩 오버레이 -->
-        <div id="loading-overlay" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
-          <div class="bg-white rounded-2xl p-8 text-center max-w-md mx-4 shadow-2xl">
-            <div class="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2">AI가 분석 중입니다...</h3>
-            <p id="loading-status" class="text-gray-500 mb-4">상권 데이터를 수집하고 있습니다</p>
-            <div class="bg-gray-200 rounded-full h-3 overflow-hidden">
-              <div id="progress-bar" class="bg-emerald-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
-            </div>
-            <p class="text-xs text-gray-400 mt-2">잠시만 기다려주세요...</p>
-          </div>
-        </div>
 
       </main>
 
@@ -284,13 +231,6 @@ export const mainPage = (c: Context) => {
             </div>
           </div>
           
-          <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-            <p class="text-xs text-yellow-700">
-              <i class="fas fa-info-circle mr-1"></i>
-              Gemini API 키는 필수입니다. Naver API 키가 없으면 상권분석이 제한됩니다.
-            </p>
-          </div>
-          
           <button onclick="saveApiKeys()" class="w-full mt-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition">
             <i class="fas fa-save mr-2"></i>저장하기
           </button>
@@ -301,301 +241,466 @@ export const mainPage = (c: Context) => {
         // 30개 봇 데이터
         const ALL_BOTS = [
           // 상권분석 (5개)
-          { id: 'trade-area-overview', name: '상권 종합분석', icon: '🗺️', category: '상권분석' },
-          { id: 'competitor-analysis', name: '경쟁사 분석', icon: '🎯', category: '상권분석' },
-          { id: 'target-customer', name: '타겟고객 분석', icon: '👥', category: '상권분석' },
-          { id: 'location-evaluation', name: '입지 평가', icon: '📍', category: '상권분석' },
-          { id: 'trend-analysis', name: '상권 트렌드', icon: '📈', category: '상권분석' },
+          { id: 'trade-area-overview', name: '상권 종합분석', icon: '🗺️', category: '상권분석', desc: '상권 등급, 유동인구, 강점/약점' },
+          { id: 'competitor-analysis', name: '경쟁사 분석', icon: '🎯', category: '상권분석', desc: '경쟁사 약점 → 우리 기회' },
+          { id: 'target-customer', name: '타겟고객 분석', icon: '👥', category: '상권분석', desc: '페르소나, 동선, 마케팅 타이밍' },
+          { id: 'location-evaluation', name: '입지 평가', icon: '📍', category: '상권분석', desc: '가시성, 접근성, 개선책' },
+          { id: 'trend-analysis', name: '상권 트렌드', icon: '📈', category: '상권분석', desc: '돈 되는 트렌드, 계절 전략' },
           // 고객응대 (5개)
-          { id: 'greeting', name: '첫인사', icon: '👋', category: '고객응대' },
-          { id: 'menu-recommend', name: '메뉴추천', icon: '🍽️', category: '고객응대' },
-          { id: 'event-announce', name: '이벤트 안내', icon: '🎉', category: '고객응대' },
-          { id: 'review-request', name: '리뷰 요청', icon: '⭐', category: '고객응대' },
-          { id: 'sns-content', name: 'SNS 홍보', icon: '📱', category: '고객응대' },
+          { id: 'greeting', name: '첫인사 봇', icon: '👋', category: '고객응대', desc: '지역/타겟별 환영 메시지' },
+          { id: 'menu-recommend', name: '메뉴추천 봇', icon: '🍽️', category: '고객응대', desc: '스토리 있는 메뉴 추천' },
+          { id: 'event-announce', name: '이벤트 안내', icon: '🎉', category: '고객응대', desc: '마진 지키는 이벤트 기획' },
+          { id: 'review-request', name: '리뷰 요청', icon: '⭐', category: '고객응대', desc: '거절 못하는 리뷰 요청' },
+          { id: 'sns-content', name: 'SNS 홍보', icon: '📱', category: '고객응대', desc: '촬영 팁 포함 SNS 콘텐츠' },
           // 콘텐츠 (5개)
-          { id: 'blog-content', name: '블로그 콘텐츠', icon: '📝', category: '콘텐츠' },
-          { id: 'keyword-strategy', name: '키워드 전략', icon: '🔍', category: '콘텐츠' },
-          { id: 'local-marketing', name: '지역 마케팅', icon: '🏘️', category: '콘텐츠' },
-          { id: 'seasonal-marketing', name: '시즌 마케팅', icon: '🗓️', category: '콘텐츠' },
-          { id: 'visual-planning', name: '비주얼 기획', icon: '🎬', category: '콘텐츠' },
+          { id: 'blog-content', name: '블로그 콘텐츠', icon: '📝', category: '콘텐츠', desc: '검색 상위 노출 후기 형식' },
+          { id: 'keyword-strategy', name: '키워드 전략', icon: '🔍', category: '콘텐츠', desc: '틈새 키워드 발굴' },
+          { id: 'local-marketing', name: '지역 마케팅', icon: '🏘️', category: '콘텐츠', desc: '당근/맘카페 공략법' },
+          { id: 'seasonal-marketing', name: '시즌 마케팅', icon: '🗓️', category: '콘텐츠', desc: '2주 앞서 준비하는 전략' },
+          { id: 'visual-planning', name: '비주얼 기획', icon: '🎬', category: '콘텐츠', desc: '초보도 따라하는 촬영법' },
           // 고객관계 (5개)
-          { id: 'loyalty-program', name: '단골 관리', icon: '💎', category: '고객관계' },
-          { id: 'upselling', name: '업셀링', icon: '💰', category: '고객관계' },
-          { id: 'referral-program', name: '소개 유도', icon: '🤝', category: '고객관계' },
-          { id: 'feedback-collection', name: '피드백 수집', icon: '💬', category: '고객관계' },
-          { id: 'crisis-response', name: '불만 대응', icon: '🆘', category: '고객관계' },
+          { id: 'loyalty-program', name: '단골 관리', icon: '💎', category: '고객관계', desc: '비용 최소 재방문 유도' },
+          { id: 'upselling', name: '업셀링 봇', icon: '💰', category: '고객관계', desc: '자연스럽게 2-3천원 더' },
+          { id: 'referral-program', name: '소개 유도', icon: '🤝', category: '고객관계', desc: '친구 데려오면 양쪽 혜택' },
+          { id: 'feedback-collection', name: '피드백 수집', icon: '💬', category: '고객관계', desc: '10초 만에 솔직한 의견' },
+          { id: 'crisis-response', name: '불만 대응', icon: '🆘', category: '고객관계', desc: '공감+사과+보상 3단계' },
           // 소셜미디어 (5개)
-          { id: 'story-content', name: '스토리 콘텐츠', icon: '📸', category: '소셜미디어' },
-          { id: 'hashtag-strategy', name: '해시태그 전략', icon: '#️⃣', category: '소셜미디어' },
-          { id: 'influencer-collab', name: '인플루언서 협업', icon: '🌟', category: '소셜미디어' },
-          { id: 'community-manage', name: '커뮤니티 관리', icon: '👨‍👩‍👧‍👦', category: '소셜미디어' },
-          { id: 'reels-content', name: '릴스/숏폼', icon: '🎵', category: '소셜미디어' },
+          { id: 'story-content', name: '스토리 콘텐츠', icon: '📸', category: '소셜미디어', desc: '바쁜 일상 속 쉬운 스토리' },
+          { id: 'hashtag-strategy', name: '해시태그 전략', icon: '#️⃣', category: '소셜미디어', desc: '동네 해시태그 우선 공략' },
+          { id: 'influencer-collab', name: '인플루언서 협업', icon: '🌟', category: '소셜미디어', desc: '동네 블로거 섭외법' },
+          { id: 'community-manage', name: '커뮤니티 관리', icon: '👨‍👩‍👧‍👦', category: '소셜미디어', desc: '맘카페/당근 이웃 말투' },
+          { id: 'reels-content', name: '릴스/숏폼', icon: '🎵', category: '소셜미디어', desc: '15초 매력 터지는 영상' },
           // 디지털마케팅 (3개)
-          { id: 'email-marketing', name: '카톡/문자', icon: '📧', category: '디지털마케팅' },
-          { id: 'sms-marketing', name: 'SMS 마케팅', icon: '💌', category: '디지털마케팅' },
-          { id: 'retargeting', name: '리타겟팅', icon: '🔄', category: '디지털마케팅' },
+          { id: 'email-marketing', name: '카톡/문자 소식지', icon: '📧', category: '디지털마케팅', desc: '광고 같지 않은 메시지' },
+          { id: 'sms-marketing', name: 'SMS 마케팅', icon: '💌', category: '디지털마케팅', desc: '80자 안에 매력 터뜨리기' },
+          { id: 'retargeting', name: '리타겟팅 봇', icon: '🔄', category: '디지털마케팅', desc: '안 오는 단골 다시 부르기' },
           // 전략분석 (2개)
-          { id: 'pricing-strategy', name: '가격 전략', icon: '💵', category: '전략분석' },
-          { id: 'performance-analysis', name: '성과 분석', icon: '📊', category: '전략분석' }
+          { id: 'pricing-strategy', name: '가격 전략', icon: '💵', category: '전략분석', desc: '심리적 가격 포인트' },
+          { id: 'performance-analysis', name: '성과 분석', icon: '📊', category: '전략분석', desc: '매출/고객수/객단가 파악' }
         ];
 
-        let selectedBots = new Set();
-        let analysisResults = { tradeArea: null, bots: [], storeInfo: null };
+        // 봇 결과 저장소
+        let botResults = {};
+        let tradeAreaData = null;
+
+        // 카테고리별 색상
+        const categoryColors = {
+          '상권분석': { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-600', btnBg: 'bg-red-500 hover:bg-red-600' },
+          '고객응대': { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-600', btnBg: 'bg-blue-500 hover:bg-blue-600' },
+          '콘텐츠': { bg: 'bg-purple-50', border: 'border-purple-200', text: 'text-purple-600', btnBg: 'bg-purple-500 hover:bg-purple-600' },
+          '고객관계': { bg: 'bg-yellow-50', border: 'border-yellow-200', text: 'text-yellow-700', btnBg: 'bg-yellow-500 hover:bg-yellow-600' },
+          '소셜미디어': { bg: 'bg-pink-50', border: 'border-pink-200', text: 'text-pink-600', btnBg: 'bg-pink-500 hover:bg-pink-600' },
+          '디지털마케팅': { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-600', btnBg: 'bg-green-500 hover:bg-green-600' },
+          '전략분석': { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-600', btnBg: 'bg-orange-500 hover:bg-orange-600' }
+        };
 
         // 봇 그리드 렌더링
         function renderBotGrid() {
           const grid = document.getElementById('bot-grid');
           grid.innerHTML = ALL_BOTS.map(bot => {
-            const categoryColors = {
-              '상권분석': 'bg-red-50 border-red-200',
-              '고객응대': 'bg-blue-50 border-blue-200',
-              '콘텐츠': 'bg-purple-50 border-purple-200',
-              '고객관계': 'bg-yellow-50 border-yellow-200',
-              '소셜미디어': 'bg-pink-50 border-pink-200',
-              '디지털마케팅': 'bg-green-50 border-green-200',
-              '전략분석': 'bg-orange-50 border-orange-200'
-            };
-            const color = categoryColors[bot.category] || 'bg-gray-50 border-gray-200';
+            const colors = categoryColors[bot.category] || { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-600', btnBg: 'bg-gray-500 hover:bg-gray-600' };
             
-            return '<div class="bot-card p-3 border-2 rounded-xl text-center ' + color + '" data-id="' + bot.id + '" onclick="toggleBot(\\''+bot.id+'\\')"><div class="text-2xl mb-1">' + bot.icon + '</div><div class="text-xs font-medium text-gray-700 truncate">' + bot.name + '</div><div class="text-xs text-gray-400">' + bot.category + '</div></div>';
+            return \`
+              <div id="bot-\${bot.id}" class="bot-card \${colors.bg} border-2 \${colors.border} rounded-xl p-4">
+                <div class="flex items-start justify-between mb-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-2xl">\${bot.icon}</span>
+                    <div>
+                      <div class="font-bold text-gray-800 text-sm">\${bot.name}</div>
+                      <div class="text-xs \${colors.text}">\${bot.category}</div>
+                    </div>
+                  </div>
+                  <button onclick="runSingleBot('\${bot.id}')" id="run-btn-\${bot.id}"
+                    class="run-btn px-3 py-1 \${colors.btnBg} text-white rounded-lg text-xs font-bold flex items-center gap-1">
+                    <i class="fas fa-play text-xs"></i>
+                    <span>실행</span>
+                  </button>
+                </div>
+                <p class="text-xs text-gray-500 mb-3">\${bot.desc}</p>
+                
+                <!-- 결과 패널 (숨김) -->
+                <div id="result-panel-\${bot.id}" class="result-panel">
+                  <div class="bg-white rounded-lg p-3 border border-gray-200 mt-2">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-xs font-bold text-emerald-600"><i class="fas fa-check-circle mr-1"></i>실행 완료</span>
+                      <div class="flex gap-1">
+                        <button onclick="copyBotResult('\${bot.id}')" class="p-1 hover:bg-gray-100 rounded text-gray-400 hover:text-gray-600" title="복사">
+                          <i class="fas fa-copy text-xs"></i>
+                        </button>
+                        <button onclick="downloadBotTXT('\${bot.id}')" class="p-1 hover:bg-gray-100 rounded text-blue-400 hover:text-blue-600" title="TXT 다운로드">
+                          <i class="fas fa-file-alt text-xs"></i>
+                        </button>
+                        <button onclick="downloadBotPDF('\${bot.id}')" class="p-1 hover:bg-gray-100 rounded text-red-400 hover:text-red-600" title="PDF 다운로드">
+                          <i class="fas fa-file-pdf text-xs"></i>
+                        </button>
+                      </div>
+                    </div>
+                    <div id="result-\${bot.id}" class="result-box text-xs text-gray-700 whitespace-pre-wrap bg-gray-50 rounded p-2 max-h-48 overflow-y-auto"></div>
+                  </div>
+                </div>
+              </div>
+            \`;
           }).join('');
         }
 
-        // 봇 선택/해제
-        function toggleBot(botId) {
-          const card = document.querySelector('[data-id="'+botId+'"]');
-          if (selectedBots.has(botId)) {
-            selectedBots.delete(botId);
-            card.classList.remove('selected');
-            card.style.borderColor = '';
-            card.style.background = '';
-          } else {
-            selectedBots.add(botId);
-            card.classList.add('selected');
-            card.style.borderColor = '#10B981';
-            card.style.background = '#ECFDF5';
-          }
-          updateSelectedCount();
-        }
-
-        function selectAllBots() {
-          ALL_BOTS.forEach(bot => {
-            selectedBots.add(bot.id);
-            const card = document.querySelector('[data-id="'+bot.id+'"]');
-            if (card) {
-              card.classList.add('selected');
-              card.style.borderColor = '#10B981';
-              card.style.background = '#ECFDF5';
-            }
-          });
-          updateSelectedCount();
-        }
-
-        function deselectAllBots() {
-          selectedBots.clear();
-          document.querySelectorAll('.bot-card').forEach(card => {
-            card.classList.remove('selected');
-            card.style.borderColor = '';
-            card.style.background = '';
-          });
-          updateSelectedCount();
-        }
-
-        function updateSelectedCount() {
-          document.getElementById('selected-count').textContent = selectedBots.size;
-        }
-
-        // 메인 실행 함수
-        async function executeAnalysis() {
-          // 입력값 검증
-          const storeName = document.getElementById('store-name').value.trim();
-          const storeLocation = document.getElementById('store-location').value.trim();
-          const storeIndustry = document.getElementById('store-industry').value;
-          
-          if (!storeName || !storeLocation || !storeIndustry) {
-            alert('❌ 매장명, 위치, 업종은 필수 입력입니다!');
-            return;
-          }
-
-          if (selectedBots.size === 0) {
-            alert('❌ 실행할 봇을 1개 이상 선택해주세요!');
-            return;
-          }
-
-          const geminiKey = localStorage.getItem('gemini_key');
-          if (!geminiKey) {
-            alert('❌ Gemini API 키를 먼저 설정해주세요!');
-            openApiModal();
-            return;
-          }
-
-          // 매장 정보 구성
-          const storeInfo = {
-            name: storeName,
-            location: storeLocation,
-            industry: storeIndustry,
+        // 매장 정보 가져오기
+        function getStoreInfo() {
+          return {
+            name: document.getElementById('store-name').value.trim(),
+            location: document.getElementById('store-location').value.trim(),
+            industry: document.getElementById('store-industry').value,
             mainProduct: document.getElementById('store-product').value.trim(),
             priceRange: document.getElementById('store-price').value.trim(),
             targetCustomer: document.getElementById('store-target').value.trim()
           };
+        }
 
+        // 입력값 검증
+        function validateInputs() {
+          const storeInfo = getStoreInfo();
+          if (!storeInfo.name || !storeInfo.location || !storeInfo.industry) {
+            alert('❌ 매장명, 위치, 업종은 필수 입력입니다!');
+            return false;
+          }
+          
+          const geminiKey = localStorage.getItem('gemini_key');
+          if (!geminiKey) {
+            alert('❌ Gemini API 키를 먼저 설정해주세요!');
+            openApiModal();
+            return false;
+          }
+          
+          return true;
+        }
+
+        // 단일 봇 실행
+        async function runSingleBot(botId) {
+          if (!validateInputs()) return;
+          
+          const bot = ALL_BOTS.find(b => b.id === botId);
+          if (!bot) return;
+          
+          const storeInfo = getStoreInfo();
+          const geminiKey = localStorage.getItem('gemini_key');
           const radius = document.querySelector('input[name="radius"]:checked').value;
-
-          // 로딩 시작
-          showLoading();
-          analysisResults = { tradeArea: null, bots: [], storeInfo: storeInfo };
-
+          
+          // 버튼 로딩 상태
+          const btn = document.getElementById('run-btn-' + botId);
+          const card = document.getElementById('bot-' + botId);
+          const originalBtnHtml = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-spinner animate-spin text-xs"></i> <span>실행중...</span>';
+          btn.disabled = true;
+          card.classList.add('running');
+          
           try {
-            // 1. 상권분석 실행
-            updateLoadingStatus('📊 상권 데이터를 수집하고 있습니다...', 5);
-            
-            const naverClientId = localStorage.getItem('naver_client_id');
-            const naverClientSecret = localStorage.getItem('naver_client_secret');
-            
-            let tradeAreaData = { 
-              competitors: [], 
-              totalCompetitors: 0, 
-              radius: parseInt(radius),
-              analysisDate: new Date().toISOString()
-            };
-            
-            if (naverClientId && naverClientSecret) {
-              try {
-                const tradeAreaResponse = await fetch('/api/trade-area/analyze', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'X-Naver-Client-Id': naverClientId,
-                    'X-Naver-Client-Secret': naverClientSecret
-                  },
-                  body: JSON.stringify({ 
-                    location: storeLocation, 
-                    industry: storeIndustry, 
-                    radius: parseInt(radius) 
-                  })
-                });
-                const tradeAreaResult = await tradeAreaResponse.json();
-                if (tradeAreaResult.success && tradeAreaResult.data) {
-                  tradeAreaData = tradeAreaResult.data;
+            // 상권분석 봇인 경우 먼저 상권 데이터 수집
+            if (bot.category === '상권분석' && !tradeAreaData) {
+              const naverClientId = localStorage.getItem('naver_client_id');
+              const naverClientSecret = localStorage.getItem('naver_client_secret');
+              
+              if (naverClientId && naverClientSecret) {
+                try {
+                  const tradeAreaResponse = await fetch('/api/trade-area/analyze', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'X-Naver-Client-Id': naverClientId,
+                      'X-Naver-Client-Secret': naverClientSecret
+                    },
+                    body: JSON.stringify({ 
+                      location: storeInfo.location, 
+                      industry: storeInfo.industry, 
+                      radius: parseInt(radius) 
+                    })
+                  });
+                  const tradeAreaResult = await tradeAreaResponse.json();
+                  if (tradeAreaResult.success && tradeAreaResult.data) {
+                    tradeAreaData = tradeAreaResult.data;
+                  }
+                } catch (e) {
+                  console.log('상권분석 API 오류:', e);
                 }
-              } catch (e) {
-                console.log('상권분석 API 오류:', e);
               }
             }
-
-            analysisResults.tradeArea = tradeAreaData;
-            updateLoadingStatus('✅ 상권분석 완료! 봇 실행 시작...', 15);
-
-            // 2. 선택된 봇들 실행
-            const selectedBotList = ALL_BOTS.filter(bot => selectedBots.has(bot.id));
-            const totalBots = selectedBotList.length;
             
-            for (let i = 0; i < totalBots; i++) {
-              const bot = selectedBotList[i];
-              const progress = 15 + ((i + 1) / totalBots) * 80;
-              updateLoadingStatus(bot.icon + ' ' + bot.name + ' 봇 실행 중... (' + (i+1) + '/' + totalBots + ')', progress);
+            // 봇 실행
+            const response = await fetch('/api/bot/execute', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Gemini-Key': geminiKey
+              },
+              body: JSON.stringify({
+                botId: bot.id,
+                storeInfo: storeInfo,
+                industry: storeInfo.industry,
+                tradeAreaData: tradeAreaData || { radius: parseInt(radius), competitors: [], totalCompetitors: 0 }
+              })
+            });
 
-              try {
-                const response = await fetch('/api/bot/execute', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'X-Gemini-Key': geminiKey
-                  },
-                  body: JSON.stringify({
-                    botId: bot.id,
-                    storeInfo: storeInfo,
-                    industry: storeIndustry,
-                    tradeAreaData: tradeAreaData
-                  })
-                });
-
-                const result = await response.json();
-                
-                if (result.success) {
-                  analysisResults.bots.push({
-                    ...bot,
-                    result: result.result,
-                    success: true
-                  });
-                } else {
-                  analysisResults.bots.push({
-                    ...bot,
-                    result: '⚠️ 실행 실패: ' + (result.error || '알 수 없는 오류'),
-                    success: false
-                  });
-                }
-              } catch (err) {
-                analysisResults.bots.push({
-                  ...bot,
-                  result: '⚠️ 네트워크 오류: ' + err.message,
-                  success: false
-                });
-              }
-
-              // 약간의 딜레이 (API 부하 방지)
-              await new Promise(resolve => setTimeout(resolve, 300));
+            const result = await response.json();
+            
+            if (result.success) {
+              // 결과 저장
+              botResults[botId] = {
+                ...bot,
+                result: result.result,
+                storeInfo: storeInfo,
+                timestamp: new Date().toISOString()
+              };
+              
+              // 결과 표시
+              document.getElementById('result-' + botId).textContent = result.result;
+              document.getElementById('result-panel-' + botId).classList.add('show');
+              card.classList.add('has-result');
+              
+              // 버튼 변경
+              btn.innerHTML = '<i class="fas fa-redo text-xs"></i> <span>재실행</span>';
+              
+              // 실행 카운트 업데이트
+              updateExecutedCount();
+              updateAllResultsList();
+              
+            } else {
+              alert('❌ 실행 실패: ' + (result.error || '알 수 없는 오류'));
+              btn.innerHTML = originalBtnHtml;
             }
-
-            // 3. 결과 표시
-            updateLoadingStatus('📋 결과를 정리하고 있습니다...', 98);
-            await new Promise(resolve => setTimeout(resolve, 500));
             
-            displayResults();
-
-          } catch (error) {
-            alert('❌ 실행 중 오류가 발생했습니다: ' + error.message);
+          } catch (err) {
+            alert('❌ 네트워크 오류: ' + err.message);
+            btn.innerHTML = originalBtnHtml;
           } finally {
-            hideLoading();
+            btn.disabled = false;
+            card.classList.remove('running');
           }
         }
 
-        // 결과 표시
-        function displayResults() {
-          const resultsSection = document.getElementById('results-section');
-          resultsSection.classList.remove('hidden');
-          
-          // 상권분석 결과
-          const tradeArea = analysisResults.tradeArea;
-          document.getElementById('competitor-count').textContent = '경쟁사 ' + (tradeArea?.totalCompetitors || 0) + '개';
-          
-          let tradeAreaHtml = '📊 상권분석 요약\\n';
-          tradeAreaHtml += '═'.repeat(40) + '\\n\\n';
-          tradeAreaHtml += '■ 분석 반경: ' + (tradeArea?.radius || 3) + 'km\\n';
-          tradeAreaHtml += '■ 총 경쟁사: ' + (tradeArea?.totalCompetitors || 0) + '개\\n';
-          tradeAreaHtml += '■ 분석 일자: ' + new Date().toLocaleDateString('ko-KR') + '\\n\\n';
-          
-          if (tradeArea?.competitors?.length > 0) {
-            tradeAreaHtml += '📍 주변 경쟁사 TOP 10:\\n';
-            tradeAreaHtml += '─'.repeat(40) + '\\n';
-            tradeArea.competitors.slice(0, 10).forEach((c, i) => {
-              const name = c.title?.replace(/<[^>]*>/g, '') || '이름 없음';
-              const addr = c.address || '';
-              tradeAreaHtml += (i+1) + '. ' + name + '\\n   ' + addr + '\\n';
-            });
-          } else {
-            tradeAreaHtml += '\\n⚠️ 네이버 API 키가 없어 상권분석이 제한됩니다.\\n';
-            tradeAreaHtml += '   API 설정에서 네이버 API 키를 입력해주세요.';
-          }
-          
-          document.getElementById('trade-area-result').textContent = tradeAreaHtml;
+        // 실행 카운트 업데이트
+        function updateExecutedCount() {
+          const count = Object.keys(botResults).length;
+          document.getElementById('executed-count').textContent = count;
+        }
 
-          // 봇 결과들
-          const botResultsContainer = document.getElementById('bot-results');
+        // 전체 결과 목록 업데이트
+        function updateAllResultsList() {
+          const section = document.getElementById('all-results-section');
+          const list = document.getElementById('all-results-list');
           
-          if (analysisResults.bots.length > 0) {
-            botResultsContainer.innerHTML = analysisResults.bots.map((bot, index) => {
-              const bgColor = bot.success ? 'bg-white' : 'bg-red-50';
-              const textColor = bot.success ? '' : 'text-red-600';
+          const results = Object.values(botResults);
+          
+          if (results.length > 0) {
+            section.classList.remove('hidden');
+            list.innerHTML = results.map(r => \`
+              <div class="flex items-center justify-between bg-gray-50 rounded-lg p-2">
+                <div class="flex items-center gap-2">
+                  <span>\${r.icon}</span>
+                  <span class="text-sm font-medium">\${r.name}</span>
+                  <span class="text-xs text-gray-400">\${r.category}</span>
+                </div>
+                <div class="flex gap-1">
+                  <button onclick="scrollToBot('\${r.id}')" class="text-xs text-emerald-600 hover:underline">보기</button>
+                </div>
+              </div>
+            \`).join('');
+          } else {
+            section.classList.add('hidden');
+          }
+        }
+
+        // 봇 위치로 스크롤
+        function scrollToBot(botId) {
+          const el = document.getElementById('bot-' + botId);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            el.style.boxShadow = '0 0 0 3px #10B981';
+            setTimeout(() => { el.style.boxShadow = ''; }, 2000);
+          }
+        }
+
+        // 개별 봇 결과 복사
+        function copyBotResult(botId) {
+          const result = botResults[botId];
+          if (!result) return;
+          
+          const text = result.icon + ' ' + result.name + ' (' + result.category + ')\\n\\n' + result.result;
+          navigator.clipboard.writeText(text).then(() => {
+            alert('✅ 복사되었습니다!');
+          });
+        }
+
+        // 개별 봇 TXT 다운로드
+        function downloadBotTXT(botId) {
+          const result = botResults[botId];
+          if (!result) return;
+          
+          let content = '═'.repeat(50) + '\\n';
+          content += '   STUDIOJUAI - ' + result.name + '\\n';
+          content += '═'.repeat(50) + '\\n\\n';
+          content += '📅 생성일: ' + new Date().toLocaleString('ko-KR') + '\\n';
+          content += '📍 매장: ' + (result.storeInfo?.name || '') + '\\n';
+          content += '📌 위치: ' + (result.storeInfo?.location || '') + '\\n';
+          content += '🏷️ 업종: ' + (result.storeInfo?.industry || '') + '\\n\\n';
+          content += '─'.repeat(50) + '\\n\\n';
+          content += result.result + '\\n\\n';
+          content += '═'.repeat(50) + '\\n';
+          content += '   STUDIOJUAI - https://studiojuai.pages.dev\\n';
+          content += '═'.repeat(50);
+          
+          downloadFile(content, 'STUDIOJUAI_' + result.name.replace(/\\s/g, '_') + '_' + new Date().toISOString().slice(0,10) + '.txt', 'text/plain');
+        }
+
+        // 개별 봇 PDF 다운로드
+        function downloadBotPDF(botId) {
+          const result = botResults[botId];
+          if (!result) return;
+          
+          const html = \`
+            <!DOCTYPE html>
+            <html lang="ko">
+            <head>
+              <meta charset="UTF-8">
+              <title>STUDIOJUAI - \${result.name}</title>
+              <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif; padding: 40px; line-height: 1.8; max-width: 800px; margin: 0 auto; }
+                h1 { color: #10B981; border-bottom: 3px solid #10B981; padding-bottom: 15px; }
+                .info { background: #f0fdf4; padding: 15px; border-radius: 10px; margin: 20px 0; }
+                .info p { margin: 5px 0; }
+                .content { background: #f9fafb; padding: 20px; border-radius: 10px; white-space: pre-wrap; line-height: 2; }
+                .footer { text-align: center; margin-top: 40px; color: #666; border-top: 2px solid #10B981; padding-top: 20px; }
+              </style>
+            </head>
+            <body>
+              <h1>\${result.icon} \${result.name}</h1>
+              <p style="color: #666;">\${result.category} | 생성일: \${new Date().toLocaleString('ko-KR')}</p>
               
-              return '<div class="' + bgColor + ' rounded-2xl shadow-lg p-6 fade-in" style="animation-delay: ' + (index * 0.1) + 's"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold text-gray-800 flex items-center gap-2"><span class="text-2xl">' + bot.icon + '</span>' + bot.name + '<span class="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded-full">' + bot.category + '</span></h3><button onclick="copyResult(\\''+bot.id+'\\', ' + index + ')" class="p-2 hover:bg-gray-100 rounded-lg transition" title="결과 복사"><i class="fas fa-copy text-gray-400"></i></button></div><div id="result-' + index + '" class="result-box bg-gray-50 rounded-xl p-4 whitespace-pre-wrap text-sm ' + textColor + ' leading-relaxed">' + escapeHtml(bot.result) + '</div></div>';
-            }).join('');
-          } else {
-            botResultsContainer.innerHTML = '<div class="bg-yellow-50 rounded-2xl p-6 text-center text-yellow-700"><i class="fas fa-exclamation-triangle text-3xl mb-2"></i><p>실행된 봇 결과가 없습니다.</p></div>';
-          }
+              <div class="info">
+                <p><strong>📍 매장명:</strong> \${result.storeInfo?.name || '-'}</p>
+                <p><strong>📌 위치:</strong> \${result.storeInfo?.location || '-'}</p>
+                <p><strong>🏷️ 업종:</strong> \${result.storeInfo?.industry || '-'}</p>
+              </div>
+              
+              <div class="content">\${escapeHtml(result.result)}</div>
+              
+              <div class="footer">
+                <p><strong style="color:#10B981;">STUDIOJUAI</strong></p>
+                <p>https://studiojuai.pages.dev</p>
+              </div>
+            </body>
+            </html>
+          \`;
+          
+          const printWindow = window.open('', '_blank');
+          printWindow.document.write(html);
+          printWindow.document.close();
+          setTimeout(() => printWindow.print(), 500);
+        }
 
-          // 스크롤
-          resultsSection.scrollIntoView({ behavior: 'smooth' });
+        // 전체 TXT 다운로드
+        function downloadAllTXT() {
+          const results = Object.values(botResults);
+          if (results.length === 0) {
+            alert('❌ 실행된 봇이 없습니다.');
+            return;
+          }
+          
+          let content = '═'.repeat(60) + '\\n';
+          content += '           STUDIOJUAI AI 마케팅 분석 리포트\\n';
+          content += '═'.repeat(60) + '\\n\\n';
+          content += '📅 생성일시: ' + new Date().toLocaleString('ko-KR') + '\\n';
+          content += '📊 실행된 봇: ' + results.length + '개\\n\\n';
+          
+          const storeInfo = results[0]?.storeInfo;
+          if (storeInfo) {
+            content += '📋 매장 정보\\n';
+            content += '─'.repeat(40) + '\\n';
+            content += '매장명: ' + (storeInfo.name || '') + '\\n';
+            content += '위치: ' + (storeInfo.location || '') + '\\n';
+            content += '업종: ' + (storeInfo.industry || '') + '\\n\\n';
+          }
+          
+          results.forEach(r => {
+            content += '\\n' + '━'.repeat(50) + '\\n';
+            content += r.icon + ' ' + r.name + ' (' + r.category + ')\\n';
+            content += '━'.repeat(50) + '\\n\\n';
+            content += r.result + '\\n';
+          });
+          
+          content += '\\n' + '═'.repeat(60) + '\\n';
+          content += '           STUDIOJUAI - https://studiojuai.pages.dev\\n';
+          content += '═'.repeat(60);
+          
+          downloadFile(content, 'STUDIOJUAI_전체리포트_' + new Date().toISOString().slice(0,10) + '.txt', 'text/plain');
+        }
+
+        // 전체 PDF 다운로드
+        function downloadAllPDF() {
+          const results = Object.values(botResults);
+          if (results.length === 0) {
+            alert('❌ 실행된 봇이 없습니다.');
+            return;
+          }
+          
+          const storeInfo = results[0]?.storeInfo;
+          
+          let html = \`
+            <!DOCTYPE html>
+            <html lang="ko">
+            <head>
+              <meta charset="UTF-8">
+              <title>STUDIOJUAI 전체 리포트</title>
+              <style>
+                body { font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif; padding: 40px; line-height: 1.8; max-width: 800px; margin: 0 auto; }
+                h1 { color: #10B981; border-bottom: 3px solid #10B981; padding-bottom: 15px; }
+                h2 { color: #333; margin-top: 40px; border-left: 4px solid #10B981; padding-left: 15px; background: #f0fdf4; padding: 10px 15px; }
+                .info { background: #f0fdf4; padding: 15px; border-radius: 10px; margin: 20px 0; }
+                .info p { margin: 5px 0; }
+                .content { background: #f9fafb; padding: 20px; border-radius: 10px; white-space: pre-wrap; line-height: 1.8; margin-bottom: 30px; page-break-inside: avoid; }
+                .footer { text-align: center; margin-top: 40px; color: #666; border-top: 2px solid #10B981; padding-top: 20px; }
+                @media print { .content { page-break-inside: avoid; } }
+              </style>
+            </head>
+            <body>
+              <h1>🤖 STUDIOJUAI AI 마케팅 분석 리포트</h1>
+              <p style="color: #666;">생성일: \${new Date().toLocaleString('ko-KR')} | 실행 봇: \${results.length}개</p>
+              
+              <div class="info">
+                <p><strong>📍 매장명:</strong> \${storeInfo?.name || '-'}</p>
+                <p><strong>📌 위치:</strong> \${storeInfo?.location || '-'}</p>
+                <p><strong>🏷️ 업종:</strong> \${storeInfo?.industry || '-'}</p>
+              </div>
+          \`;
+          
+          results.forEach(r => {
+            html += \`
+              <h2>\${r.icon} \${r.name} <span style="font-size:12px;color:#666;">(\${r.category})</span></h2>
+              <div class="content">\${escapeHtml(r.result)}</div>
+            \`;
+          });
+          
+          html += \`
+              <div class="footer">
+                <p><strong style="color:#10B981;">STUDIOJUAI</strong></p>
+                <p>https://studiojuai.pages.dev</p>
+              </div>
+            </body>
+            </html>
+          \`;
+          
+          const printWindow = window.open('', '_blank');
+          printWindow.document.write(html);
+          printWindow.document.close();
+          setTimeout(() => printWindow.print(), 500);
+        }
+
+        // 파일 다운로드 헬퍼
+        function downloadFile(content, filename, mimeType) {
+          const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          a.click();
+          URL.revokeObjectURL(url);
         }
 
         // HTML 이스케이프
@@ -607,152 +712,6 @@ export const mainPage = (c: Context) => {
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
-        }
-
-        // 결과 복사
-        function copyResult(botId, index) {
-          const resultEl = document.getElementById('result-' + index);
-          if (resultEl) {
-            navigator.clipboard.writeText(resultEl.textContent).then(() => {
-              alert('✅ 복사되었습니다!');
-            }).catch(() => {
-              alert('❌ 복사에 실패했습니다.');
-            });
-          }
-        }
-
-        function copyAllResults() {
-          let allText = '═'.repeat(60) + '\\n';
-          allText += '           STUDIOJUAI AI 마케팅 분석 리포트\\n';
-          allText += '═'.repeat(60) + '\\n\\n';
-          allText += '생성일: ' + new Date().toLocaleString('ko-KR') + '\\n\\n';
-          
-          allText += '━━━ 상권분석 결과 ━━━\\n';
-          allText += document.getElementById('trade-area-result').textContent + '\\n\\n';
-          
-          analysisResults.bots.forEach(bot => {
-            allText += '━━━ ' + bot.icon + ' ' + bot.name + ' (' + bot.category + ') ━━━\\n';
-            allText += bot.result + '\\n\\n';
-          });
-          
-          allText += '═'.repeat(60) + '\\n';
-          allText += '           STUDIOJUAI - AI 마케팅 자동화 플랫폼\\n';
-          allText += '           https://studiojuai.pages.dev\\n';
-          allText += '═'.repeat(60);
-          
-          navigator.clipboard.writeText(allText).then(() => {
-            alert('✅ 전체 결과가 복사되었습니다!');
-          }).catch(() => {
-            alert('❌ 복사에 실패했습니다.');
-          });
-        }
-
-        // TXT 다운로드
-        function downloadTXT() {
-          let content = '═'.repeat(60) + '\\n';
-          content += '           STUDIOJUAI AI 마케팅 분석 리포트\\n';
-          content += '═'.repeat(60) + '\\n\\n';
-          content += '생성일시: ' + new Date().toLocaleString('ko-KR') + '\\n\\n';
-          
-          const store = analysisResults.storeInfo;
-          content += '📋 매장 정보\\n';
-          content += '─'.repeat(40) + '\\n';
-          content += '매장명: ' + (store?.name || '') + '\\n';
-          content += '위치: ' + (store?.location || '') + '\\n';
-          content += '업종: ' + (store?.industry || '') + '\\n';
-          content += '대표 메뉴: ' + (store?.mainProduct || '') + '\\n';
-          content += '가격대: ' + (store?.priceRange || '') + '\\n';
-          content += '타겟 고객: ' + (store?.targetCustomer || '') + '\\n\\n';
-          
-          content += '🗺️ 상권분석 결과\\n';
-          content += '─'.repeat(40) + '\\n';
-          content += document.getElementById('trade-area-result').textContent + '\\n\\n';
-          
-          analysisResults.bots.forEach(bot => {
-            content += '\\n' + bot.icon + ' ' + bot.name + ' (' + bot.category + ')\\n';
-            content += '─'.repeat(40) + '\\n';
-            content += bot.result + '\\n';
-          });
-          
-          content += '\\n' + '═'.repeat(60) + '\\n';
-          content += '           STUDIOJUAI - AI 마케팅 자동화 플랫폼\\n';
-          content += '           https://studiojuai.pages.dev\\n';
-          content += '═'.repeat(60);
-          
-          const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'STUDIOJUAI_리포트_' + new Date().toISOString().slice(0,10) + '.txt';
-          a.click();
-          URL.revokeObjectURL(url);
-        }
-
-        // PDF 다운로드 (HTML 인쇄)
-        function downloadPDF() {
-          const store = analysisResults.storeInfo;
-          
-          let html = '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>STUDIOJUAI 마케팅 분석 리포트</title>';
-          html += '<style>body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;padding:40px;line-height:1.8;max-width:800px;margin:0 auto;}';
-          html += 'h1{color:#10B981;border-bottom:3px solid #10B981;padding-bottom:10px;margin-bottom:30px;}';
-          html += 'h2{color:#333;margin-top:40px;border-left:4px solid #10B981;padding-left:15px;background:#f0fdf4;padding:10px 15px;}';
-          html += '.info-table{width:100%;border-collapse:collapse;margin:20px 0;}';
-          html += '.info-table td{padding:10px;border:1px solid #ddd;}';
-          html += '.info-table td:first-child{background:#f9fafb;width:120px;font-weight:600;}';
-          html += '.result-box{background:#f9fafb;padding:20px;border-radius:10px;margin:15px 0;white-space:pre-wrap;font-size:14px;line-height:1.8;}';
-          html += '.footer{text-align:center;margin-top:50px;color:#666;border-top:2px solid #10B981;padding-top:20px;}';
-          html += '@media print{body{padding:20px;}}</style></head><body>';
-          
-          html += '<h1>🤖 STUDIOJUAI AI 마케팅 분석 리포트</h1>';
-          html += '<p style="color:#666;">생성일시: ' + new Date().toLocaleString('ko-KR') + '</p>';
-          
-          html += '<h2>📋 매장 정보</h2>';
-          html += '<table class="info-table">';
-          html += '<tr><td>매장명</td><td>' + (store?.name || '-') + '</td></tr>';
-          html += '<tr><td>위치</td><td>' + (store?.location || '-') + '</td></tr>';
-          html += '<tr><td>업종</td><td>' + (store?.industry || '-') + '</td></tr>';
-          html += '<tr><td>대표 메뉴</td><td>' + (store?.mainProduct || '-') + '</td></tr>';
-          html += '<tr><td>가격대</td><td>' + (store?.priceRange || '-') + '</td></tr>';
-          html += '<tr><td>타겟 고객</td><td>' + (store?.targetCustomer || '-') + '</td></tr>';
-          html += '</table>';
-          
-          html += '<h2>🗺️ 상권분석 결과</h2>';
-          html += '<div class="result-box">' + escapeHtml(document.getElementById('trade-area-result').textContent) + '</div>';
-          
-          analysisResults.bots.forEach(bot => {
-            html += '<h2>' + bot.icon + ' ' + bot.name + ' <span style="font-size:12px;color:#666;">(' + bot.category + ')</span></h2>';
-            html += '<div class="result-box">' + escapeHtml(bot.result) + '</div>';
-          });
-          
-          html += '<div class="footer">';
-          html += '<p><strong style="color:#10B981;">STUDIOJUAI</strong> - AI 마케팅 자동화 플랫폼</p>';
-          html += '<p>https://studiojuai.pages.dev</p>';
-          html += '</div></body></html>';
-          
-          const printWindow = window.open('', '_blank');
-          printWindow.document.write(html);
-          printWindow.document.close();
-          setTimeout(() => {
-            printWindow.print();
-          }, 500);
-        }
-
-        // 로딩 관련
-        function showLoading() {
-          document.getElementById('loading-overlay').classList.remove('hidden');
-          document.getElementById('execute-btn').disabled = true;
-          document.getElementById('execute-btn').innerHTML = '<i class="fas fa-spinner animate-spin"></i> 실행 중...';
-        }
-
-        function hideLoading() {
-          document.getElementById('loading-overlay').classList.add('hidden');
-          document.getElementById('execute-btn').disabled = false;
-          document.getElementById('execute-btn').innerHTML = '<i class="fas fa-play"></i> <span>상권분석 + 봇 실행</span>';
-        }
-
-        function updateLoadingStatus(text, progress) {
-          document.getElementById('loading-status').textContent = text;
-          document.getElementById('progress-bar').style.width = progress + '%';
         }
 
         // API 키 모달
@@ -788,11 +747,6 @@ export const mainPage = (c: Context) => {
         // 초기화
         document.addEventListener('DOMContentLoaded', function() {
           renderBotGrid();
-          
-          // 기본으로 상권분석 5개 봇 선택
-          ['trade-area-overview', 'competitor-analysis', 'target-customer', 'location-evaluation', 'trend-analysis'].forEach(id => {
-            setTimeout(() => toggleBot(id), 100);
-          });
         });
       </script>
 

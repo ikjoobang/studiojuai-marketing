@@ -1,1326 +1,802 @@
 import type { Context } from 'hono'
 
 export const mainPage = (c: Context) => {
-  return c.render(
-    <>
-      {/* 헤더 */}
-      <header class="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-dark-bg/80 backdrop-blur-lg border-b border-slate-200 dark:border-dark-border">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex items-center justify-between h-16">
-            <a href="/" class="flex items-center space-x-2">
-              <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center">
-                <i class="fas fa-robot text-white text-lg"></i>
-              </div>
-              <span class="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
-                STUDIOJUAI
+  return c.html(`
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>STUDIOJUAI - AI 마케팅 자동화</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet" />
+      <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet" />
+      <style>
+        body { font-family: 'Pretendard', sans-serif; }
+        .bot-card { transition: all 0.2s; cursor: pointer; }
+        .bot-card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .bot-card.selected { border-color: #10B981; background: #ECFDF5; }
+        .result-box { max-height: 500px; overflow-y: auto; }
+        .loading { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      </style>
+    </head>
+    <body class="bg-gray-50 min-h-screen">
+      
+      <!-- 헤더 -->
+      <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl flex items-center justify-center">
+              <i class="fas fa-robot text-white"></i>
+            </div>
+            <span class="text-xl font-bold text-gray-800">STUDIOJUAI</span>
+          </div>
+          <button onclick="openApiModal()" class="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg font-medium transition">
+            <i class="fas fa-key mr-2"></i>API 설정
+          </button>
+        </div>
+      </header>
+
+      <main class="max-w-7xl mx-auto px-4 py-6">
+        
+        <!-- 안내 메시지 -->
+        <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl p-6 mb-6">
+          <h1 class="text-2xl font-bold mb-2">🚀 홈에서 모든 작업 완료!</h1>
+          <p class="text-emerald-100">매장 정보 입력 → 봇 선택 → 실행 → 결과 확인 → PDF/TXT 다운로드</p>
+        </div>
+
+        <!-- STEP 1: 매장 정보 입력 -->
+        <section class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">1</span>
+            매장 정보 입력
+          </h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">매장명 <span class="text-red-500">*</span></label>
+              <input type="text" id="store-name" placeholder="예: 맛있는 카페" 
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">위치 <span class="text-red-500">*</span></label>
+              <input type="text" id="store-location" placeholder="예: 서울 강남역 3번출구" 
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">업종 <span class="text-red-500">*</span></label>
+              <select id="store-industry" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent">
+                <option value="">선택하세요</option>
+                <optgroup label="🍽️ 음식/요식업">
+                  <option value="cafe">카페</option>
+                  <option value="chicken">치킨집</option>
+                  <option value="korean">한식당</option>
+                  <option value="chinese">중식당</option>
+                  <option value="japanese">일식당</option>
+                  <option value="western">양식당</option>
+                  <option value="bbq">고깃집</option>
+                  <option value="bakery">베이커리</option>
+                  <option value="bar">술집/호프</option>
+                </optgroup>
+                <optgroup label="💇 미용/뷰티">
+                  <option value="salon">미용실</option>
+                  <option value="nail">네일샵</option>
+                  <option value="skin">피부관리</option>
+                  <option value="spa">스파/마사지</option>
+                </optgroup>
+                <optgroup label="🛒 소매/판매">
+                  <option value="convenience">편의점</option>
+                  <option value="clothing">의류매장</option>
+                  <option value="pharmacy">약국</option>
+                  <option value="flower">꽃집</option>
+                </optgroup>
+                <optgroup label="🏢 서비스업">
+                  <option value="gym">헬스장</option>
+                  <option value="academy">학원</option>
+                  <option value="laundry">세탁소</option>
+                  <option value="realtor">부동산</option>
+                </optgroup>
+                <optgroup label="🏥 의료/기타">
+                  <option value="clinic">병원/의원</option>
+                  <option value="dental">치과</option>
+                  <option value="veterinary">동물병원</option>
+                </optgroup>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">대표 메뉴/서비스</label>
+              <input type="text" id="store-product" placeholder="예: 아메리카노, 케이크" 
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">평균 가격대</label>
+              <input type="text" id="store-price" placeholder="예: 5,000~15,000원" 
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">타겟 고객</label>
+              <input type="text" id="store-target" placeholder="예: 20-30대 직장인" 
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent" />
+            </div>
+          </div>
+          
+          <!-- 상권분석 반경 선택 -->
+          <div class="mt-6 p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+            <label class="block text-sm font-medium text-gray-700 mb-3">
+              <i class="fas fa-map-marker-alt text-emerald-500 mr-1"></i>
+              상권분석 반경
+            </label>
+            <div class="flex gap-6">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="radius" value="2" class="w-4 h-4 text-emerald-500 focus:ring-emerald-500" />
+                <span>2km</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="radius" value="3" checked class="w-4 h-4 text-emerald-500 focus:ring-emerald-500" />
+                <span>3km <span class="text-emerald-600 text-xs">(추천)</span></span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="radius" value="5" class="w-4 h-4 text-emerald-500 focus:ring-emerald-500" />
+                <span>5km</span>
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <!-- STEP 2: 30개 봇 선택 -->
+        <section class="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+              <span class="w-8 h-8 bg-emerald-500 text-white rounded-full flex items-center justify-center text-sm font-bold">2</span>
+              AI 봇 선택 <span class="text-sm font-normal text-gray-500">(클릭해서 선택)</span>
+            </h2>
+            <div class="flex gap-2">
+              <button onclick="selectAllBots()" class="px-3 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded-lg text-sm transition">전체선택</button>
+              <button onclick="deselectAllBots()" class="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm transition">선택해제</button>
+            </div>
+          </div>
+          
+          <!-- 30개 봇 그리드 -->
+          <div id="bot-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-3">
+            <!-- JavaScript로 동적 생성 -->
+          </div>
+          
+          <div class="mt-4 text-center">
+            <span class="text-sm text-gray-500">선택된 봇: </span>
+            <span id="selected-count" class="font-bold text-emerald-600 text-lg">0</span>
+            <span class="text-sm text-gray-500">개</span>
+          </div>
+        </section>
+
+        <!-- STEP 3: 실행 버튼 -->
+        <section class="bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-2xl shadow-lg p-6 mb-6">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="text-white text-center sm:text-left">
+              <h2 class="text-xl font-bold">🎯 준비 완료!</h2>
+              <p class="text-emerald-100">매장 정보와 봇을 선택하고 실행하세요</p>
+            </div>
+            <button onclick="executeAnalysis()" id="execute-btn"
+              class="px-8 py-4 bg-white text-emerald-600 font-bold rounded-xl hover:bg-emerald-50 transition shadow-lg flex items-center gap-2 text-lg">
+              <i class="fas fa-play"></i>
+              <span>상권분석 + 봇 실행</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- STEP 4: 결과 표시 영역 (처음엔 숨김) -->
+        <section id="results-section" class="hidden">
+          
+          <!-- 상권분석 결과 -->
+          <div class="bg-white rounded-2xl shadow-lg p-6 mb-6 fade-in">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <i class="fas fa-map-marked-alt text-red-500 text-2xl"></i>
+                상권분석 결과
+              </h2>
+              <span id="competitor-count" class="px-4 py-2 bg-red-100 text-red-600 rounded-full text-sm font-bold">
+                경쟁사 0개
               </span>
-            </a>
-            
-            <nav class="hidden md:flex items-center space-x-8">
-              <a href="/" class="text-primary-600 dark:text-primary-400 font-medium">홈</a>
-              <a href="/dashboard" class="text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">대시보드</a>
-              <a href="/analytics" class="text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">분석</a>
-              <a href="/settings" class="text-slate-600 dark:text-slate-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">설정</a>
-            </nav>
-            
-            <div class="flex items-center space-x-3">
-              <button onclick="toggleDarkMode()" class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-card transition-colors">
-                <i class="fas fa-moon dark:hidden text-slate-600"></i>
-                <i class="fas fa-sun hidden dark:block text-yellow-400"></i>
+            </div>
+            <div id="trade-area-result" class="result-box bg-gray-50 rounded-xl p-4 whitespace-pre-wrap text-sm font-mono leading-relaxed">
+              분석 결과가 여기에 표시됩니다...
+            </div>
+          </div>
+
+          <!-- 봇 결과들 -->
+          <div id="bot-results" class="space-y-4">
+            <!-- JavaScript로 동적 생성 -->
+          </div>
+
+          <!-- 다운로드 버튼 -->
+          <div class="bg-white rounded-2xl shadow-lg p-6 mt-6 fade-in">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <i class="fas fa-download text-blue-500"></i>
+              결과 다운로드
+            </h2>
+            <div class="flex flex-wrap gap-4">
+              <button onclick="downloadTXT()" class="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium flex items-center gap-2 transition shadow">
+                <i class="fas fa-file-alt"></i>
+                TXT 다운로드
               </button>
-              <button onclick="openApiKeyModal()" class="hidden sm:flex items-center space-x-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors">
-                <i class="fas fa-key"></i>
-                <span>API 설정</span>
+              <button onclick="downloadPDF()" class="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium flex items-center gap-2 transition shadow">
+                <i class="fas fa-file-pdf"></i>
+                PDF 다운로드
               </button>
-              <button onclick="toggleMobileMenu()" class="md:hidden p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-card">
-                <i class="fas fa-bars text-slate-600 dark:text-slate-400"></i>
+              <button onclick="copyAllResults()" class="px-6 py-3 bg-gray-700 hover:bg-gray-800 text-white rounded-lg font-medium flex items-center gap-2 transition shadow">
+                <i class="fas fa-copy"></i>
+                전체 복사
               </button>
             </div>
           </div>
-        </div>
-        
-        {/* 모바일 메뉴 */}
-        <div id="mobile-menu" class="hidden md:hidden border-t border-slate-200 dark:border-dark-border bg-white dark:bg-dark-bg">
-          <nav class="px-4 py-3 space-y-2">
-            <a href="/" class="block px-4 py-2 rounded-lg bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400">홈</a>
-            <a href="/dashboard" class="block px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-card text-slate-600 dark:text-slate-400">대시보드</a>
-            <a href="/analytics" class="block px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-card text-slate-600 dark:text-slate-400">분석</a>
-            <a href="/settings" class="block px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-dark-card text-slate-600 dark:text-slate-400">설정</a>
-          </nav>
-        </div>
-      </header>
-      
-      {/* 히어로 섹션 */}
-      <section class="pt-24 pb-16 sm:pt-32 sm:pb-24 relative overflow-hidden">
-        <div class="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-blue-50 dark:from-dark-bg dark:via-slate-900 dark:to-slate-800"></div>
-        <div class="absolute top-20 left-10 w-72 h-72 bg-primary-300/30 rounded-full blur-3xl animate-pulse-slow"></div>
-        <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-300/20 rounded-full blur-3xl animate-pulse-slow"></div>
-        
-        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="text-center">
-            <div class="inline-flex items-center space-x-2 px-4 py-2 bg-primary-100 dark:bg-primary-900/30 rounded-full mb-6">
-              <span class="w-2 h-2 bg-primary-500 rounded-full animate-pulse"></span>
-              <span class="text-sm font-medium text-primary-700 dark:text-primary-300">상권분석 기반 AI 마케팅</span>
+        </section>
+
+        <!-- 로딩 오버레이 -->
+        <div id="loading-overlay" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+          <div class="bg-white rounded-2xl p-8 text-center max-w-md mx-4 shadow-2xl">
+            <div class="w-16 h-16 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">AI가 분석 중입니다...</h3>
+            <p id="loading-status" class="text-gray-500 mb-4">상권 데이터를 수집하고 있습니다</p>
+            <div class="bg-gray-200 rounded-full h-3 overflow-hidden">
+              <div id="progress-bar" class="bg-emerald-500 h-3 rounded-full transition-all duration-300" style="width: 0%"></div>
             </div>
-            
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-6">
-              <span class="bg-gradient-to-r from-primary-600 via-primary-500 to-emerald-400 bg-clip-text text-transparent">
-                상권분석
-              </span>부터<br class="sm:hidden" />
-              마케팅 실행까지
-            </h1>
-            
-            <p class="text-lg sm:text-xl text-slate-600 dark:text-slate-400 mb-8 max-w-2xl mx-auto">
-              반경 2/3/5km 상권을 분석하고,<br />
-              타겟에 맞는 30개 AI 봇이 마케팅을 자동화합니다.
-            </p>
-            
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <button onclick="scrollToForm()" class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-xl transition-all transform hover:-translate-y-1">
-                <i class="fas fa-map-marked-alt mr-2"></i>
-                상권분석 시작하기
-              </button>
-              <a href="/dashboard" class="w-full sm:w-auto px-8 py-4 bg-white dark:bg-dark-card border border-slate-200 dark:border-dark-border text-slate-700 dark:text-slate-300 font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
-                <i class="fas fa-th-large mr-2"></i>
-                대시보드 보기
+            <p class="text-xs text-gray-400 mt-2">잠시만 기다려주세요...</p>
+          </div>
+        </div>
+
+      </main>
+
+      <!-- API 키 모달 -->
+      <div id="api-modal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-2xl p-6 max-w-md mx-4 w-full shadow-2xl">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-bold text-gray-800">🔑 API 키 설정</h3>
+            <button onclick="closeApiModal()" class="text-gray-400 hover:text-gray-600 transition">
+              <i class="fas fa-times text-xl"></i>
+            </button>
+          </div>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Gemini API Key <span class="text-red-500">*</span></label>
+              <input type="password" id="gemini-key" placeholder="AIza..." 
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500" />
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-xs text-blue-500 hover:underline mt-1 inline-block">
+                <i class="fas fa-external-link-alt mr-1"></i>Google AI Studio에서 발급받기
+              </a>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Naver Client ID <span class="text-gray-400">(선택)</span></label>
+              <input type="password" id="naver-id" placeholder="Client ID" 
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Naver Client Secret <span class="text-gray-400">(선택)</span></label>
+              <input type="password" id="naver-secret" placeholder="Client Secret" 
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500" />
+              <a href="https://developers.naver.com/apps" target="_blank" class="text-xs text-blue-500 hover:underline mt-1 inline-block">
+                <i class="fas fa-external-link-alt mr-1"></i>Naver Developers에서 발급받기
               </a>
             </div>
           </div>
           
-          {/* 플로우 다이어그램 */}
-          <div class="mt-16 bg-white dark:bg-dark-card rounded-2xl p-6 shadow-xl border border-slate-100 dark:border-dark-border">
-            <h3 class="text-center text-lg font-semibold text-slate-700 dark:text-slate-300 mb-6">실행 순서</h3>
-            <div class="flex flex-col md:flex-row items-center justify-center gap-4">
-              <div class="flex items-center space-x-3 px-6 py-4 bg-red-50 dark:bg-red-900/20 rounded-xl border-2 border-red-200 dark:border-red-800">
-                <div class="w-10 h-10 bg-red-500 rounded-lg flex items-center justify-center"><i class="fas fa-map-marked-alt text-white"></i></div>
-                <div>
-                  <div class="font-bold text-red-700 dark:text-red-400">1. 상권분석</div>
-                  <div class="text-sm text-red-600 dark:text-red-300">반경 설정 - 경쟁사/타겟 분석</div>
-                </div>
-              </div>
-              <i class="fas fa-arrow-right text-slate-400 hidden md:block"></i>
-              <i class="fas fa-arrow-down text-slate-400 md:hidden"></i>
-              <div class="flex items-center space-x-3 px-6 py-4 bg-amber-50 dark:bg-amber-900/20 rounded-xl border-2 border-amber-200 dark:border-amber-800">
-                <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center"><i class="fas fa-crosshairs text-white"></i></div>
-                <div>
-                  <div class="font-bold text-amber-700 dark:text-amber-400">2. 타겟 도출</div>
-                  <div class="text-sm text-amber-600 dark:text-amber-300">상권 기반 핵심 고객층</div>
-                </div>
-              </div>
-              <i class="fas fa-arrow-right text-slate-400 hidden md:block"></i>
-              <i class="fas fa-arrow-down text-slate-400 md:hidden"></i>
-              <div class="flex items-center space-x-3 px-6 py-4 bg-green-50 dark:bg-green-900/20 rounded-xl border-2 border-green-200 dark:border-green-800">
-                <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center"><i class="fas fa-robot text-white"></i></div>
-                <div>
-                  <div class="font-bold text-green-700 dark:text-green-400">3. 봇 실행</div>
-                  <div class="text-sm text-green-600 dark:text-green-300">25개 봇 맞춤 콘텐츠 생성</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* 매장 정보 + 상권분석 섹션 */}
-      <section id="store-form-section" class="py-16 bg-slate-50 dark:bg-dark-bg">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="bg-white dark:bg-dark-card rounded-3xl shadow-xl border border-slate-100 dark:border-dark-border overflow-hidden">
-            {/* 폼 헤더 */}
-            <div class="bg-gradient-to-r from-primary-500 to-primary-600 p-6 sm:p-8">
-              <h2 class="text-2xl sm:text-3xl font-bold text-white mb-2">
-                <i class="fas fa-store mr-3"></i>
-                매장 정보 & 상권분석
-              </h2>
-              <p class="text-primary-100">
-                매장 정보를 입력하고 상권을 분석하세요
-              </p>
-            </div>
-            
-            {/* 폼 본문 */}
-            <form id="store-form" class="p-6 sm:p-8 space-y-6">
-              {/* 업종 선택 */}
-              <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
-                  <i class="fas fa-tags text-primary-500 mr-2"></i>업종 선택 *
-                </label>
-                
-                {/* 업종 대분류 탭 */}
-                <div class="flex flex-wrap gap-2 mb-4" id="industry-category-tabs">
-                  <button type="button" onclick="showIndustryCategory('food')" class="industry-tab px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium transition-all" data-category="food">
-                    <i class="fas fa-utensils mr-1"></i>음식/요식업
-                  </button>
-                  <button type="button" onclick="showIndustryCategory('beauty')" class="industry-tab px-4 py-2 rounded-lg bg-slate-100 dark:bg-dark-bg text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-200 transition-all" data-category="beauty">
-                    <i class="fas fa-spa mr-1"></i>미용/뷰티
-                  </button>
-                  <button type="button" onclick="showIndustryCategory('retail')" class="industry-tab px-4 py-2 rounded-lg bg-slate-100 dark:bg-dark-bg text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-200 transition-all" data-category="retail">
-                    <i class="fas fa-shopping-bag mr-1"></i>소매/판매
-                  </button>
-                  <button type="button" onclick="showIndustryCategory('service')" class="industry-tab px-4 py-2 rounded-lg bg-slate-100 dark:bg-dark-bg text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-200 transition-all" data-category="service">
-                    <i class="fas fa-concierge-bell mr-1"></i>서비스업
-                  </button>
-                  <button type="button" onclick="showIndustryCategory('health')" class="industry-tab px-4 py-2 rounded-lg bg-slate-100 dark:bg-dark-bg text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-200 transition-all" data-category="health">
-                    <i class="fas fa-heartbeat mr-1"></i>의료/건강
-                  </button>
-                  <button type="button" onclick="showIndustryCategory('auto')" class="industry-tab px-4 py-2 rounded-lg bg-slate-100 dark:bg-dark-bg text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-200 transition-all" data-category="auto">
-                    <i class="fas fa-car mr-1"></i>자동차
-                  </button>
-                  <button type="button" onclick="showIndustryCategory('lodging')" class="industry-tab px-4 py-2 rounded-lg bg-slate-100 dark:bg-dark-bg text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-200 transition-all" data-category="lodging">
-                    <i class="fas fa-bed mr-1"></i>숙박/임대
-                  </button>
-                </div>
-                
-                {/* 업종 세부 선택 */}
-                <div class="bg-slate-50 dark:bg-dark-bg rounded-xl p-4 border border-slate-200 dark:border-dark-border">
-                  {/* 음식/요식업 */}
-                  <div id="industry-food" class="industry-category grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
-                    <button type="button" onclick="selectIndustry('cafe')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="cafe">
-                      <i class="fas fa-mug-hot text-amber-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">카페</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('chicken')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="chicken">
-                      <i class="fas fa-drumstick-bite text-orange-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">치킨집</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('korean')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="korean">
-                      <i class="fas fa-bowl-rice text-green-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">한식당</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('chinese')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="chinese">
-                      <i class="fas fa-bowl-food text-red-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">중식당</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('japanese')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="japanese">
-                      <i class="fas fa-fish text-blue-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">일식당</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('western')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="western">
-                      <i class="fas fa-burger text-yellow-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">양식당</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('fastfood')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="fastfood">
-                      <i class="fas fa-hotdog text-red-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">패스트푸드</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('pizza')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="pizza">
-                      <i class="fas fa-pizza-slice text-orange-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">피자집</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('bakery')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="bakery">
-                      <i class="fas fa-bread-slice text-amber-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">베이커리</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('dessert')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="dessert">
-                      <i class="fas fa-ice-cream text-pink-400 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">디저트</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('bar')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="bar">
-                      <i class="fas fa-beer-mug-empty text-amber-700 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">주점/술집</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('bbq')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="bbq">
-                      <i class="fas fa-fire text-red-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">고깃집</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('seafood')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="seafood">
-                      <i class="fas fa-shrimp text-cyan-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">해산물/횟집</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('noodle')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="noodle">
-                      <i class="fas fa-wheat-awn text-yellow-700 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">면요리</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('lunch')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="lunch">
-                      <i class="fas fa-box text-green-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">도시락/분식</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('buffet')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="buffet">
-                      <i class="fas fa-plate-wheat text-purple-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">뷔페</div>
-                    </button>
-                  </div>
-                  
-                  {/* 미용/뷰티 */}
-                  <div id="industry-beauty" class="industry-category hidden grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
-                    <button type="button" onclick="selectIndustry('salon')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="salon">
-                      <i class="fas fa-scissors text-pink-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">미용실</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('barbershop')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="barbershop">
-                      <i class="fas fa-user text-slate-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">이발소</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('nail')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="nail">
-                      <i class="fas fa-hand-sparkles text-rose-400 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">네일샵</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('skin')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="skin">
-                      <i class="fas fa-face-smile text-amber-400 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">피부관리</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('spa')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="spa">
-                      <i class="fas fa-spa text-teal-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">스파/마사지</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('makeup')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="makeup">
-                      <i class="fas fa-paintbrush text-purple-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">메이크업</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('waxing')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="waxing">
-                      <i class="fas fa-leaf text-green-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">왁싱샵</div>
-                    </button>
-                  </div>
-                  
-                  {/* 소매/판매 */}
-                  <div id="industry-retail" class="industry-category hidden grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
-                    <button type="button" onclick="selectIndustry('retail')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="retail">
-                      <i class="fas fa-cart-shopping text-blue-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">소매점</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('convenience')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="convenience">
-                      <i class="fas fa-store text-green-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">편의점</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('supermarket')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="supermarket">
-                      <i class="fas fa-basket-shopping text-orange-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">슈퍼마켓</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('clothing')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="clothing">
-                      <i class="fas fa-shirt text-indigo-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">의류매장</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('shoes')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="shoes">
-                      <i class="fas fa-shoe-prints text-amber-700 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">신발매장</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('accessory')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="accessory">
-                      <i class="fas fa-gem text-cyan-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">악세서리</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('cosmetic')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="cosmetic">
-                      <i class="fas fa-pump-soap text-pink-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">화장품</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('phone')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="phone">
-                      <i class="fas fa-mobile-screen text-slate-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">휴대폰</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('electronics')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="electronics">
-                      <i class="fas fa-tv text-blue-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">전자제품</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('furniture')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="furniture">
-                      <i class="fas fa-couch text-amber-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">가구매장</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('interior')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="interior">
-                      <i class="fas fa-house text-teal-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">인테리어</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('flower')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="flower">
-                      <i class="fas fa-seedling text-green-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">꽃집</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('pet')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="pet">
-                      <i class="fas fa-paw text-orange-400 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">반려동물</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('book')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="book">
-                      <i class="fas fa-book text-emerald-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">서점</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('stationery')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="stationery">
-                      <i class="fas fa-pencil text-yellow-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">문구점</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('pharmacy')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="pharmacy">
-                      <i class="fas fa-prescription-bottle-medical text-green-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">약국</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('optical')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="optical">
-                      <i class="fas fa-glasses text-slate-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">안경점</div>
-                    </button>
-                  </div>
-                  
-                  {/* 서비스업 */}
-                  <div id="industry-service" class="industry-category hidden grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
-                    <button type="button" onclick="selectIndustry('laundry')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="laundry">
-                      <i class="fas fa-soap text-blue-400 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">세탁소</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('repair')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="repair">
-                      <i class="fas fa-wrench text-slate-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">수선/수리</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('printing')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="printing">
-                      <i class="fas fa-print text-slate-700 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">인쇄/복사</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('studio')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="studio">
-                      <i class="fas fa-camera text-purple-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">사진스튜디오</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('travel')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="travel">
-                      <i class="fas fa-plane text-sky-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">여행사</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('realtor')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="realtor">
-                      <i class="fas fa-building text-amber-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">부동산</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('insurance')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="insurance">
-                      <i class="fas fa-umbrella text-blue-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">보험</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('academy')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="academy">
-                      <i class="fas fa-graduation-cap text-indigo-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">학원</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('gym')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="gym">
-                      <i class="fas fa-dumbbell text-red-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">헬스장</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('yoga')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="yoga">
-                      <i class="fas fa-person-walking text-purple-400 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">요가/필라테스</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('taekwondo')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="taekwondo">
-                      <i class="fas fa-hand-fist text-red-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">태권도</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('pc')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="pc">
-                      <i class="fas fa-desktop text-slate-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">PC방</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('karaoke')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="karaoke">
-                      <i class="fas fa-microphone text-pink-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">노래방</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('billiard')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="billiard">
-                      <i class="fas fa-circle text-green-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">당구장</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('golf')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="golf">
-                      <i class="fas fa-golf-ball-tee text-green-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">골프연습장</div>
-                    </button>
-                  </div>
-                  
-                  {/* 의료/건강 */}
-                  <div id="industry-health" class="industry-category hidden grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
-                    <button type="button" onclick="selectIndustry('clinic')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="clinic">
-                      <i class="fas fa-hospital text-red-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">병원/의원</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('dental')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="dental">
-                      <i class="fas fa-tooth text-sky-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">치과</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('oriental')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="oriental">
-                      <i class="fas fa-yin-yang text-emerald-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">한의원</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('veterinary')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="veterinary">
-                      <i class="fas fa-dog text-amber-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">동물병원</div>
-                    </button>
-                  </div>
-                  
-                  {/* 자동차 */}
-                  <div id="industry-auto" class="industry-category hidden grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
-                    <button type="button" onclick="selectIndustry('carwash')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="carwash">
-                      <i class="fas fa-car-side text-blue-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">세차장</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('carmaintenance')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="carmaintenance">
-                      <i class="fas fa-screwdriver-wrench text-slate-600 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">정비소</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('carparts')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="carparts">
-                      <i class="fas fa-car-battery text-red-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">자동차용품</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('gasstation')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="gasstation">
-                      <i class="fas fa-gas-pump text-orange-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">주유소</div>
-                    </button>
-                  </div>
-                  
-                  {/* 숙박/임대 */}
-                  <div id="industry-lodging" class="industry-category hidden grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2">
-                    <button type="button" onclick="selectIndustry('motel')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="motel">
-                      <i class="fas fa-hotel text-purple-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">모텔/호텔</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('guesthouse')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="guesthouse">
-                      <i class="fas fa-house-chimney text-amber-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">펜션</div>
-                    </button>
-                    <button type="button" onclick="selectIndustry('rental')" class="industry-btn p-2 bg-white dark:bg-dark-card rounded-lg border-2 border-transparent hover:border-primary-500 transition-all text-center" data-industry="rental">
-                      <i class="fas fa-handshake text-blue-500 text-lg"></i>
-                      <div class="text-xs mt-1 text-slate-700 dark:text-slate-300">렌탈샵</div>
-                    </button>
-                  </div>
-                </div>
-                
-                {/* 선택된 업종 표시 */}
-                <div class="mt-3 flex items-center space-x-2">
-                  <span class="text-sm text-slate-500">선택된 업종:</span>
-                  <span id="selected-industry-display" class="px-3 py-1 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-sm font-medium rounded-full">카페</span>
-                </div>
-                
-                <input type="hidden" id="store-industry" name="industry" value="cafe" />
-              </div>
-              
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {/* 매장명 */}
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    <i class="fas fa-store text-primary-500 mr-2"></i>매장명 *
-                  </label>
-                  <input type="text" id="store-name" name="name" required
-                    class="w-full px-4 py-3 bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                    placeholder="예: 스마일 카페" />
-                </div>
-                
-                {/* 위치 */}
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    <i class="fas fa-map-marker-alt text-primary-500 mr-2"></i>위치 (상권분석 기준) *
-                  </label>
-                  <input type="text" id="store-location" name="location" required
-                    class="w-full px-4 py-3 bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                    placeholder="예: 서울 강남구 역삼동" />
-                </div>
-                
-                {/* 대표 메뉴/서비스 */}
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    <i class="fas fa-star text-primary-500 mr-2"></i>대표 메뉴/서비스
-                  </label>
-                  <input type="text" id="store-main-product" name="mainProduct"
-                    class="w-full px-4 py-3 bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                    placeholder="예: 시그니처 라떼, 수제 케이크" />
-                </div>
-                
-                {/* 평균 가격대 */}
-                <div>
-                  <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                    <i class="fas fa-won-sign text-primary-500 mr-2"></i>평균 가격대
-                  </label>
-                  <input type="text" id="store-price-range" name="priceRange"
-                    class="w-full px-4 py-3 bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-                    placeholder="예: 5,000원~15,000원" />
-                </div>
-              </div>
-              
-              {/* 특이사항 */}
-              <div>
-                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                  <i class="fas fa-info-circle text-primary-500 mr-2"></i>특이사항/강점
-                </label>
-                <textarea id="store-note" name="specialNote" rows={2}
-                  class="w-full px-4 py-3 bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all resize-none"
-                  placeholder="예: 넓은 주차장 완비, 애견 동반 가능"></textarea>
-              </div>
-              
-              {/* 상권분석 반경 선택 */}
-              <div class="bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-2xl p-6 border border-red-200 dark:border-red-800">
-                <label class="block text-sm font-medium text-red-700 dark:text-red-400 mb-4">
-                  <i class="fas fa-map-marked-alt mr-2"></i>상권분석 반경 선택 *
-                </label>
-                <div class="grid grid-cols-3 gap-4">
-                  <button type="button" onclick="selectRadius(2)" class="radius-btn p-4 bg-white dark:bg-dark-card rounded-xl border-2 border-slate-200 dark:border-dark-border hover:border-red-500 transition-all text-center" data-radius="2">
-                    <div class="text-3xl font-bold text-red-600 dark:text-red-400">2km</div>
-                    <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">도보권</div>
-                  </button>
-                  <button type="button" onclick="selectRadius(3)" class="radius-btn p-4 bg-white dark:bg-dark-card rounded-xl border-2 border-red-500 transition-all text-center" data-radius="3">
-                    <div class="text-3xl font-bold text-red-600 dark:text-red-400">3km</div>
-                    <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">생활권 (추천)</div>
-                  </button>
-                  <button type="button" onclick="selectRadius(5)" class="radius-btn p-4 bg-white dark:bg-dark-card rounded-xl border-2 border-slate-200 dark:border-dark-border hover:border-red-500 transition-all text-center" data-radius="5">
-                    <div class="text-3xl font-bold text-red-600 dark:text-red-400">5km</div>
-                    <div class="text-xs text-slate-600 dark:text-slate-400 mt-1">광역권</div>
-                  </button>
-                </div>
-                <input type="hidden" id="analysis-radius" value="3" />
-              </div>
-              
-              {/* 버튼들 */}
-              <div class="space-y-4 pt-4">
-                {/* 1단계: 상권분석 실행 */}
-                <button type="button" onclick="executeTradeAreaAnalysis()"
-                  class="w-full px-6 py-4 bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-semibold rounded-xl shadow-lg shadow-red-500/30 hover:shadow-xl transition-all flex items-center justify-center space-x-2">
-                  <i class="fas fa-search-location text-xl"></i>
-                  <span>1단계: 상권분석 실행 (5개 봇)</span>
-                </button>
-                
-                {/* 상권분석 결과 표시 영역 */}
-                <div id="trade-area-result" class="hidden bg-slate-50 dark:bg-dark-bg rounded-xl p-4 border border-slate-200 dark:border-dark-border">
-                  <div class="flex items-center justify-between mb-3">
-                    <h4 class="font-semibold text-slate-700 dark:text-slate-300">
-                      <i class="fas fa-check-circle text-green-500 mr-2"></i>
-                      상권분석 완료
-                    </h4>
-                    <span id="competitor-count" class="text-sm text-slate-600 dark:text-slate-400"></span>
-                  </div>
-                  <div id="trade-area-summary" class="text-sm text-slate-600 dark:text-slate-400"></div>
-                </div>
-                
-                {/* 2단계: 나머지 봇 실행 */}
-                <button type="button" onclick="executeAllBots()" id="execute-all-btn" disabled
-                  class="w-full px-6 py-4 bg-gradient-to-r from-slate-300 to-slate-400 text-white font-semibold rounded-xl shadow-lg transition-all flex items-center justify-center space-x-2 cursor-not-allowed">
-                  <i class="fas fa-bolt text-xl"></i>
-                  <span>2단계: 마케팅 봇 실행 (25개 봇)</span>
-                </button>
-                <p id="execute-all-hint" class="text-center text-sm text-slate-500">
-                  * 상권분석을 먼저 실행해주세요
-                </p>
-                
-                {/* 저장 버튼 */}
-                <button type="submit"
-                  class="w-full px-6 py-3 bg-slate-100 dark:bg-dark-bg text-slate-700 dark:text-slate-300 font-medium rounded-xl border border-slate-200 dark:border-dark-border hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
-                  <i class="fas fa-save mr-2"></i>
-                  매장 정보만 저장
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      </section>
-      
-      {/* 봇 카테고리 소개 섹션 */}
-      <section class="py-16 bg-white dark:bg-dark-card">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="text-center mb-12">
-            <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">
-              30개 AI 봇 (6개 카테고리)
-            </h2>
-            <p class="text-slate-600 dark:text-slate-400">
-              상권분석 → 타겟 도출 → 맞춤 마케팅 자동화
+          <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+            <p class="text-xs text-yellow-700">
+              <i class="fas fa-info-circle mr-1"></i>
+              Gemini API 키는 필수입니다. Naver API 키가 없으면 상권분석이 제한됩니다.
             </p>
           </div>
           
-          {/* 카테고리 카드 */}
-          <div class="grid grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* 상권분석 */}
-            <div class="bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-2xl p-6 border border-red-200 dark:border-red-800">
-              <div class="flex items-center space-x-3 mb-4">
-                <div class="w-12 h-12 bg-red-500 rounded-xl flex items-center justify-center">
-                  <i class="fas fa-map-marked-alt text-white text-xl"></i>
-                </div>
-                <div>
-                  <h3 class="font-bold text-red-700 dark:text-red-400">상권분석</h3>
-                  <p class="text-sm text-red-600 dark:text-red-300">5개 봇 - 가장 먼저 실행</p>
-                </div>
-              </div>
-              <ul class="text-sm text-slate-600 dark:text-slate-400 space-y-1">
-                <li><i class="fas fa-check text-red-400 mr-2"></i>상권 종합분석</li>
-                <li><i class="fas fa-check text-red-400 mr-2"></i>경쟁사 분석</li>
-                <li><i class="fas fa-check text-red-400 mr-2"></i>타겟고객 분석</li>
-                <li><i class="fas fa-check text-red-400 mr-2"></i>입지 평가</li>
-                <li><i class="fas fa-check text-red-400 mr-2"></i>상권 트렌드</li>
-              </ul>
-            </div>
-            
-            {/* 고객응대 */}
-            <div class="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
-              <div class="flex items-center space-x-3 mb-4">
-                <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
-                  <i class="fas fa-hand-wave text-white text-xl"></i>
-                </div>
-                <div>
-                  <h3 class="font-bold text-blue-700 dark:text-blue-400">고객응대</h3>
-                  <p class="text-sm text-blue-600 dark:text-blue-300">5개 봇</p>
-                </div>
-              </div>
-              <ul class="text-sm text-slate-600 dark:text-slate-400 space-y-1">
-                <li><i class="fas fa-check text-blue-400 mr-2"></i>첫인사</li>
-                <li><i class="fas fa-check text-blue-400 mr-2"></i>메뉴추천</li>
-                <li><i class="fas fa-check text-blue-400 mr-2"></i>이벤트 안내</li>
-                <li><i class="fas fa-check text-blue-400 mr-2"></i>리뷰 요청</li>
-                <li><i class="fas fa-check text-blue-400 mr-2"></i>SNS 홍보</li>
-              </ul>
-            </div>
-            
-            {/* 콘텐츠 */}
-            <div class="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-2xl p-6 border border-purple-200 dark:border-purple-800">
-              <div class="flex items-center space-x-3 mb-4">
-                <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center">
-                  <i class="fas fa-pen-fancy text-white text-xl"></i>
-                </div>
-                <div>
-                  <h3 class="font-bold text-purple-700 dark:text-purple-400">콘텐츠</h3>
-                  <p class="text-sm text-purple-600 dark:text-purple-300">5개 봇</p>
-                </div>
-              </div>
-              <ul class="text-sm text-slate-600 dark:text-slate-400 space-y-1">
-                <li><i class="fas fa-check text-purple-400 mr-2"></i>블로그 콘텐츠</li>
-                <li><i class="fas fa-check text-purple-400 mr-2"></i>키워드 전략</li>
-                <li><i class="fas fa-check text-purple-400 mr-2"></i>지역 마케팅</li>
-                <li><i class="fas fa-check text-purple-400 mr-2"></i>시즌 마케팅</li>
-                <li><i class="fas fa-check text-purple-400 mr-2"></i>비주얼 기획</li>
-              </ul>
-            </div>
-            
-            {/* 고객관계 */}
-            <div class="bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 rounded-2xl p-6 border border-emerald-200 dark:border-emerald-800">
-              <div class="flex items-center space-x-3 mb-4">
-                <div class="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
-                  <i class="fas fa-gem text-white text-xl"></i>
-                </div>
-                <div>
-                  <h3 class="font-bold text-emerald-700 dark:text-emerald-400">고객관계</h3>
-                  <p class="text-sm text-emerald-600 dark:text-emerald-300">5개 봇</p>
-                </div>
-              </div>
-              <ul class="text-sm text-slate-600 dark:text-slate-400 space-y-1">
-                <li><i class="fas fa-check text-emerald-400 mr-2"></i>단골 관리</li>
-                <li><i class="fas fa-check text-emerald-400 mr-2"></i>업셀링</li>
-                <li><i class="fas fa-check text-emerald-400 mr-2"></i>소개 유도</li>
-                <li><i class="fas fa-check text-emerald-400 mr-2"></i>피드백 수집</li>
-                <li><i class="fas fa-check text-emerald-400 mr-2"></i>불만 대응</li>
-              </ul>
-            </div>
-            
-            {/* 소셜미디어 */}
-            <div class="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-900/20 dark:to-rose-900/20 rounded-2xl p-6 border border-pink-200 dark:border-pink-800">
-              <div class="flex items-center space-x-3 mb-4">
-                <div class="w-12 h-12 bg-pink-500 rounded-xl flex items-center justify-center">
-                  <i class="fas fa-share-nodes text-white text-xl"></i>
-                </div>
-                <div>
-                  <h3 class="font-bold text-pink-700 dark:text-pink-400">소셜미디어</h3>
-                  <p class="text-sm text-pink-600 dark:text-pink-300">5개 봇</p>
-                </div>
-              </div>
-              <ul class="text-sm text-slate-600 dark:text-slate-400 space-y-1">
-                <li><i class="fas fa-check text-pink-400 mr-2"></i>스토리 콘텐츠</li>
-                <li><i class="fas fa-check text-pink-400 mr-2"></i>해시태그 전략</li>
-                <li><i class="fas fa-check text-pink-400 mr-2"></i>인플루언서 협업</li>
-                <li><i class="fas fa-check text-pink-400 mr-2"></i>커뮤니티 관리</li>
-                <li><i class="fas fa-check text-pink-400 mr-2"></i>릴스/숏폼</li>
-              </ul>
-            </div>
-            
-            {/* 디지털마케팅 + 전략분석 */}
-            <div class="bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 rounded-2xl p-6 border border-amber-200 dark:border-amber-800">
-              <div class="flex items-center space-x-3 mb-4">
-                <div class="w-12 h-12 bg-amber-500 rounded-xl flex items-center justify-center">
-                  <i class="fas fa-chart-line text-white text-xl"></i>
-                </div>
-                <div>
-                  <h3 class="font-bold text-amber-700 dark:text-amber-400">디지털마케팅 & 전략</h3>
-                  <p class="text-sm text-amber-600 dark:text-amber-300">5개 봇</p>
-                </div>
-              </div>
-              <ul class="text-sm text-slate-600 dark:text-slate-400 space-y-1">
-                <li><i class="fas fa-check text-amber-400 mr-2"></i>이메일 마케팅</li>
-                <li><i class="fas fa-check text-amber-400 mr-2"></i>SMS 마케팅</li>
-                <li><i class="fas fa-check text-amber-400 mr-2"></i>리타겟팅</li>
-                <li><i class="fas fa-check text-amber-400 mr-2"></i>가격 전략</li>
-                <li><i class="fas fa-check text-amber-400 mr-2"></i>성과 분석</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-      
-      {/* 푸터 */}
-      <footer class="bg-slate-900 text-slate-400 py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="flex flex-col md:flex-row items-center justify-between">
-            <div class="flex items-center space-x-2 mb-4 md:mb-0">
-              <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center">
-                <i class="fas fa-robot text-white text-sm"></i>
-              </div>
-              <span class="text-lg font-bold text-white">STUDIOJUAI</span>
-            </div>
-            <p class="text-sm">
-              © 2024 STUDIOJUAI. 상권분석 기반 AI 마케팅 자동화 플랫폼
-            </p>
-          </div>
-        </div>
-      </footer>
-      
-      {/* API 키 모달 */}
-      <div id="api-key-modal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-dark-card rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-          <div class="p-6 border-b border-slate-200 dark:border-dark-border">
-            <div class="flex items-center justify-between">
-              <h3 class="text-xl font-bold text-slate-900 dark:text-white">
-                <i class="fas fa-key text-primary-500 mr-2"></i>
-                API 키 설정
-              </h3>
-              <button onclick="closeApiKeyModal()" class="p-2 hover:bg-slate-100 dark:hover:bg-dark-bg rounded-lg transition-colors">
-                <i class="fas fa-times text-slate-500"></i>
-              </button>
-            </div>
-          </div>
-          <div class="p-6 space-y-6">
-            {/* Gemini API */}
-            <div class="space-y-3">
-              <h4 class="font-semibold text-slate-700 dark:text-slate-300">
-                <i class="fas fa-brain text-blue-500 mr-2"></i>
-                Gemini API (Google AI)
-              </h4>
-              <p class="text-sm text-slate-600 dark:text-slate-400">
-                AI 봇 실행에 필요합니다.
-                <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-primary-500 hover:underline ml-1">
-                  발급받기 →
-                </a>
-              </p>
-              <input type="password" id="gemini-api-key"
-                class="w-full px-4 py-3 bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border rounded-xl"
-                placeholder="AIza..." />
-              <div class="flex gap-2">
-                <button onclick="validateGeminiKey()" class="flex-1 px-3 py-2 bg-slate-100 dark:bg-dark-bg text-slate-700 dark:text-slate-300 text-sm rounded-lg hover:bg-slate-200 transition-colors">
-                  검증
-                </button>
-                <button onclick="saveGeminiKey()" class="flex-1 px-3 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors">
-                  저장
-                </button>
-              </div>
-              <p id="gemini-key-status" class="text-sm text-center hidden"></p>
-            </div>
-            
-            {/* 네이버 API */}
-            <div class="space-y-3 pt-4 border-t border-slate-200 dark:border-dark-border">
-              <h4 class="font-semibold text-slate-700 dark:text-slate-300">
-                <i class="fas fa-map text-green-500 mr-2"></i>
-                네이버 API (상권분석)
-              </h4>
-              <p class="text-sm text-slate-600 dark:text-slate-400">
-                상권분석에 필요합니다.
-                <a href="https://developers.naver.com/apps/" target="_blank" class="text-primary-500 hover:underline ml-1">
-                  발급받기 →
-                </a>
-              </p>
-              <input type="text" id="naver-client-id"
-                class="w-full px-4 py-3 bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border rounded-xl"
-                placeholder="Client ID" />
-              <input type="password" id="naver-client-secret"
-                class="w-full px-4 py-3 bg-slate-50 dark:bg-dark-bg border border-slate-200 dark:border-dark-border rounded-xl"
-                placeholder="Client Secret" />
-              <div class="flex gap-2">
-                <button onclick="validateNaverKey()" class="flex-1 px-3 py-2 bg-slate-100 dark:bg-dark-bg text-slate-700 dark:text-slate-300 text-sm rounded-lg hover:bg-slate-200 transition-colors">
-                  검증
-                </button>
-                <button onclick="saveNaverKey()" class="flex-1 px-3 py-2 bg-green-500 text-white text-sm rounded-lg hover:bg-green-600 transition-colors">
-                  저장
-                </button>
-              </div>
-              <p id="naver-key-status" class="text-sm text-center hidden"></p>
-            </div>
-          </div>
+          <button onclick="saveApiKeys()" class="w-full mt-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg transition">
+            <i class="fas fa-save mr-2"></i>저장하기
+          </button>
         </div>
       </div>
-      
-      {/* 로딩 오버레이 */}
-      <div id="loading-overlay" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center">
-        <div class="bg-white dark:bg-dark-card rounded-2xl p-8 max-w-md w-full mx-4 text-center">
-          <div class="w-16 h-16 border-4 border-primary-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h3 id="loading-title" class="text-xl font-bold text-slate-900 dark:text-white mb-2">분석 중...</h3>
-          <p id="loading-message" class="text-slate-600 dark:text-slate-400">잠시만 기다려주세요</p>
-          <div class="mt-4">
-            <div class="w-full bg-slate-200 dark:bg-dark-bg rounded-full h-2">
-              <div id="loading-progress" class="bg-primary-500 h-2 rounded-full transition-all" style="width: 0%"></div>
-            </div>
-            <p id="loading-status" class="text-sm text-slate-500 mt-2"></p>
-          </div>
-        </div>
-      </div>
-      
-      {/* 페이지 스크립트 */}
-      <script dangerouslySetInnerHTML={{
-        __html: `
-          let selectedIndustry = 'cafe';
-          let selectedRadius = 3;
-          let tradeAreaData = null;
-          let currentIndustryCategory = 'food';
-          
-          // 업종명 매핑
-          const industryNames = {
-            // 음식/요식업
-            cafe: '카페', chicken: '치킨집', korean: '한식당', chinese: '중식당',
-            japanese: '일식당', western: '양식당', fastfood: '패스트푸드점', pizza: '피자집',
-            bakery: '베이커리', dessert: '디저트카페', bar: '주점/술집', bbq: '고깃집',
-            seafood: '해산물/횟집', noodle: '면요리전문점', lunch: '도시락/분식점', buffet: '뷔페/식당',
-            // 미용/뷰티
-            salon: '미용실', barbershop: '이발소', nail: '네일샵', skin: '피부관리샵',
-            spa: '스파/마사지', makeup: '메이크업샵', waxing: '왁싱샵',
-            // 소매/판매
-            retail: '소매점', convenience: '편의점', supermarket: '슈퍼마켓', clothing: '의류매장',
-            shoes: '신발매장', accessory: '악세서리샵', cosmetic: '화장품매장', phone: '휴대폰판매점',
-            electronics: '전자제품매장', furniture: '가구매장', interior: '인테리어소품샵', flower: '꽃집',
-            pet: '반려동물용품점', book: '서점', stationery: '문구점', pharmacy: '약국', optical: '안경점',
-            // 서비스업
-            laundry: '세탁소', repair: '수선/수리점', printing: '인쇄/복사점', studio: '사진스튜디오',
-            travel: '여행사', realtor: '부동산중개', insurance: '보험대리점', academy: '학원/교습소',
-            gym: '헬스장/피트니스', yoga: '요가/필라테스', taekwondo: '태권도/무술학원',
-            pc: 'PC방', karaoke: '노래방', billiard: '당구장', golf: '골프연습장',
-            // 의료/건강
-            clinic: '병원/의원', dental: '치과', oriental: '한의원', veterinary: '동물병원',
-            // 자동차
-            carwash: '세차장', carmaintenance: '자동차정비소', carparts: '자동차용품점', gasstation: '주유소',
-            // 숙박/임대
-            motel: '모텔/호텔', guesthouse: '게스트하우스/펜션', rental: '렌탈샵'
-          };
-          
-          // 페이지 로드 시 초기화
-          document.addEventListener('DOMContentLoaded', function() {
-            loadSavedData();
-            checkApiKeys();
-            showIndustryCategory('food');
-          });
-          
-          // 업종 카테고리 전환
-          function showIndustryCategory(category) {
-            currentIndustryCategory = category;
-            
-            // 탭 스타일 업데이트
-            document.querySelectorAll('.industry-tab').forEach(tab => {
-              if (tab.dataset.category === category) {
-                tab.className = 'industry-tab px-4 py-2 rounded-lg bg-primary-500 text-white text-sm font-medium transition-all';
-              } else {
-                tab.className = 'industry-tab px-4 py-2 rounded-lg bg-slate-100 dark:bg-dark-bg text-slate-700 dark:text-slate-300 text-sm font-medium hover:bg-slate-200 transition-all';
-              }
-            });
-            
-            // 카테고리 컨텐츠 전환
-            document.querySelectorAll('.industry-category').forEach(cat => {
-              cat.classList.add('hidden');
-            });
-            
-            const categoryEl = document.getElementById('industry-' + category);
-            if (categoryEl) {
-              categoryEl.classList.remove('hidden');
-            }
-          }
-          
-          // 업종 선택
-          function selectIndustry(industry) {
-            selectedIndustry = industry;
-            document.getElementById('store-industry').value = industry;
-            
-            // 선택된 업종 표시 업데이트
-            const displayEl = document.getElementById('selected-industry-display');
-            if (displayEl) {
-              displayEl.textContent = industryNames[industry] || industry;
-            }
-            
-            document.querySelectorAll('.industry-btn').forEach(btn => {
-              if (btn.dataset.industry === industry) {
-                btn.classList.add('border-primary-500', 'bg-primary-50', 'dark:bg-primary-900/20');
-              } else {
-                btn.classList.remove('border-primary-500', 'bg-primary-50', 'dark:bg-primary-900/20');
-              }
-            });
-          }
-          
-          // 반경 선택
-          function selectRadius(radius) {
-            selectedRadius = radius;
-            document.getElementById('analysis-radius').value = radius;
-            
-            document.querySelectorAll('.radius-btn').forEach(btn => {
-              if (parseInt(btn.dataset.radius) === radius) {
-                btn.classList.add('border-red-500');
-                btn.classList.remove('border-slate-200', 'dark:border-dark-border');
-              } else {
-                btn.classList.remove('border-red-500');
-                btn.classList.add('border-slate-200', 'dark:border-dark-border');
-              }
-            });
-          }
-          
-          // 폼으로 스크롤
-          function scrollToForm() {
-            document.getElementById('store-form-section').scrollIntoView({ behavior: 'smooth' });
-          }
-          
-          // 모바일 메뉴 토글
-          function toggleMobileMenu() {
-            document.getElementById('mobile-menu').classList.toggle('hidden');
-          }
-          
-          // API 키 모달
-          function openApiKeyModal() {
-            document.getElementById('api-key-modal').classList.remove('hidden');
-            
-            // 저장된 키 로드
-            const geminiKey = localStorage.getItem('gemini_api_key') || '';
-            const naverClientId = localStorage.getItem('naver_client_id') || '';
-            const naverClientSecret = localStorage.getItem('naver_client_secret') || '';
-            
-            document.getElementById('gemini-api-key').value = geminiKey;
-            document.getElementById('naver-client-id').value = naverClientId;
-            document.getElementById('naver-client-secret').value = naverClientSecret;
-          }
-          
-          function closeApiKeyModal() {
-            document.getElementById('api-key-modal').classList.add('hidden');
-          }
-          
-          // Gemini API 키 검증
-          async function validateGeminiKey() {
-            const apiKey = document.getElementById('gemini-api-key').value.trim();
-            const statusEl = document.getElementById('gemini-key-status');
-            
-            if (!apiKey) {
-              statusEl.textContent = 'API 키를 입력해주세요';
-              statusEl.className = 'text-sm text-center text-red-500';
-              statusEl.classList.remove('hidden');
-              return;
-            }
-            
-            statusEl.textContent = '검증 중...';
-            statusEl.className = 'text-sm text-center text-slate-500';
-            statusEl.classList.remove('hidden');
-            
-            try {
-              const response = await fetch('/api/validate-key', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ apiKey, type: 'gemini' })
-              });
-              
-              const result = await response.json();
-              
-              if (result.success) {
-                statusEl.textContent = '✅ 유효한 API 키입니다';
-                statusEl.className = 'text-sm text-center text-green-500';
-              } else {
-                statusEl.textContent = '❌ ' + (result.error || '유효하지 않은 키');
-                statusEl.className = 'text-sm text-center text-red-500';
-              }
-            } catch (error) {
-              statusEl.textContent = '❌ 검증 실패';
-              statusEl.className = 'text-sm text-center text-red-500';
-            }
-          }
-          
-          // Gemini API 키 저장
-          function saveGeminiKey() {
-            const apiKey = document.getElementById('gemini-api-key').value.trim();
-            if (apiKey) {
-              localStorage.setItem('gemini_api_key', apiKey);
-              showToast('Gemini API 키가 저장되었습니다', 'success');
-            }
-          }
-          
-          // 네이버 API 키 검증
-          async function validateNaverKey() {
-            const clientId = document.getElementById('naver-client-id').value.trim();
-            const clientSecret = document.getElementById('naver-client-secret').value.trim();
-            const statusEl = document.getElementById('naver-key-status');
-            
-            if (!clientId || !clientSecret) {
-              statusEl.textContent = 'Client ID와 Secret을 모두 입력해주세요';
-              statusEl.className = 'text-sm text-center text-red-500';
-              statusEl.classList.remove('hidden');
-              return;
-            }
-            
-            statusEl.textContent = '검증 중...';
-            statusEl.className = 'text-sm text-center text-slate-500';
-            statusEl.classList.remove('hidden');
-            
-            try {
-              const response = await fetch('/api/validate-key', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'naver', clientId, clientSecret })
-              });
-              
-              const result = await response.json();
-              
-              if (result.success) {
-                statusEl.textContent = '✅ 유효한 API 키입니다';
-                statusEl.className = 'text-sm text-center text-green-500';
-              } else {
-                statusEl.textContent = '❌ ' + (result.error || '유효하지 않은 키');
-                statusEl.className = 'text-sm text-center text-red-500';
-              }
-            } catch (error) {
-              statusEl.textContent = '❌ 검증 실패';
-              statusEl.className = 'text-sm text-center text-red-500';
-            }
-          }
-          
-          // 네이버 API 키 저장
-          function saveNaverKey() {
-            const clientId = document.getElementById('naver-client-id').value.trim();
-            const clientSecret = document.getElementById('naver-client-secret').value.trim();
-            if (clientId && clientSecret) {
-              localStorage.setItem('naver_client_id', clientId);
-              localStorage.setItem('naver_client_secret', clientSecret);
-              showToast('네이버 API 키가 저장되었습니다', 'success');
-            }
-          }
-          
-          // API 키 확인
-          function checkApiKeys() {
-            const geminiKey = localStorage.getItem('gemini_api_key');
-            const naverClientId = localStorage.getItem('naver_client_id');
-            
-            if (!geminiKey || !naverClientId) {
-              setTimeout(() => {
-                showToast('API 키를 설정해주세요 (우측 상단 API 설정)', 'warning');
-              }, 2000);
-            }
-          }
-          
-          // 저장된 데이터 로드
-          function loadSavedData() {
-            const saved = localStorage.getItem('store_info');
-            if (saved) {
-              try {
-                const data = JSON.parse(saved);
-                document.getElementById('store-name').value = data.name || '';
-                document.getElementById('store-location').value = data.location || '';
-                document.getElementById('store-main-product').value = data.mainProduct || '';
-                document.getElementById('store-price-range').value = data.priceRange || '';
-                document.getElementById('store-note').value = data.specialNote || '';
-                
-                if (data.industry) {
-                  selectIndustry(data.industry);
-                }
-              } catch (e) {}
-            }
-            
-            // 저장된 상권분석 데이터 확인
-            const savedTradeArea = localStorage.getItem('trade_area_data');
-            if (savedTradeArea) {
-              try {
-                tradeAreaData = JSON.parse(savedTradeArea);
-                showTradeAreaResult(tradeAreaData);
-                enableExecuteAllBtn();
-              } catch (e) {}
-            }
-          }
-          
-          // 매장 정보 가져오기
-          function getStoreInfo() {
-            return {
-              name: document.getElementById('store-name').value.trim(),
-              location: document.getElementById('store-location').value.trim(),
-              industry: selectedIndustry,
-              mainProduct: document.getElementById('store-main-product').value.trim(),
-              priceRange: document.getElementById('store-price-range').value.trim(),
-              specialNote: document.getElementById('store-note').value.trim()
+
+      <script>
+        // 30개 봇 데이터
+        const ALL_BOTS = [
+          // 상권분석 (5개)
+          { id: 'trade-area-overview', name: '상권 종합분석', icon: '🗺️', category: '상권분석' },
+          { id: 'competitor-analysis', name: '경쟁사 분석', icon: '🎯', category: '상권분석' },
+          { id: 'target-customer', name: '타겟고객 분석', icon: '👥', category: '상권분석' },
+          { id: 'location-evaluation', name: '입지 평가', icon: '📍', category: '상권분석' },
+          { id: 'trend-analysis', name: '상권 트렌드', icon: '📈', category: '상권분석' },
+          // 고객응대 (5개)
+          { id: 'greeting', name: '첫인사', icon: '👋', category: '고객응대' },
+          { id: 'menu-recommend', name: '메뉴추천', icon: '🍽️', category: '고객응대' },
+          { id: 'event-announce', name: '이벤트 안내', icon: '🎉', category: '고객응대' },
+          { id: 'review-request', name: '리뷰 요청', icon: '⭐', category: '고객응대' },
+          { id: 'sns-content', name: 'SNS 홍보', icon: '📱', category: '고객응대' },
+          // 콘텐츠 (5개)
+          { id: 'blog-content', name: '블로그 콘텐츠', icon: '📝', category: '콘텐츠' },
+          { id: 'keyword-strategy', name: '키워드 전략', icon: '🔍', category: '콘텐츠' },
+          { id: 'local-marketing', name: '지역 마케팅', icon: '🏘️', category: '콘텐츠' },
+          { id: 'seasonal-marketing', name: '시즌 마케팅', icon: '🗓️', category: '콘텐츠' },
+          { id: 'visual-planning', name: '비주얼 기획', icon: '🎬', category: '콘텐츠' },
+          // 고객관계 (5개)
+          { id: 'loyalty-program', name: '단골 관리', icon: '💎', category: '고객관계' },
+          { id: 'upselling', name: '업셀링', icon: '💰', category: '고객관계' },
+          { id: 'referral-program', name: '소개 유도', icon: '🤝', category: '고객관계' },
+          { id: 'feedback-collection', name: '피드백 수집', icon: '💬', category: '고객관계' },
+          { id: 'crisis-response', name: '불만 대응', icon: '🆘', category: '고객관계' },
+          // 소셜미디어 (5개)
+          { id: 'story-content', name: '스토리 콘텐츠', icon: '📸', category: '소셜미디어' },
+          { id: 'hashtag-strategy', name: '해시태그 전략', icon: '#️⃣', category: '소셜미디어' },
+          { id: 'influencer-collab', name: '인플루언서 협업', icon: '🌟', category: '소셜미디어' },
+          { id: 'community-manage', name: '커뮤니티 관리', icon: '👨‍👩‍👧‍👦', category: '소셜미디어' },
+          { id: 'reels-content', name: '릴스/숏폼', icon: '🎵', category: '소셜미디어' },
+          // 디지털마케팅 (3개)
+          { id: 'email-marketing', name: '카톡/문자', icon: '📧', category: '디지털마케팅' },
+          { id: 'sms-marketing', name: 'SMS 마케팅', icon: '💌', category: '디지털마케팅' },
+          { id: 'retargeting', name: '리타겟팅', icon: '🔄', category: '디지털마케팅' },
+          // 전략분석 (2개)
+          { id: 'pricing-strategy', name: '가격 전략', icon: '💵', category: '전략분석' },
+          { id: 'performance-analysis', name: '성과 분석', icon: '📊', category: '전략분석' }
+        ];
+
+        let selectedBots = new Set();
+        let analysisResults = { tradeArea: null, bots: [], storeInfo: null };
+
+        // 봇 그리드 렌더링
+        function renderBotGrid() {
+          const grid = document.getElementById('bot-grid');
+          grid.innerHTML = ALL_BOTS.map(bot => {
+            const categoryColors = {
+              '상권분석': 'bg-red-50 border-red-200',
+              '고객응대': 'bg-blue-50 border-blue-200',
+              '콘텐츠': 'bg-purple-50 border-purple-200',
+              '고객관계': 'bg-yellow-50 border-yellow-200',
+              '소셜미디어': 'bg-pink-50 border-pink-200',
+              '디지털마케팅': 'bg-green-50 border-green-200',
+              '전략분석': 'bg-orange-50 border-orange-200'
             };
+            const color = categoryColors[bot.category] || 'bg-gray-50 border-gray-200';
+            
+            return '<div class="bot-card p-3 border-2 rounded-xl text-center ' + color + '" data-id="' + bot.id + '" onclick="toggleBot(\\''+bot.id+'\\')"><div class="text-2xl mb-1">' + bot.icon + '</div><div class="text-xs font-medium text-gray-700 truncate">' + bot.name + '</div><div class="text-xs text-gray-400">' + bot.category + '</div></div>';
+          }).join('');
+        }
+
+        // 봇 선택/해제
+        function toggleBot(botId) {
+          const card = document.querySelector('[data-id="'+botId+'"]');
+          if (selectedBots.has(botId)) {
+            selectedBots.delete(botId);
+            card.classList.remove('selected');
+            card.style.borderColor = '';
+            card.style.background = '';
+          } else {
+            selectedBots.add(botId);
+            card.classList.add('selected');
+            card.style.borderColor = '#10B981';
+            card.style.background = '#ECFDF5';
           }
-          
-          // 폼 제출 (저장만)
-          document.getElementById('store-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const storeInfo = getStoreInfo();
-            localStorage.setItem('store_info', JSON.stringify(storeInfo));
-            showToast('매장 정보가 저장되었습니다', 'success');
-          });
-          
-          // 1단계: 상권분석 실행
-          async function executeTradeAreaAnalysis() {
-            const storeInfo = getStoreInfo();
-            
-            if (!storeInfo.name || !storeInfo.location) {
-              showToast('매장명과 위치를 입력해주세요', 'error');
-              return;
+          updateSelectedCount();
+        }
+
+        function selectAllBots() {
+          ALL_BOTS.forEach(bot => {
+            selectedBots.add(bot.id);
+            const card = document.querySelector('[data-id="'+bot.id+'"]');
+            if (card) {
+              card.classList.add('selected');
+              card.style.borderColor = '#10B981';
+              card.style.background = '#ECFDF5';
             }
+          });
+          updateSelectedCount();
+        }
+
+        function deselectAllBots() {
+          selectedBots.clear();
+          document.querySelectorAll('.bot-card').forEach(card => {
+            card.classList.remove('selected');
+            card.style.borderColor = '';
+            card.style.background = '';
+          });
+          updateSelectedCount();
+        }
+
+        function updateSelectedCount() {
+          document.getElementById('selected-count').textContent = selectedBots.size;
+        }
+
+        // 메인 실행 함수
+        async function executeAnalysis() {
+          // 입력값 검증
+          const storeName = document.getElementById('store-name').value.trim();
+          const storeLocation = document.getElementById('store-location').value.trim();
+          const storeIndustry = document.getElementById('store-industry').value;
+          
+          if (!storeName || !storeLocation || !storeIndustry) {
+            alert('❌ 매장명, 위치, 업종은 필수 입력입니다!');
+            return;
+          }
+
+          if (selectedBots.size === 0) {
+            alert('❌ 실행할 봇을 1개 이상 선택해주세요!');
+            return;
+          }
+
+          const geminiKey = localStorage.getItem('gemini_key');
+          if (!geminiKey) {
+            alert('❌ Gemini API 키를 먼저 설정해주세요!');
+            openApiModal();
+            return;
+          }
+
+          // 매장 정보 구성
+          const storeInfo = {
+            name: storeName,
+            location: storeLocation,
+            industry: storeIndustry,
+            mainProduct: document.getElementById('store-product').value.trim(),
+            priceRange: document.getElementById('store-price').value.trim(),
+            targetCustomer: document.getElementById('store-target').value.trim()
+          };
+
+          const radius = document.querySelector('input[name="radius"]:checked').value;
+
+          // 로딩 시작
+          showLoading();
+          analysisResults = { tradeArea: null, bots: [], storeInfo: storeInfo };
+
+          try {
+            // 1. 상권분석 실행
+            updateLoadingStatus('📊 상권 데이터를 수집하고 있습니다...', 5);
             
-            const geminiKey = localStorage.getItem('gemini_api_key');
             const naverClientId = localStorage.getItem('naver_client_id');
             const naverClientSecret = localStorage.getItem('naver_client_secret');
             
-            if (!geminiKey) {
-              showToast('Gemini API 키를 설정해주세요', 'error');
-              openApiKeyModal();
-              return;
-            }
+            let tradeAreaData = { 
+              competitors: [], 
+              totalCompetitors: 0, 
+              radius: parseInt(radius),
+              analysisDate: new Date().toISOString()
+            };
             
-            if (!naverClientId || !naverClientSecret) {
-              showToast('네이버 API 키를 설정해주세요', 'error');
-              openApiKeyModal();
-              return;
-            }
-            
-            // 로딩 표시
-            showLoading('상권분석 중...', '네이버 API로 주변 경쟁사를 검색하고 있습니다');
-            
-            try {
-              const response = await fetch('/api/bot/execute-trade-area', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-Gemini-Key': geminiKey,
-                  'X-Naver-Client-Id': naverClientId,
-                  'X-Naver-Client-Secret': naverClientSecret
-                },
-                body: JSON.stringify({
-                  storeInfo,
-                  industry: selectedIndustry,
-                  radius: selectedRadius
-                })
-              });
-              
-              const result = await response.json();
-              
-              hideLoading();
-              
-              if (result.success) {
-                tradeAreaData = {
-                  ...result.tradeAreaAnalysis,
-                  botResults: result.results
-                };
-                
-                // 로컬 저장
-                localStorage.setItem('store_info', JSON.stringify(storeInfo));
-                localStorage.setItem('trade_area_data', JSON.stringify(tradeAreaData));
-                
-                // 결과 표시
-                showTradeAreaResult(tradeAreaData);
-                enableExecuteAllBtn();
-                
-                showToast('상권분석 완료! (' + result.successCount + '/5개 봇 성공)', 'success');
-                
-                // 대시보드로 이동 제안
-                if (confirm('상권분석이 완료되었습니다. 대시보드에서 결과를 확인하시겠습니까?')) {
-                  window.location.href = '/dashboard';
+            if (naverClientId && naverClientSecret) {
+              try {
+                const tradeAreaResponse = await fetch('/api/trade-area/analyze', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-Naver-Client-Id': naverClientId,
+                    'X-Naver-Client-Secret': naverClientSecret
+                  },
+                  body: JSON.stringify({ 
+                    location: storeLocation, 
+                    industry: storeIndustry, 
+                    radius: parseInt(radius) 
+                  })
+                });
+                const tradeAreaResult = await tradeAreaResponse.json();
+                if (tradeAreaResult.success && tradeAreaResult.data) {
+                  tradeAreaData = tradeAreaResult.data;
                 }
-              } else {
-                showToast(result.error || '상권분석 실패', 'error');
+              } catch (e) {
+                console.log('상권분석 API 오류:', e);
               }
-            } catch (error) {
-              hideLoading();
-              showToast('상권분석 중 오류가 발생했습니다', 'error');
-              console.error(error);
             }
-          }
-          
-          // 상권분석 결과 표시
-          function showTradeAreaResult(data) {
-            const resultEl = document.getElementById('trade-area-result');
-            const countEl = document.getElementById('competitor-count');
-            const summaryEl = document.getElementById('trade-area-summary');
+
+            analysisResults.tradeArea = tradeAreaData;
+            updateLoadingStatus('✅ 상권분석 완료! 봇 실행 시작...', 15);
+
+            // 2. 선택된 봇들 실행
+            const selectedBotList = ALL_BOTS.filter(bot => selectedBots.has(bot.id));
+            const totalBots = selectedBotList.length;
             
-            resultEl.classList.remove('hidden');
-            countEl.textContent = '경쟁사 ' + (data.totalCompetitors || 0) + '개 발견';
-            
-            let summaryHtml = '<div class="space-y-2">';
-            summaryHtml += '<p>📍 분석 위치: ' + (data.location || '-') + '</p>';
-            summaryHtml += '<p>📐 분석 반경: ' + (data.radius || 3) + 'km</p>';
-            
-            if (data.botResults && data.botResults.length > 0) {
-              summaryHtml += '<p class="mt-2 font-medium">실행된 봇:</p>';
-              summaryHtml += '<ul class="list-disc list-inside">';
-              data.botResults.forEach(bot => {
-                const icon = bot.success ? '✅' : '❌';
-                summaryHtml += '<li>' + icon + ' ' + bot.botName + '</li>';
-              });
-              summaryHtml += '</ul>';
-            }
-            
-            summaryHtml += '</div>';
-            summaryEl.innerHTML = summaryHtml;
-          }
-          
-          // 2단계 버튼 활성화
-          function enableExecuteAllBtn() {
-            const btn = document.getElementById('execute-all-btn');
-            const hint = document.getElementById('execute-all-hint');
-            
-            btn.disabled = false;
-            btn.className = 'w-full px-6 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-semibold rounded-xl shadow-lg shadow-amber-500/30 hover:shadow-xl transition-all flex items-center justify-center space-x-2 cursor-pointer';
-            hint.textContent = '* 상권분석 데이터를 기반으로 25개 봇이 실행됩니다';
-          }
-          
-          // 2단계: 전체 봇 실행
-          async function executeAllBots() {
-            if (!tradeAreaData) {
-              showToast('먼저 상권분석을 실행해주세요', 'error');
-              return;
-            }
-            
-            const storeInfo = getStoreInfo();
-            const geminiKey = localStorage.getItem('gemini_api_key');
-            
-            if (!geminiKey) {
-              showToast('Gemini API 키를 설정해주세요', 'error');
-              openApiKeyModal();
-              return;
-            }
-            
-            showLoading('마케팅 봇 실행 중...', '25개 봇이 상권분석 결과를 기반으로 콘텐츠를 생성합니다');
-            
-            try {
-              const response = await fetch('/api/bot/execute-all', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'X-Gemini-Key': geminiKey
-                },
-                body: JSON.stringify({
-                  storeInfo,
-                  industry: selectedIndustry,
-                  radius: selectedRadius,
-                  tradeAreaData
-                })
-              });
-              
-              const result = await response.json();
-              
-              hideLoading();
-              
-              if (result.success) {
-                // 결과 저장
-                localStorage.setItem('bot_results', JSON.stringify(result.results));
+            for (let i = 0; i < totalBots; i++) {
+              const bot = selectedBotList[i];
+              const progress = 15 + ((i + 1) / totalBots) * 80;
+              updateLoadingStatus(bot.icon + ' ' + bot.name + ' 봇 실행 중... (' + (i+1) + '/' + totalBots + ')', progress);
+
+              try {
+                const response = await fetch('/api/bot/execute', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-Gemini-Key': geminiKey
+                  },
+                  body: JSON.stringify({
+                    botId: bot.id,
+                    storeInfo: storeInfo,
+                    industry: storeIndustry,
+                    tradeAreaData: tradeAreaData
+                  })
+                });
+
+                const result = await response.json();
                 
-                showToast('봇 실행 완료! (' + result.successCount + '/' + result.totalExecuted + '개 성공)', 'success');
-                
-                // 대시보드로 이동
-                window.location.href = '/dashboard';
-              } else {
-                showToast(result.error || '봇 실행 실패', 'error');
+                if (result.success) {
+                  analysisResults.bots.push({
+                    ...bot,
+                    result: result.result,
+                    success: true
+                  });
+                } else {
+                  analysisResults.bots.push({
+                    ...bot,
+                    result: '⚠️ 실행 실패: ' + (result.error || '알 수 없는 오류'),
+                    success: false
+                  });
+                }
+              } catch (err) {
+                analysisResults.bots.push({
+                  ...bot,
+                  result: '⚠️ 네트워크 오류: ' + err.message,
+                  success: false
+                });
               }
-            } catch (error) {
-              hideLoading();
-              showToast('봇 실행 중 오류가 발생했습니다', 'error');
-              console.error(error);
+
+              // 약간의 딜레이 (API 부하 방지)
+              await new Promise(resolve => setTimeout(resolve, 300));
             }
+
+            // 3. 결과 표시
+            updateLoadingStatus('📋 결과를 정리하고 있습니다...', 98);
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            displayResults();
+
+          } catch (error) {
+            alert('❌ 실행 중 오류가 발생했습니다: ' + error.message);
+          } finally {
+            hideLoading();
+          }
+        }
+
+        // 결과 표시
+        function displayResults() {
+          const resultsSection = document.getElementById('results-section');
+          resultsSection.classList.remove('hidden');
+          
+          // 상권분석 결과
+          const tradeArea = analysisResults.tradeArea;
+          document.getElementById('competitor-count').textContent = '경쟁사 ' + (tradeArea?.totalCompetitors || 0) + '개';
+          
+          let tradeAreaHtml = '📊 상권분석 요약\\n';
+          tradeAreaHtml += '═'.repeat(40) + '\\n\\n';
+          tradeAreaHtml += '■ 분석 반경: ' + (tradeArea?.radius || 3) + 'km\\n';
+          tradeAreaHtml += '■ 총 경쟁사: ' + (tradeArea?.totalCompetitors || 0) + '개\\n';
+          tradeAreaHtml += '■ 분석 일자: ' + new Date().toLocaleDateString('ko-KR') + '\\n\\n';
+          
+          if (tradeArea?.competitors?.length > 0) {
+            tradeAreaHtml += '📍 주변 경쟁사 TOP 10:\\n';
+            tradeAreaHtml += '─'.repeat(40) + '\\n';
+            tradeArea.competitors.slice(0, 10).forEach((c, i) => {
+              const name = c.title?.replace(/<[^>]*>/g, '') || '이름 없음';
+              const addr = c.address || '';
+              tradeAreaHtml += (i+1) + '. ' + name + '\\n   ' + addr + '\\n';
+            });
+          } else {
+            tradeAreaHtml += '\\n⚠️ 네이버 API 키가 없어 상권분석이 제한됩니다.\\n';
+            tradeAreaHtml += '   API 설정에서 네이버 API 키를 입력해주세요.';
           }
           
-          // 로딩 표시
-          function showLoading(title, message) {
-            document.getElementById('loading-title').textContent = title;
-            document.getElementById('loading-message').textContent = message;
-            document.getElementById('loading-progress').style.width = '0%';
-            document.getElementById('loading-status').textContent = '';
-            document.getElementById('loading-overlay').classList.remove('hidden');
-            
-            // 프로그레스 애니메이션
-            let progress = 0;
-            const interval = setInterval(() => {
-              progress += Math.random() * 15;
-              if (progress > 90) progress = 90;
-              document.getElementById('loading-progress').style.width = progress + '%';
-            }, 500);
-            
-            window.loadingInterval = interval;
+          document.getElementById('trade-area-result').textContent = tradeAreaHtml;
+
+          // 봇 결과들
+          const botResultsContainer = document.getElementById('bot-results');
+          
+          if (analysisResults.bots.length > 0) {
+            botResultsContainer.innerHTML = analysisResults.bots.map((bot, index) => {
+              const bgColor = bot.success ? 'bg-white' : 'bg-red-50';
+              const textColor = bot.success ? '' : 'text-red-600';
+              
+              return '<div class="' + bgColor + ' rounded-2xl shadow-lg p-6 fade-in" style="animation-delay: ' + (index * 0.1) + 's"><div class="flex items-center justify-between mb-4"><h3 class="text-lg font-bold text-gray-800 flex items-center gap-2"><span class="text-2xl">' + bot.icon + '</span>' + bot.name + '<span class="text-xs px-2 py-1 bg-gray-100 text-gray-500 rounded-full">' + bot.category + '</span></h3><button onclick="copyResult(\\''+bot.id+'\\', ' + index + ')" class="p-2 hover:bg-gray-100 rounded-lg transition" title="결과 복사"><i class="fas fa-copy text-gray-400"></i></button></div><div id="result-' + index + '" class="result-box bg-gray-50 rounded-xl p-4 whitespace-pre-wrap text-sm ' + textColor + ' leading-relaxed">' + escapeHtml(bot.result) + '</div></div>';
+            }).join('');
+          } else {
+            botResultsContainer.innerHTML = '<div class="bg-yellow-50 rounded-2xl p-6 text-center text-yellow-700"><i class="fas fa-exclamation-triangle text-3xl mb-2"></i><p>실행된 봇 결과가 없습니다.</p></div>';
+          }
+
+          // 스크롤
+          resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // HTML 이스케이프
+        function escapeHtml(text) {
+          if (!text) return '';
+          return text
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+        }
+
+        // 결과 복사
+        function copyResult(botId, index) {
+          const resultEl = document.getElementById('result-' + index);
+          if (resultEl) {
+            navigator.clipboard.writeText(resultEl.textContent).then(() => {
+              alert('✅ 복사되었습니다!');
+            }).catch(() => {
+              alert('❌ 복사에 실패했습니다.');
+            });
+          }
+        }
+
+        function copyAllResults() {
+          let allText = '═'.repeat(60) + '\\n';
+          allText += '           STUDIOJUAI AI 마케팅 분석 리포트\\n';
+          allText += '═'.repeat(60) + '\\n\\n';
+          allText += '생성일: ' + new Date().toLocaleString('ko-KR') + '\\n\\n';
+          
+          allText += '━━━ 상권분석 결과 ━━━\\n';
+          allText += document.getElementById('trade-area-result').textContent + '\\n\\n';
+          
+          analysisResults.bots.forEach(bot => {
+            allText += '━━━ ' + bot.icon + ' ' + bot.name + ' (' + bot.category + ') ━━━\\n';
+            allText += bot.result + '\\n\\n';
+          });
+          
+          allText += '═'.repeat(60) + '\\n';
+          allText += '           STUDIOJUAI - AI 마케팅 자동화 플랫폼\\n';
+          allText += '           https://studiojuai.pages.dev\\n';
+          allText += '═'.repeat(60);
+          
+          navigator.clipboard.writeText(allText).then(() => {
+            alert('✅ 전체 결과가 복사되었습니다!');
+          }).catch(() => {
+            alert('❌ 복사에 실패했습니다.');
+          });
+        }
+
+        // TXT 다운로드
+        function downloadTXT() {
+          let content = '═'.repeat(60) + '\\n';
+          content += '           STUDIOJUAI AI 마케팅 분석 리포트\\n';
+          content += '═'.repeat(60) + '\\n\\n';
+          content += '생성일시: ' + new Date().toLocaleString('ko-KR') + '\\n\\n';
+          
+          const store = analysisResults.storeInfo;
+          content += '📋 매장 정보\\n';
+          content += '─'.repeat(40) + '\\n';
+          content += '매장명: ' + (store?.name || '') + '\\n';
+          content += '위치: ' + (store?.location || '') + '\\n';
+          content += '업종: ' + (store?.industry || '') + '\\n';
+          content += '대표 메뉴: ' + (store?.mainProduct || '') + '\\n';
+          content += '가격대: ' + (store?.priceRange || '') + '\\n';
+          content += '타겟 고객: ' + (store?.targetCustomer || '') + '\\n\\n';
+          
+          content += '🗺️ 상권분석 결과\\n';
+          content += '─'.repeat(40) + '\\n';
+          content += document.getElementById('trade-area-result').textContent + '\\n\\n';
+          
+          analysisResults.bots.forEach(bot => {
+            content += '\\n' + bot.icon + ' ' + bot.name + ' (' + bot.category + ')\\n';
+            content += '─'.repeat(40) + '\\n';
+            content += bot.result + '\\n';
+          });
+          
+          content += '\\n' + '═'.repeat(60) + '\\n';
+          content += '           STUDIOJUAI - AI 마케팅 자동화 플랫폼\\n';
+          content += '           https://studiojuai.pages.dev\\n';
+          content += '═'.repeat(60);
+          
+          const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'STUDIOJUAI_리포트_' + new Date().toISOString().slice(0,10) + '.txt';
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+
+        // PDF 다운로드 (HTML 인쇄)
+        function downloadPDF() {
+          const store = analysisResults.storeInfo;
+          
+          let html = '<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>STUDIOJUAI 마케팅 분석 리포트</title>';
+          html += '<style>body{font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;padding:40px;line-height:1.8;max-width:800px;margin:0 auto;}';
+          html += 'h1{color:#10B981;border-bottom:3px solid #10B981;padding-bottom:10px;margin-bottom:30px;}';
+          html += 'h2{color:#333;margin-top:40px;border-left:4px solid #10B981;padding-left:15px;background:#f0fdf4;padding:10px 15px;}';
+          html += '.info-table{width:100%;border-collapse:collapse;margin:20px 0;}';
+          html += '.info-table td{padding:10px;border:1px solid #ddd;}';
+          html += '.info-table td:first-child{background:#f9fafb;width:120px;font-weight:600;}';
+          html += '.result-box{background:#f9fafb;padding:20px;border-radius:10px;margin:15px 0;white-space:pre-wrap;font-size:14px;line-height:1.8;}';
+          html += '.footer{text-align:center;margin-top:50px;color:#666;border-top:2px solid #10B981;padding-top:20px;}';
+          html += '@media print{body{padding:20px;}}</style></head><body>';
+          
+          html += '<h1>🤖 STUDIOJUAI AI 마케팅 분석 리포트</h1>';
+          html += '<p style="color:#666;">생성일시: ' + new Date().toLocaleString('ko-KR') + '</p>';
+          
+          html += '<h2>📋 매장 정보</h2>';
+          html += '<table class="info-table">';
+          html += '<tr><td>매장명</td><td>' + (store?.name || '-') + '</td></tr>';
+          html += '<tr><td>위치</td><td>' + (store?.location || '-') + '</td></tr>';
+          html += '<tr><td>업종</td><td>' + (store?.industry || '-') + '</td></tr>';
+          html += '<tr><td>대표 메뉴</td><td>' + (store?.mainProduct || '-') + '</td></tr>';
+          html += '<tr><td>가격대</td><td>' + (store?.priceRange || '-') + '</td></tr>';
+          html += '<tr><td>타겟 고객</td><td>' + (store?.targetCustomer || '-') + '</td></tr>';
+          html += '</table>';
+          
+          html += '<h2>🗺️ 상권분석 결과</h2>';
+          html += '<div class="result-box">' + escapeHtml(document.getElementById('trade-area-result').textContent) + '</div>';
+          
+          analysisResults.bots.forEach(bot => {
+            html += '<h2>' + bot.icon + ' ' + bot.name + ' <span style="font-size:12px;color:#666;">(' + bot.category + ')</span></h2>';
+            html += '<div class="result-box">' + escapeHtml(bot.result) + '</div>';
+          });
+          
+          html += '<div class="footer">';
+          html += '<p><strong style="color:#10B981;">STUDIOJUAI</strong> - AI 마케팅 자동화 플랫폼</p>';
+          html += '<p>https://studiojuai.pages.dev</p>';
+          html += '</div></body></html>';
+          
+          const printWindow = window.open('', '_blank');
+          printWindow.document.write(html);
+          printWindow.document.close();
+          setTimeout(() => {
+            printWindow.print();
+          }, 500);
+        }
+
+        // 로딩 관련
+        function showLoading() {
+          document.getElementById('loading-overlay').classList.remove('hidden');
+          document.getElementById('execute-btn').disabled = true;
+          document.getElementById('execute-btn').innerHTML = '<i class="fas fa-spinner animate-spin"></i> 실행 중...';
+        }
+
+        function hideLoading() {
+          document.getElementById('loading-overlay').classList.add('hidden');
+          document.getElementById('execute-btn').disabled = false;
+          document.getElementById('execute-btn').innerHTML = '<i class="fas fa-play"></i> <span>상권분석 + 봇 실행</span>';
+        }
+
+        function updateLoadingStatus(text, progress) {
+          document.getElementById('loading-status').textContent = text;
+          document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        // API 키 모달
+        function openApiModal() {
+          document.getElementById('api-modal').classList.remove('hidden');
+          document.getElementById('gemini-key').value = localStorage.getItem('gemini_key') || '';
+          document.getElementById('naver-id').value = localStorage.getItem('naver_client_id') || '';
+          document.getElementById('naver-secret').value = localStorage.getItem('naver_client_secret') || '';
+        }
+
+        function closeApiModal() {
+          document.getElementById('api-modal').classList.add('hidden');
+        }
+
+        function saveApiKeys() {
+          const geminiKey = document.getElementById('gemini-key').value.trim();
+          const naverId = document.getElementById('naver-id').value.trim();
+          const naverSecret = document.getElementById('naver-secret').value.trim();
+          
+          if (!geminiKey) {
+            alert('❌ Gemini API 키는 필수입니다!');
+            return;
           }
           
-          function hideLoading() {
-            if (window.loadingInterval) {
-              clearInterval(window.loadingInterval);
-            }
-            document.getElementById('loading-progress').style.width = '100%';
-            setTimeout(() => {
-              document.getElementById('loading-overlay').classList.add('hidden');
-            }, 300);
-          }
-        `
-      }} />
-    </>
-  )
+          localStorage.setItem('gemini_key', geminiKey);
+          if (naverId) localStorage.setItem('naver_client_id', naverId);
+          if (naverSecret) localStorage.setItem('naver_client_secret', naverSecret);
+          
+          alert('✅ API 키가 저장되었습니다!');
+          closeApiModal();
+        }
+
+        // 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+          renderBotGrid();
+          
+          // 기본으로 상권분석 5개 봇 선택
+          ['trade-area-overview', 'competitor-analysis', 'target-customer', 'location-evaluation', 'trend-analysis'].forEach(id => {
+            setTimeout(() => toggleBot(id), 100);
+          });
+        });
+      </script>
+
+    </body>
+    </html>
+  `)
 }

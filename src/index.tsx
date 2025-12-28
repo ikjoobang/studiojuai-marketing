@@ -5,6 +5,7 @@ import { mainPage } from './pages/main'
 import { dashboardPage } from './pages/dashboard'
 import { analyticsPage } from './pages/analytics'
 import { settingsPage } from './pages/settings'
+import { adminPage } from './pages/admin'
 
 type Bindings = {
   GEMINI_API_KEY: string
@@ -27,6 +28,7 @@ app.get('/', mainPage)
 app.get('/dashboard', dashboardPage)
 app.get('/analytics', analyticsPage)
 app.get('/settings', settingsPage)
+app.get('/admin', adminPage)
 
 // ============================================
 // 네이버 지역검색 API - 상권분석용
@@ -523,6 +525,291 @@ app.get('/api/bots', (c) => {
   const industry = c.req.query('industry') || 'cafe'
   const bots = getAllBots(industry)
   return c.json({ success: true, bots })
+})
+
+// ============================================
+// 내보내기 API (TXT/PDF)
+// ============================================
+
+// TXT 내보내기
+app.post('/api/export/txt', async (c) => {
+  try {
+    const body = await c.req.json()
+    const { storeInfo, tradeAreaData, botResults } = body
+    
+    let content = `
+================================================================================
+                       STUDIOJUAI AI 마케팅 분석 리포트
+================================================================================
+
+생성일시: ${new Date().toLocaleString('ko-KR')}
+
+================================================================================
+                              📋 매장 정보
+================================================================================
+
+매장명: ${storeInfo?.name || '미입력'}
+위치: ${storeInfo?.location || '미입력'}
+업종: ${storeInfo?.industry || '미입력'}
+대표 메뉴/서비스: ${storeInfo?.mainProduct || '미입력'}
+평균 가격대: ${storeInfo?.priceRange || '미입력'}
+타겟 고객: ${storeInfo?.targetCustomer || '미입력'}
+특이사항: ${storeInfo?.specialNote || '미입력'}
+
+================================================================================
+                             🗺️ 상권분석 결과
+================================================================================
+
+분석 반경: ${tradeAreaData?.radius || 3}km
+총 경쟁사 수: ${tradeAreaData?.totalCompetitors || 0}개
+분석 일자: ${tradeAreaData?.analysisDate || ''}
+
+[주변 경쟁사 목록]
+${tradeAreaData?.competitors?.slice(0, 10).map((c: any, i: number) => 
+  `${i+1}. ${c.title?.replace(/<[^>]*>/g, '')} - ${c.address || ''}`
+).join('\n') || '데이터 없음'}
+
+================================================================================
+                             🤖 AI 봇 분석 결과
+================================================================================
+`
+    
+    if (botResults && Array.isArray(botResults)) {
+      for (const result of botResults) {
+        content += `
+
+--------------------------------------------------------------------------------
+📌 ${result.botName} (${result.category})
+--------------------------------------------------------------------------------
+
+${result.result || '결과 없음'}
+
+`
+      }
+    }
+    
+    content += `
+
+================================================================================
+                              STUDIOJUAI
+                     AI 마케팅 자동화 플랫폼
+                    https://studiojuai.pages.dev
+================================================================================
+`
+    
+    return c.text(content, 200, {
+      'Content-Type': 'text/plain; charset=utf-8',
+      'Content-Disposition': `attachment; filename="studiojuai_report_${Date.now()}.txt"`
+    })
+    
+  } catch (error) {
+    return c.json({ 
+      success: false, 
+      error: 'TXT 내보내기 실패' 
+    }, 500)
+  }
+})
+
+// Markdown 내보내기 (PDF 변환용)
+app.post('/api/export/markdown', async (c) => {
+  try {
+    const body = await c.req.json()
+    const { storeInfo, tradeAreaData, botResults } = body
+    
+    let content = `# STUDIOJUAI AI 마케팅 분석 리포트
+
+> 생성일시: ${new Date().toLocaleString('ko-KR')}
+
+---
+
+## 📋 매장 정보
+
+| 항목 | 내용 |
+|------|------|
+| 매장명 | ${storeInfo?.name || '미입력'} |
+| 위치 | ${storeInfo?.location || '미입력'} |
+| 업종 | ${storeInfo?.industry || '미입력'} |
+| 대표 메뉴/서비스 | ${storeInfo?.mainProduct || '미입력'} |
+| 평균 가격대 | ${storeInfo?.priceRange || '미입력'} |
+| 타겟 고객 | ${storeInfo?.targetCustomer || '미입력'} |
+| 특이사항 | ${storeInfo?.specialNote || '미입력'} |
+
+---
+
+## 🗺️ 상권분석 결과
+
+- **분석 반경**: ${tradeAreaData?.radius || 3}km
+- **총 경쟁사 수**: ${tradeAreaData?.totalCompetitors || 0}개
+- **분석 일자**: ${tradeAreaData?.analysisDate || ''}
+
+### 주변 경쟁사 목록
+
+${tradeAreaData?.competitors?.slice(0, 10).map((c: any, i: number) => 
+  `${i+1}. **${c.title?.replace(/<[^>]*>/g, '')}** - ${c.address || ''}`
+).join('\n') || '데이터 없음'}
+
+---
+
+## 🤖 AI 봇 분석 결과
+
+`
+    
+    if (botResults && Array.isArray(botResults)) {
+      for (const result of botResults) {
+        content += `
+### ${result.botName} (${result.category})
+
+${result.result || '결과 없음'}
+
+---
+`
+      }
+    }
+    
+    content += `
+
+---
+
+> **STUDIOJUAI** - AI 마케팅 자동화 플랫폼  
+> [https://studiojuai.pages.dev](https://studiojuai.pages.dev)
+`
+    
+    return c.text(content, 200, {
+      'Content-Type': 'text/markdown; charset=utf-8',
+      'Content-Disposition': `attachment; filename="studiojuai_report_${Date.now()}.md"`
+    })
+    
+  } catch (error) {
+    return c.json({ 
+      success: false, 
+      error: 'Markdown 내보내기 실패' 
+    }, 500)
+  }
+})
+
+// JSON 데이터 내보내기
+app.post('/api/export/json', async (c) => {
+  try {
+    const body = await c.req.json()
+    const { storeInfo, tradeAreaData, botResults } = body
+    
+    const exportData = {
+      exportDate: new Date().toISOString(),
+      platform: 'STUDIOJUAI',
+      version: '1.0.0',
+      storeInfo,
+      tradeAreaData,
+      botResults,
+      summary: {
+        totalBots: botResults?.length || 0,
+        successCount: botResults?.filter((r: any) => r.success !== false)?.length || 0,
+        categories: [...new Set(botResults?.map((r: any) => r.category) || [])]
+      }
+    }
+    
+    return c.json(exportData, 200, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Disposition': `attachment; filename="studiojuai_data_${Date.now()}.json"`
+    })
+    
+  } catch (error) {
+    return c.json({ 
+      success: false, 
+      error: 'JSON 내보내기 실패' 
+    }, 500)
+  }
+})
+
+// ============================================
+// 보안 API - 무료/유료 분리 및 인증
+// ============================================
+
+// 사용자 인증 (휴대폰 번호 기반)
+app.post('/api/auth/verify-phone', async (c) => {
+  try {
+    const body = await c.req.json()
+    const { phoneNumber } = body
+    
+    if (!phoneNumber || !/^01[0-9]{8,9}$/.test(phoneNumber.replace(/-/g, ''))) {
+      return c.json({ success: false, error: '올바른 휴대폰 번호를 입력해주세요.' }, 400)
+    }
+    
+    // 인증 코드 생성 (6자리)
+    const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
+    
+    // 실제 환경에서는 SMS 발송 API 연동 필요
+    // 개발용: 콘솔에 코드 출력
+    console.log(`[인증 코드] ${phoneNumber}: ${verificationCode}`)
+    
+    return c.json({ 
+      success: true, 
+      message: '인증 코드가 발송되었습니다.',
+      // 개발용: 실제 배포 시 제거
+      devCode: verificationCode
+    })
+    
+  } catch (error) {
+    return c.json({ 
+      success: false, 
+      error: '인증 코드 발송에 실패했습니다.' 
+    }, 500)
+  }
+})
+
+// 상권분석 사용 횟수 체크 (무료 1회 제한)
+app.post('/api/auth/check-usage', async (c) => {
+  try {
+    const body = await c.req.json()
+    const { phoneNumber, action } = body
+    
+    // 실제 환경에서는 D1 데이터베이스에서 조회
+    // 현재는 클라이언트 localStorage 기반
+    
+    return c.json({
+      success: true,
+      isPremium: false, // 유료 회원 여부
+      usageCount: 0, // 상권분석 사용 횟수
+      maxFreeUsage: 1, // 무료 최대 사용 횟수
+      canUse: true
+    })
+    
+  } catch (error) {
+    return c.json({ 
+      success: false, 
+      error: '사용량 확인에 실패했습니다.' 
+    }, 500)
+  }
+})
+
+// 프리미엄 상태 확인
+app.get('/api/auth/premium-status', async (c) => {
+  const phoneNumber = c.req.query('phone')
+  
+  // 실제 환경에서는 결제 시스템 연동
+  return c.json({
+    success: true,
+    isPremium: false,
+    plan: 'free',
+    features: {
+      tradeAreaAnalysis: 1, // 무료: 1회
+      marketingBots: false, // 무료: 제한
+      download: false // 무료: 제한
+    }
+  })
+})
+
+// 헬스체크 API
+app.get('/api/health', (c) => {
+  return c.json({
+    success: true,
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    version: '1.0.0',
+    services: {
+      gemini: 'connected',
+      naver: 'connected'
+    }
+  })
 })
 
 // API 키 검증
@@ -2365,8 +2652,60 @@ async function callGeminiAPI(
   tradeAreaData?: any
 ): Promise<string> {
   
+  // 상권 특성 분석 함수
+  const analyzeTradeAreaCharacteristics = (tradeArea: any, location: string) => {
+    if (!tradeArea) return null
+    
+    const competitors = tradeArea.competitors || []
+    const totalCount = tradeArea.totalCompetitors || 0
+    
+    // 경쟁 강도 분석
+    let competitionLevel = '낮음'
+    if (totalCount > 20) competitionLevel = '매우 높음'
+    else if (totalCount > 10) competitionLevel = '높음'
+    else if (totalCount > 5) competitionLevel = '중간'
+    
+    // 상권 유형 추정 (위치 기반)
+    const locationLower = location.toLowerCase()
+    let areaType = '일반 상권'
+    let primaryTarget = '일반 고객'
+    let peakTime = '점심/저녁'
+    
+    if (locationLower.includes('역') || locationLower.includes('station')) {
+      areaType = '역세권'
+      primaryTarget = '직장인, 통근자'
+      peakTime = '출퇴근 시간 (8-9시, 18-19시)'
+    } else if (locationLower.includes('대학') || locationLower.includes('학교')) {
+      areaType = '학교 주변'
+      primaryTarget = '학생, 20대'
+      peakTime = '점심 (12-13시), 저녁 (17-20시)'
+    } else if (locationLower.includes('아파트') || locationLower.includes('주거')) {
+      areaType = '주거 밀집 지역'
+      primaryTarget = '가족, 주부'
+      peakTime = '저녁 (18-20시), 주말'
+    } else if (locationLower.includes('오피스') || locationLower.includes('빌딩')) {
+      areaType = '오피스 상권'
+      primaryTarget = '직장인'
+      peakTime = '점심 (11:30-13:00)'
+    } else if (locationLower.includes('강남') || locationLower.includes('홍대') || locationLower.includes('이태원')) {
+      areaType = '핫플레이스'
+      primaryTarget = '2030 젊은층'
+      peakTime = '저녁~야간 (18-23시)'
+    }
+    
+    return {
+      competitionLevel,
+      areaType,
+      primaryTarget,
+      peakTime,
+      totalCompetitors: totalCount
+    }
+  }
+  
+  const tradeAreaAnalysis = analyzeTradeAreaCharacteristics(tradeAreaData, storeInfo.location || '')
+  
   let userPrompt = `
-[매장 정보]
+[📋 매장 정보]
 - 매장명: ${storeInfo.name || '미입력'}
 - 위치: ${storeInfo.location || '미입력'}
 - 업종: ${storeInfo.industry || '미입력'}
@@ -2379,24 +2718,41 @@ async function callGeminiAPI(
   // 상권분석 데이터가 있으면 추가
   if (tradeAreaData) {
     userPrompt += `
-[상권분석 데이터]
+
+[🗺️ 상권분석 데이터]
 - 분석 반경: ${tradeAreaData.radius || 3}km
 - 총 경쟁사 수: ${tradeAreaData.totalCompetitors || 0}개
 - 분석 일자: ${tradeAreaData.analysisDate || ''}
 
-[주변 경쟁사 목록]
+[📊 상권 특성 분석]
+- 경쟁 강도: ${tradeAreaAnalysis?.competitionLevel || '분석 중'}
+- 상권 유형: ${tradeAreaAnalysis?.areaType || '일반 상권'}
+- 주요 타겟: ${tradeAreaAnalysis?.primaryTarget || '일반 고객'}
+- 피크 시간대: ${tradeAreaAnalysis?.peakTime || '점심/저녁'}
+
+[🏪 주변 경쟁사 목록 (상위 10개)]
 ${tradeAreaData.competitors?.slice(0, 10).map((c: any, i: number) => 
   `${i+1}. ${c.title?.replace(/<[^>]*>/g, '')} - ${c.address || ''} ${c.category || ''}`
 ).join('\n') || '데이터 없음'}
 
-[상권분석 결과 요약]
-${tradeAreaData.summary ? JSON.stringify(tradeAreaData.summary) : '분석 결과 없음'}
+[📈 상권분석 결과 요약]
+${tradeAreaData.summary ? JSON.stringify(tradeAreaData.summary, null, 2) : '분석 결과 없음'}
+
+[⚠️ 중요: 상권 맥락 반영 지침]
+1. 위 상권 특성(${tradeAreaAnalysis?.areaType}, ${tradeAreaAnalysis?.primaryTarget})을 반드시 결과물에 반영하세요.
+2. 경쟁사 ${tradeAreaData.totalCompetitors || 0}개 중 차별화 포인트를 명시하세요.
+3. 피크 시간대(${tradeAreaAnalysis?.peakTime})에 맞춘 전략을 제시하세요.
+4. 지역명(${storeInfo.location})을 활용한 구체적인 콘텐츠를 작성하세요.
 `
   }
 
   userPrompt += `
+
+[🎯 요청사항]
 위 정보를 바탕으로, 당신의 역할에 맞는 분석/콘텐츠를 작성해주세요.
-실제로 사용할 수 있는 구체적인 결과물을 제시해주세요.
+- 상권 특성과 타겟 고객을 반드시 반영하세요.
+- 실제로 사용할 수 있는 구체적인 결과물을 제시해주세요.
+- 추상적인 조언보다 '누가, 언제, 어디서, 어떻게' 실행 중심으로 작성하세요.
 `
 
   const response = await fetch(

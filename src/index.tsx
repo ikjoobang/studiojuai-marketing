@@ -724,7 +724,46 @@ app.post('/api/export/json', async (c) => {
 // 보안 API - 무료/유료 분리 및 인증
 // ============================================
 
-// 사용자 인증 (휴대폰 번호 기반)
+// 알리고 SMS API 설정
+const ALIGO_API_KEY = 'fosjbgzx87u2tyb7ohlnh191yeoovypf'
+const ALIGO_USER_ID = 'xivix'
+const ALIGO_SENDER = '01039880124'
+
+// 알리고 SMS 발송 함수
+async function sendAligoSMS(receiver: string, message: string, testMode: boolean = false): Promise<{success: boolean, error?: string, data?: any}> {
+  try {
+    const formData = new URLSearchParams()
+    formData.append('key', ALIGO_API_KEY)
+    formData.append('user_id', ALIGO_USER_ID)
+    formData.append('sender', ALIGO_SENDER)
+    formData.append('receiver', receiver.replace(/-/g, ''))
+    formData.append('msg', message)
+    formData.append('msg_type', 'SMS')
+    if (testMode) {
+      formData.append('testmode_yn', 'Y')
+    }
+    
+    const response = await fetch('https://apis.aligo.in/send/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData.toString()
+    })
+    
+    const result = await response.json()
+    
+    if (result.result_code > 0) {
+      return { success: true, data: result }
+    } else {
+      return { success: false, error: result.message || 'SMS 발송 실패' }
+    }
+  } catch (error) {
+    return { success: false, error: error instanceof Error ? error.message : 'SMS API 호출 실패' }
+  }
+}
+
+// 사용자 인증 (휴대폰 번호 기반) - 알리고 SMS 연동
 app.post('/api/auth/verify-phone', async (c) => {
   try {
     const body = await c.req.json()
@@ -737,22 +776,104 @@ app.post('/api/auth/verify-phone', async (c) => {
     // 인증 코드 생성 (6자리)
     const verificationCode = Math.floor(100000 + Math.random() * 900000).toString()
     
-    // 실제 환경에서는 SMS 발송 API 연동 필요
-    // 개발용: 콘솔에 코드 출력
-    console.log(`[인증 코드] ${phoneNumber}: ${verificationCode}`)
+    // 알리고 SMS로 인증번호 발송
+    const smsMessage = `[XIΛIX] 인증번호는 [${verificationCode}] 입니다. 타인에게 절대 알려주지 마세요.`
+    const smsResult = await sendAligoSMS(phoneNumber, smsMessage, false) // 실제 발송
+    
+    if (!smsResult.success) {
+      console.error('[SMS 발송 실패]', smsResult.error)
+      return c.json({ 
+        success: false, 
+        error: 'SMS 발송에 실패했습니다. 잠시 후 다시 시도해주세요.',
+        detail: smsResult.error
+      }, 500)
+    }
+    
+    console.log(`[인증 코드 발송 성공] ${phoneNumber}: ${verificationCode}`)
     
     return c.json({ 
       success: true, 
-      message: '인증 코드가 발송되었습니다.',
-      // 개발용: 실제 배포 시 제거
-      devCode: verificationCode
+      message: '인증번호가 발송되었습니다.',
+      // 서버에서 인증코드 검증을 위해 암호화하여 반환 (간단 버전: base64)
+      token: Buffer.from(`${phoneNumber}:${verificationCode}:${Date.now()}`).toString('base64')
+    })
+    
+  } catch (error) {
+    console.error('[인증 API 오류]', error)
+    return c.json({ 
+      success: false, 
+      error: '인증 코드 발송에 실패했습니다.' 
+    }, 500)
+  }
+})
+
+// 인증번호 확인 API
+app.post('/api/auth/verify-code', async (c) => {
+  try {
+    const body = await c.req.json()
+    const { token, code } = body
+    
+    if (!token || !code) {
+      return c.json({ success: false, error: '인증 정보가 없습니다.' }, 400)
+    }
+    
+    // 토큰 디코딩
+    const decoded = Buffer.from(token, 'base64').toString('utf-8')
+    const [phoneNumber, savedCode, timestamp] = decoded.split(':')
+    
+    // 유효시간 체크 (5분)
+    const elapsed = Date.now() - parseInt(timestamp)
+    if (elapsed > 5 * 60 * 1000) {
+      return c.json({ success: false, error: '인증번호가 만료되었습니다. 다시 요청해주세요.' }, 400)
+    }
+    
+    // 인증번호 확인
+    if (code !== savedCode) {
+      return c.json({ success: false, error: '인증번호가 일치하지 않습니다.' }, 400)
+    }
+    
+    return c.json({ 
+      success: true, 
+      message: '인증이 완료되었습니다.',
+      phoneNumber: phoneNumber
     })
     
   } catch (error) {
     return c.json({ 
       success: false, 
-      error: '인증 코드 발송에 실패했습니다.' 
+      error: '인증 확인에 실패했습니다.' 
     }, 500)
+  }
+})
+
+// SMS 잔여건수 조회 API
+app.get('/api/sms/remain', async (c) => {
+  try {
+    const formData = new URLSearchParams()
+    formData.append('key', ALIGO_API_KEY)
+    formData.append('user_id', ALIGO_USER_ID)
+    
+    const response = await fetch('https://apis.aligo.in/remain/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: formData.toString()
+    })
+    
+    const result = await response.json()
+    
+    return c.json({
+      success: result.result_code > 0,
+      data: {
+        SMS_CNT: result.SMS_CNT,
+        LMS_CNT: result.LMS_CNT,
+        MMS_CNT: result.MMS_CNT
+      },
+      message: result.message
+    })
+  } catch (error) {
+    return c.json({ success: false, error: 'SMS 잔여건수 조회 실패' }, 500)
   }
 })
 

@@ -1113,7 +1113,7 @@ export const mainPage = (c: Context) => {
         
         let verifiedPhone = localStorage.getItem('verified_phone') || null;
         let usageCount = parseInt(localStorage.getItem('usage_count') || '0');
-        let verificationCodeSent = null;
+        let authToken = null; // 서버에서 받은 인증 토큰
         
         // 인증 상태 확인
         function checkAuthStatus() {
@@ -1133,12 +1133,13 @@ export const mainPage = (c: Context) => {
           document.getElementById('phone-auth-modal').classList.remove('hidden');
         }
         
-        // 인증번호 발송 (시뮬레이션)
-        function sendVerificationCode() {
-          const phone = document.getElementById('phone-number').value.trim();
+        // 인증번호 발송 (알리고 SMS API)
+        async function sendVerificationCode() {
+          const phone = document.getElementById('phone-number').value.trim().replace(/-/g, '');
+          const sendBtn = document.querySelector('#phone-step-1 button');
           
-          if (!phone || phone.length < 10) {
-            alert('❌ 올바른 휴대폰 번호를 입력해주세요.');
+          if (!phone || phone.length < 10 || !/^01[0-9]{8,9}$/.test(phone)) {
+            alert('❌ 올바른 휴대폰 번호를 입력해주세요.\\n예: 01012345678');
             return;
           }
           
@@ -1150,35 +1151,86 @@ export const mainPage = (c: Context) => {
             return;
           }
           
-          // 6자리 랜덤 코드 생성
-          verificationCodeSent = Math.floor(100000 + Math.random() * 900000).toString();
+          // 버튼 로딩 상태
+          const originalBtnText = sendBtn.innerHTML;
+          sendBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>발송중...';
+          sendBtn.disabled = true;
           
-          // 실제로는 SMS API를 호출해야 함
-          alert('✅ 인증번호가 발송되었습니다.\\n(테스트: ' + verificationCodeSent + ')');
-          
-          document.getElementById('phone-step-1').classList.add('hidden');
-          document.getElementById('phone-step-2').classList.remove('hidden');
+          try {
+            // 서버 API 호출 (알리고 SMS 발송)
+            const response = await fetch('/api/auth/verify-phone', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ phoneNumber: phone })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+              authToken = result.token; // 서버에서 받은 토큰 저장
+              alert('✅ 인증번호가 발송되었습니다.\\n문자를 확인해주세요!');
+              
+              document.getElementById('phone-step-1').classList.add('hidden');
+              document.getElementById('phone-step-2').classList.remove('hidden');
+            } else {
+              alert('❌ ' + (result.error || 'SMS 발송에 실패했습니다.'));
+            }
+          } catch (error) {
+            alert('❌ 네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+            console.error('SMS 발송 오류:', error);
+          } finally {
+            sendBtn.innerHTML = originalBtnText;
+            sendBtn.disabled = false;
+          }
         }
         
-        // 인증번호 확인
-        function verifyCode() {
+        // 인증번호 확인 (서버 검증)
+        async function verifyCode() {
           const code = document.getElementById('verification-code').value.trim();
-          const phone = document.getElementById('phone-number').value.trim();
+          const phone = document.getElementById('phone-number').value.trim().replace(/-/g, '');
+          const verifyBtn = document.querySelector('#phone-step-2 button');
           
-          if (code === verificationCodeSent) {
-            // 인증 성공
-            verifiedPhone = phone;
-            localStorage.setItem('verified_phone', phone);
+          if (!code || code.length !== 6) {
+            alert('❌ 6자리 인증번호를 입력해주세요.');
+            return;
+          }
+          
+          // 버튼 로딩 상태
+          const originalBtnText = verifyBtn.innerHTML;
+          verifyBtn.innerHTML = '<i class="fas fa-spinner animate-spin mr-2"></i>확인중...';
+          verifyBtn.disabled = true;
+          
+          try {
+            // 서버 API 호출 (인증번호 검증)
+            const response = await fetch('/api/auth/verify-code', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token: authToken, code: code })
+            });
             
-            // 사용한 번호 목록에 추가
-            const usedPhones = JSON.parse(localStorage.getItem('used_phones') || '[]');
-            usedPhones.push(phone);
-            localStorage.setItem('used_phones', JSON.stringify(usedPhones));
+            const result = await response.json();
             
-            alert('✅ 인증 완료!\\n무료 체험 1회를 사용하실 수 있습니다.');
-            document.getElementById('phone-auth-modal').classList.add('hidden');
-          } else {
-            alert('❌ 인증번호가 일치하지 않습니다.');
+            if (result.success) {
+              // 인증 성공
+              verifiedPhone = phone;
+              localStorage.setItem('verified_phone', phone);
+              
+              // 사용한 번호 목록에 추가
+              const usedPhones = JSON.parse(localStorage.getItem('used_phones') || '[]');
+              usedPhones.push(phone);
+              localStorage.setItem('used_phones', JSON.stringify(usedPhones));
+              
+              alert('✅ 인증 완료!\\n무료 체험 1회를 사용하실 수 있습니다.');
+              document.getElementById('phone-auth-modal').classList.add('hidden');
+            } else {
+              alert('❌ ' + (result.error || '인증번호가 일치하지 않습니다.'));
+            }
+          } catch (error) {
+            alert('❌ 네트워크 오류가 발생했습니다.');
+            console.error('인증 확인 오류:', error);
+          } finally {
+            verifyBtn.innerHTML = originalBtnText;
+            verifyBtn.disabled = false;
           }
         }
         
@@ -1188,7 +1240,7 @@ export const mainPage = (c: Context) => {
           document.getElementById('phone-step-2').classList.add('hidden');
           document.getElementById('phone-number').value = '';
           document.getElementById('verification-code').value = '';
-          verificationCodeSent = null;
+          authToken = null;
         }
         
         // 사용량 소진 모달 표시
